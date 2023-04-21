@@ -725,4 +725,7 @@ class STM {
       placeholder: (context, url) => STM().loadingPlaceHolder(),
     );
   }
+  String nameShort(name) {
+    return name.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
+  }
 }

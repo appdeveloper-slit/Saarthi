@@ -37,7 +37,7 @@ class Sty {
     fontWeight: FontWeight.w700,
   );
   TextStyle extraLargeText = TextStyle(
-    fontFamily: 'Opensans_Bold',
+    fontFamily: 'Opensans',
     letterSpacing: 0.5,
     color: Clr().black,
     fontSize: 20.0,

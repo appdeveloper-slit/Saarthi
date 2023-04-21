@@ -377,7 +377,7 @@ class _EditProfileState extends State<EditProfile> {
                     setState(() {
                       stateValue = value as int?;
                       int position = int.parse(stateValue.toString());
-                      cityList = stateList[position]['city'];
+                      cityList = stateList[position - 1]['city'];
                       cityValue = null;
                     });
                   },

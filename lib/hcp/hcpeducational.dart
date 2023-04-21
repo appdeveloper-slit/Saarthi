@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:saarathi/hcp/hcpMyprofile.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
@@ -17,6 +18,10 @@ import '../values/styles.dart';
 import 'hcpappointmentavailability.dart';
 
 class EducationalInfo extends StatefulWidget {
+  final pagetype;
+  dynamic data;
+  dynamic professionaldata;
+   EducationalInfo({super.key, this.pagetype,this.data,this.professionaldata});
   @override
   State<EducationalInfo> createState() => _EducationalInfoState();
 }
@@ -48,6 +53,11 @@ class _EducationalInfoState extends State<EducationalInfo> {
     setState(() {
       hcptoken = sp.getString('hcptoken') ?? '';
     });
+    widget.data == null ? null : setState((){
+      adddegreeList = widget.data['degree_name'];
+      registerCtrl = TextEditingController(text: widget.professionaldata['registration_number'].toString());
+
+    });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         // getHome();
@@ -59,6 +69,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
   @override
   void initState() {
     getSession();
+    print(widget.data);
     super.initState();
   }
 
@@ -235,11 +246,11 @@ class _EducationalInfoState extends State<EducationalInfo> {
                                 text: TextSpan(
                                     text: certificateList.isNotEmpty
                                         ? '${certificateList.length} Degrees Certificates Selected'
-                                        : 'Degree Certificates',
-                                    style: Sty().mediumText.copyWith(color: certificateList.isNotEmpty ? Clr().black : Clr().dottedColor, fontWeight: FontWeight.w600, fontSize: Dim().d14),
+                                        : widget.data == null ? 'Degree Certificates' : widget.data['degree_certi'] != null ? 'Degrees Certificates Selected'  : 'Degree Certificates',
+                                    style: Sty().mediumText.copyWith(color: certificateList.isNotEmpty ? Clr().black : widget.data == null ? Clr().dottedColor : widget.data['degree_certi'] != null ? Clr().black : Clr().dottedColor, fontWeight: FontWeight.w600, fontSize: Dim().d14),
                                     children: [
                                       TextSpan(
-                                          text: certificateList.isNotEmpty ? '' :  ' *',
+                                          text: certificateList.isNotEmpty ? '' :  widget.data == null ? ' *' : widget.data['degree_certi'] != null ? '' : ' *',
                                           style: TextStyle(color: Clr().red))
                                     ]),
                               ),
@@ -342,14 +353,14 @@ class _EducationalInfoState extends State<EducationalInfo> {
                                 text: TextSpan(
                                     text: registrationcertificate != null
                                         ? 'Registration Certificate Selected'
-                                        : 'Registration Certificate',
+                                        :  widget.professionaldata == null ? 'Registration Certificate'  :widget.professionaldata['registration_certi'] != null ? 'Registration Certificate Selected' : 'Registration Certificate',
                                     style: Sty().mediumText.copyWith(
-                                        color:  registrationcertificate != null ? Clr().black : Clr().dottedColor,
+                                        color:  registrationcertificate != null ? Clr().black : widget.professionaldata == null ? Clr().dottedColor :  widget.professionaldata['registration_certi'] != null ? Clr().black : Clr().dottedColor,
                                         fontWeight: FontWeight.w600,
                                         fontSize: Dim().d14),
                                     children: [
                                       TextSpan(
-                                          text:  registrationcertificate != null ? '' : ' *',
+                                          text:  registrationcertificate != null ? '' : widget.professionaldata == null ? ' *' : widget.professionaldata['registration_certi'] != null ? '' : ' *',
                                           style: TextStyle(color: Clr().red))
                                     ]),
                               ),
@@ -372,9 +383,8 @@ class _EducationalInfoState extends State<EducationalInfo> {
                       child: ElevatedButton(
                           onPressed: () async{
                             SharedPreferences sp = await SharedPreferences.getInstance();
-                            // STM().redirect2page(ctx, ApptAvailability());
                             if (formKey.currentState!.validate()) {
-                              _validateForm(ctx);
+                              widget.pagetype == 'edit'?  updateProffessionalinfo() : _validateForm(ctx);
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -383,7 +393,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10))),
                           child: Text(
-                            'Next',
+                            widget.pagetype == 'edit' ? 'Update' : 'Next',
                             style: Sty().mediumText.copyWith(
                                   color: Clr().white,
                                   fontWeight: FontWeight.w600,
@@ -494,6 +504,23 @@ class _EducationalInfoState extends State<EducationalInfo> {
       STM().successDialogWithAffinity(ctx, message, ApptAvailability());
       sp.setBool('hcp_educationalinfo', true);
     } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  void updateProffessionalinfo() async {
+    FormData body = FormData.fromMap({
+    'degree_name': jsonEncode(adddegreeList),
+    'registration_number':registerCtrl.text,
+    'registration_certi': registrationcertificate,
+    'degree_certi': jsonEncode(certificateList),
+    });
+    var result = await STM().postWithToken(ctx, Str().updating, 'update_education', body, hcptoken, 'hcp');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, MyProfile());
+    }else{
       STM().errorDialog(ctx, message);
     }
   }

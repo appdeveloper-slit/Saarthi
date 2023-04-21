@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
@@ -10,91 +11,41 @@ import '../values/strings.dart';
 import '../values/styles.dart';
 import 'apt_detail.dart';
 
-class OnlineAppointment extends StatefulWidget {
+class Appointment extends StatefulWidget {
+  final Map<String, dynamic> data;
+
+  const Appointment(this.data, {Key? key}) : super(key: key);
+
   @override
-  State<OnlineAppointment> createState() => _OnlineAppointmentState();
+  State<Appointment> createState() => _AppointmentState();
 }
 
-class _OnlineAppointmentState extends State<OnlineAppointment>
+class _AppointmentState extends State<Appointment>
     with TickerProviderStateMixin {
   late BuildContext ctx;
 
   TabController? tabCtrl;
 
-  List<dynamic> todayList = [
-    {
-      'id': 1,
-      'apt_id': 123456,
-      'patient_id': 1,
-      'patient_name': 'Aniket Mahakal',
-      'patient_image': 'assets/dr1.png',
-      'date': 'Sunday, 12/11/2022',
-      'time': '03 : 30PM',
-    },
-    {
-      'id': 2,
-      'apt_id': 123456,
-      'patient_id': 1,
-      'patient_name': 'Aniket Mahakal',
-      'patient_image': 'assets/dr1.png',
-      'date': 'Monday, 13/11/2022',
-      'time': '03 : 30PM',
-    },
-  ];
-  List<dynamic> upcomingList = [
-    {
-      'id': 1,
-      'apt_id': 123456,
-      'patient_id': 1,
-      'patient_name': 'Aniket Mahakal',
-      'patient_image': 'assets/dr1.png',
-      'date': 'Sunday, 12/11/2022',
-      'time': '03 : 30PM',
-    },
-    {
-      'id': 2,
-      'apt_id': 123456,
-      'patient_id': 1,
-      'patient_name': 'Aniket Mahakal',
-      'patient_image': 'assets/dr1.png',
-      'date': 'Monday, 13/11/2022',
-      'time': '03 : 30PM',
-    },
-  ];
-  List<dynamic> historyList = [
-    {
-      'id': 1,
-      'apt_id': 123456,
-      'patient_id': 1,
-      'patient_name': 'Aniket Mahakal',
-      'patient_image': 'assets/dr1.png',
-      'date': 'Sunday, 12/11/2022',
-      'time': '03 : 30PM',
-    },
-    {
-      'id': 2,
-      'patient_id': 1,
-      'patient': 123456,
-      'patient_name': 'Aniket Mahakal',
-      'patient_image': 'assets/dr1.png',
-      'date': 'Monday, 13/11/2022',
-      'time': '03 : 30PM',
-    },
-  ];
+  List<dynamic> todayList = [];
+  List<dynamic> upcomingList = [];
+  List<dynamic> historyList = [];
 
   String? sToken;
 
+  Map<String, dynamic> v = {};
+
   @override
   void initState() {
+    v = widget.data;
     tabCtrl = TabController(length: 3, vsync: this);
-    // getSession();
+    getSession();
     super.initState();
   }
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
-      sToken = sp.getString('customerId') ?? '';
+      sToken = sp.getString('hcptoken') ?? '';
       STM().checkInternet(context, widget).then((value) {
         if (value) {
           getData();
@@ -107,15 +58,19 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
   void getData() async {
     //Input
     FormData body = FormData.fromMap({
-      'page_type': 'register',
+      'type': v['apt_id'],
     });
     //Output
-    var result = await STM()
-        .postWithToken(ctx, Str().loading, "sendOTP", body, sToken, 'hcp');
+    var result = await STM().postWithToken(
+        ctx, Str().loading, "view_appointment_details", body, sToken, 'hcp');
     if (!mounted) return;
     var success = result['success'];
-    var message = result['message'];
     if (success) {
+      setState(() {
+        todayList = result['today_appointments'];
+        upcomingList = result['upcoming_appointments'];
+        historyList = result['completed_appointments'];
+      });
     } else {
       var message = result['message'];
       STM().errorDialog(ctx, message);
@@ -141,7 +96,7 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
         ),
         centerTitle: true,
         title: Text(
-          'Online Appointment',
+          '${v['apt_name']}',
           style: Sty().largeText.copyWith(color: Clr().black),
         ),
       ),
@@ -165,15 +120,15 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
                 tabs: [
                   Tab(
                     text: "Today",
-                    height: Dim().d60,
+                    height: Dim().d52,
                   ),
                   Tab(
                     text: 'Upcoming',
-                    height: Dim().d60,
+                    height: Dim().d52,
                   ),
                   Tab(
                     text: 'History',
-                    height: Dim().d60,
+                    height: Dim().d52,
                   ),
                 ]),
           ),
@@ -184,9 +139,15 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
             child: TabBarView(
               controller: tabCtrl,
               children: [
-                listView(todayList),
-                listView(upcomingList),
-                listView(historyList),
+                todayList.isEmpty
+                    ? STM().emptyData('No Appointment Found')
+                    : listView(todayList),
+                upcomingList.isEmpty
+                    ? STM().emptyData('No Appointment Found')
+                    : listView(upcomingList),
+                historyList.isEmpty
+                    ? STM().emptyData('No Appointment Found')
+                    : listView(historyList),
               ],
             ),
           ),
@@ -230,28 +191,44 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
             ),
             child: Row(
               children: [
-                ClipOval(
-                  child: STM().imageView(
-                    v['patient_image'],
-                    width: Dim().d60,
-                    height: Dim().d60,
+                Container(
+                  width: Dim().d80,
+                  height: Dim().d80,
+                  decoration: BoxDecoration(
+                    color: const Color(0x801F98B3),
+                    border: Border.all(
+                      color: const Color(0xFF1F98B3),
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      Dim().d100,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      STM().nameShort('${v['patient']['full_name']}'),
+                      style: Sty().largeText.copyWith(
+                        color: Clr().white,
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
                   width: Dim().d12,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mr. ${v['patient_name']}',
-                      style: Sty().mediumText,
-                    ),
-                    Text(
-                      'Appointment ID : ${v['apt_id']}',
-                      style: Sty().mediumText,
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Mr. ${v['patient']['full_name']}',
+                        style: Sty().mediumText,
+                      ),
+                      Text(
+                        'Appointment ID : ${v['appointment_uid']}',
+                        style: Sty().mediumText,
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),
@@ -265,29 +242,31 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     SvgPicture.asset(
                       'assets/calender_black.svg',
                     ),
                     SizedBox(
-                      width: Dim().d8,
+                      width: Dim().d12,
                     ),
                     Text(
-                      '${v['date']}',
+                      '${DateFormat('EEEE').format(DateTime.parse(v['booking_date']))}, ${DateFormat('dd/MM/yyyy').format(DateTime.parse(v['booking_date']))}',
                       style: Sty().mediumText,
                     ),
                   ],
                 ),
                 Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     SvgPicture.asset(
                       'assets/clock.svg',
                     ),
                     SizedBox(
-                      width: Dim().d8,
+                      width: Dim().d12,
                     ),
                     Text(
-                      '${v['time']}',
+                      '${v['slot']['slot']}',
                       style: Sty().mediumText,
                     ),
                   ],
@@ -304,6 +283,7 @@ class _OnlineAppointmentState extends State<OnlineAppointment>
               width: Dim().d260,
               child: ElevatedButton(
                 onPressed: () {
+                  // v.addEntries(this.v.entries);
                   STM().redirect2page(ctx, AptDetail(v));
                 },
                 style: ElevatedButton.styleFrom(

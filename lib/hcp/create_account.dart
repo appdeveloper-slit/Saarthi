@@ -264,7 +264,7 @@ class createAccountState extends State<createAccount> {
                           stateValue = value as int?;
                           _dropdownError1 = null;
                           int position = int.parse(stateValue.toString());
-                          cityList = stateList[position]['city'];
+                          cityList = stateList[position - 1]['city'];
                           cityValue = null;
                         });
                       },

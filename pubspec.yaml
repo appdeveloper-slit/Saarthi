@@ -50,8 +50,10 @@ dependencies:
   file_picker: ^5.2.9
   flutter_google_places_hoc081098: ^1.2.0
   uuid: ^3.0.7
-  flutter_cached_pdfview: ^0.4.1
   cached_network_image: ^3.2.3
+  flutter_html: ^3.0.0-alpha.5
+  flutter_pdfview: 1.2.9
+  flutter_cached_pdfview: ^0.4.1
 
 dev_dependencies:
   # rules and activating additional ones.

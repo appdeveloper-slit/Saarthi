@@ -54,12 +54,13 @@ class AddPrescriptionPage extends State<AddPrescription> {
   getSessionData() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
-      sToken = sp.getString('customerId') ?? '';
-      STM().checkInternet(context, widget).then((value) {
-        if (value) {
-          getData();
-        }
-      });
+      sToken = sp.getString('hcptoken') ?? '';
+      isLoaded = true;
+      // STM().checkInternet(context, widget).then((value) {
+      //   if (value) {
+      //     getData();
+      //   }
+      // });
     });
   }
 
@@ -79,18 +80,19 @@ class AddPrescriptionPage extends State<AddPrescription> {
     //Input
     FormData body = FormData.fromMap({
       'appointment_id': v['id'],
+      'prescription': symptomsCtrl.text.trim(),
       'symptoms': symptomsCtrl.text.trim(),
       'medicines': jsonEncode(medicineList),
-      'test_ids': jsonEncode(labArray),
+      // 'test_ids': jsonEncode(labArray),
       'hospitalization': reasonCtrl.text.trim(),
     });
     //Output
     var result = await STM().postWithToken(
-        ctx, Str().loading, "doctor/add_prescription", body, sToken, 'hcp');
+        ctx, Str().loading, "add_prescription", body, sToken, 'hcp');
     if (!mounted) return;
-    var success = result['success'];
+    var error = result['error'];
     var message = result['message'];
-    if (success) {
+    if (!error) {
       STM().successDialogWithAffinity(
           ctx, message, Preview(result['prescription']));
     } else {
@@ -156,6 +158,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
               keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.next,
               decoration: Sty().textFieldWhiteStyle.copyWith(
+                filled: true,
+                fillColor: const Color(0xFFFBFBFB),
                 hintStyle: Sty().mediumText.copyWith(
                   color: Clr().lightGrey,
                 ),
@@ -191,7 +195,9 @@ class AddPrescriptionPage extends State<AddPrescription> {
                   padding: EdgeInsets.all(
                     Dim().d12,
                   ),
-                  decoration: Sty().outlineWhiteBoxStyle,
+                  decoration: Sty().outlineWhiteBoxStyle.copyWith(
+                    color: const Color(0xFFFBFBFB),
+                  ),
                   child: Text(
                     'Name : ${medicineList[index]['name']}\nDosage : ${medicineList[index]['dosage']}',
                     style: Sty().mediumText,
@@ -224,88 +230,92 @@ class AddPrescriptionPage extends State<AddPrescription> {
             SizedBox(
               height: Dim().d12,
             ),
-            Text(
-              "Add Lab Test",
-              style: Sty().largeText,
-            ),
-            SizedBox(
-              height: Dim().d4,
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: labList.length,
-              itemBuilder: (context, index) {
-                var v = labList[index];
-                return Container(
-                  margin: EdgeInsets.symmetric(
-                    vertical: Dim().d4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Clr().white,
-                    border: Border.all(
-                      color: Clr().lightGrey,
+            if(false)
+              Text(
+                "Add Lab Test",
+                style: Sty().largeText,
+              ),
+            if(false)
+              SizedBox(
+                height: Dim().d4,
+              ),
+            if(false)
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: labList.length,
+                itemBuilder: (context, index) {
+                  var v = labList[index];
+                  return Container(
+                    margin: EdgeInsets.symmetric(
+                      vertical: Dim().d4,
                     ),
-                    borderRadius: BorderRadius.circular(
-                      Dim().d4,
-                    ),
-                  ),
-                  child: ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        onTap: () {
-                          FocusManager.instance.primaryFocus!.unfocus();
-                        },
-                        hint: Text(
-                          v ?? 'Select Test',
-                          style: Sty().mediumText.copyWith(
-                            color: Clr().lightGrey,
-                          ),
-                        ),
-                        value: v,
-                        isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        style: Sty().mediumText,
-                        onChanged: (value) {
-                          setState(() {
-                            labList[index] = value;
-                          });
-                        },
-                        items: testList.map((value) {
-                          return DropdownMenuItem<String>(
-                            value: value['id'].toString(),
-                            child: Text(
-                              value['name'],
-                              style: Sty().mediumText,
-                            ),
-                          );
-                        }).toList(),
+                    decoration: BoxDecoration(
+                      color: Clr().white,
+                      border: Border.all(
+                        color: Clr().lightGrey,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        Dim().d4,
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                icon: SvgPicture.asset(
-                  "assets/plus.svg",
-                ),
-                onPressed: () {
-                  setState(() {
-                    labList.add(null);
-                  });
+                    child: ButtonTheme(
+                      alignedDropdown: true,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          onTap: () {
+                            FocusManager.instance.primaryFocus!.unfocus();
+                          },
+                          hint: Text(
+                            v ?? 'Select Test',
+                            style: Sty().mediumText.copyWith(
+                              color: Clr().lightGrey,
+                            ),
+                          ),
+                          value: v,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          style: Sty().mediumText,
+                          onChanged: (value) {
+                            setState(() {
+                              labList[index] = value;
+                            });
+                          },
+                          items: testList.map((value) {
+                            return DropdownMenuItem<String>(
+                              value: value['id'].toString(),
+                              child: Text(
+                                value['name'],
+                                style: Sty().mediumText,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  );
                 },
-                label: Text(
-                  "Add more",
-                  style: Sty().smallText.copyWith(
-                    color: Clr().primaryColor,
+              ),
+            if(false)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: SvgPicture.asset(
+                    "assets/plus.svg",
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      labList.add(null);
+                    });
+                  },
+                  label: Text(
+                    "Add more",
+                    style: Sty().smallText.copyWith(
+                      color: Clr().primaryColor,
+                    ),
                   ),
                 ),
               ),
-            ),
             SizedBox(
               height: Dim().d12,
             ),
@@ -321,7 +331,9 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 horizontal: Dim().d12,
                 vertical: Dim().d4,
               ),
-              decoration: Sty().outlineWhiteBoxStyle,
+              decoration: Sty().outlineWhiteBoxStyle.copyWith(
+                color: const Color(0xFFFBFBFB),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -404,7 +416,9 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 alignment: Alignment.center,
                 child: Text(
                   'Add Medicine',
-                  style: Sty().extraLargeText,
+                  style: Sty().largeText.copyWith(
+                    color: Clr().primaryColor,
+                  ),
                 ),
               ),
               SizedBox(
@@ -412,7 +426,7 @@ class AddPrescriptionPage extends State<AddPrescription> {
               ),
               Text(
                 "Name",
-                style: Sty().mediumBoldText,
+                style: Sty().mediumText,
               ),
               SizedBox(
                 height: Dim().d4,
@@ -424,6 +438,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
                 decoration: Sty().textFieldWhiteStyle.copyWith(
+                  filled: true,
+                  fillColor: const Color(0xFFFBFBFB),
                   hintStyle: Sty().mediumText.copyWith(
                     color: Clr().lightGrey,
                   ),
@@ -443,7 +459,7 @@ class AddPrescriptionPage extends State<AddPrescription> {
               ),
               Text(
                 'Dosage',
-                style: Sty().largeText,
+                style: Sty().mediumText,
               ),
               SizedBox(
                 height: Dim().d4,
@@ -456,6 +472,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.done,
                 decoration: Sty().textFieldWhiteStyle.copyWith(
+                  filled: true,
+                  fillColor: const Color(0xFFFBFBFB),
                   hintStyle: Sty().mediumText.copyWith(
                     color: Clr().lightGrey,
                   ),
