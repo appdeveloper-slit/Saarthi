@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:saarathi/add_new_patient.dart';
 import 'package:saarathi/blood_glucose.dart';
 import 'package:saarathi/heart_rate.dart';
 import 'package:saarathi/lab_details.dart';
@@ -34,6 +35,9 @@ import 'product_page.dart';
 import 'set_medic_reminder.dart';
 
 class Home extends StatefulWidget {
+  final String? Lat, Lng;
+  const Home({super.key, this.Lat, this.Lng});
+
   @override
   State<Home> createState() => _HomeState();
 }
@@ -41,6 +45,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late BuildContext ctx;
   dynamic userDetails;
+  String? laguagesList;
   List<dynamic> dayList = [
     {"id": "0", "name": "Sunday"},
     {"id": "1", "name": "Monday"},
@@ -219,7 +224,7 @@ class _HomeState extends State<Home> {
       physics: const BouncingScrollPhysics(),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
-          padding:  const EdgeInsets.only(left: 6.0),
+          padding: const EdgeInsets.only(left: 6.0),
           child: Text(
             'Hello, ${userDetails == null ? '' : userDetails['name']}',
             style: Sty().largeText.copyWith(fontWeight: FontWeight.w500),
@@ -239,7 +244,8 @@ class _HomeState extends State<Home> {
               ),
               InkWell(
                 onTap: () {
-                  STM().redirect2page(ctx, const PhysicalDetails(sType: 'home'));
+                  STM()
+                      .redirect2page(ctx, const PhysicalDetails(sType: 'home'));
                 },
                 child: Text(
                   'Edit',
@@ -448,128 +454,128 @@ class _HomeState extends State<Home> {
           child: ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
-            itemCount: 6,
+            itemCount: doctorsList.length,
             itemBuilder: (context, index) {
               return doctorsLayout(ctx, index, doctorsList);
             },
           ),
         ),
         SizedBox(
-          height: 20,
+          height: Dim().d20,
         ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Medicines',
-              style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-            ),
-            InkWell(
-              onTap: () {
-                STM().redirect2page(ctx, Pharmacy());
-              },
-              child: Text(
-                'See all',
-                style: Sty().mediumText.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: Clr().primaryColor,
-                    ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 12,
-        ),
-        SizedBox(
-          height: 230,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              return medicineLayout(ctx, index, medicineList);
-            },
-          ),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              ' Nearby Labs',
-              style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-            ),
-            InkWell(
-              onTap: () {
-                STM().redirect2page(ctx, Labs());
-              },
-              child: Text(
-                'See all',
-                style: Sty().mediumText.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: Clr().primaryColor,
-                    ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 12,
-        ),
-        SizedBox(
-          height: 230,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: 6,
-            itemBuilder: (context, index) {
-              return labLayout(ctx, index, Lablist);
-            },
-          ),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Upcoming Appointment',
-              style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-            ),
-            Text(
-              'See all',
-              style: Sty().mediumText.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Clr().primaryColor,
-                  ),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 12,
-        ),
-        SizedBox(
-          height: 145,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            // itemCount: resultList.length,
-            itemCount: 5,
-            itemBuilder: (context, index) {
-              return appointmentLayout(ctx, index, appointmentList);
-            },
-          ),
-        ),
+        // SizedBox(
+        //   height: 20,
+        // ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Medicines',
+        //       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+        //     ),
+        //     InkWell(
+        //       onTap: () {
+        //         STM().redirect2page(ctx, Pharmacy());
+        //       },
+        //       child: Text(
+        //         'See all',
+        //         style: Sty().mediumText.copyWith(
+        //               fontWeight: FontWeight.w600,
+        //               fontSize: 14,
+        //               color: Clr().primaryColor,
+        //             ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(
+        //   height: 12,
+        // ),
+        // SizedBox(
+        //   height: 230,
+        //   child: ListView.builder(
+        //     shrinkWrap: true,
+        //     scrollDirection: Axis.horizontal,
+        //     itemCount: 6,
+        //     itemBuilder: (context, index) {
+        //       return medicineLayout(ctx, index, medicineList);
+        //     },
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: Dim().d20,
+        // ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       ' Nearby Labs',
+        //       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+        //     ),
+        //     InkWell(
+        //       onTap: () {
+        //         STM().redirect2page(ctx, Labs());
+        //       },
+        //       child: Text(
+        //         'See all',
+        //         style: Sty().mediumText.copyWith(
+        //               fontWeight: FontWeight.w600,
+        //               fontSize: 14,
+        //               color: Clr().primaryColor,
+        //             ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(
+        //   height: 12,
+        // ),
+        // SizedBox(
+        //   height: 230,
+        //   child: ListView.builder(
+        //     shrinkWrap: true,
+        //     scrollDirection: Axis.horizontal,
+        //     itemCount: 6,
+        //     itemBuilder: (context, index) {
+        //       return labLayout(ctx, index, Lablist);
+        //     },
+        //   ),
+        // ),
+        // SizedBox(
+        //   height: 20,
+        // ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Upcoming Appointment',
+        //       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+        //     ),
+        //     Text(
+        //       'See all',
+        //       style: Sty().mediumText.copyWith(
+        //             fontWeight: FontWeight.w600,
+        //             fontSize: 14,
+        //             color: Clr().primaryColor,
+        //           ),
+        //     ),
+        //   ],
+        // ),
+        // SizedBox(
+        //   height: 12,
+        // ),
+        // SizedBox(
+        //   height: 145,
+        //   child: ListView.builder(
+        //     shrinkWrap: true,
+        //     scrollDirection: Axis.horizontal,
+        //     // itemCount: resultList.length,
+        //     itemCount: 5,
+        //     itemBuilder: (context, index) {
+        //       return appointmentLayout(ctx, index, appointmentList);
+        //     },
+        //   ),
+        // ),
       ]),
     );
   }
@@ -581,138 +587,156 @@ class _HomeState extends State<Home> {
         medicationList.isEmpty
             ? Container()
             : Padding(
-          padding: EdgeInsets.symmetric(horizontal: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Medication Reminder',
-                style: Sty()
-                    .mediumText
-                    .copyWith(fontWeight: FontWeight.w600),
-              ),
-              InkWell(
-                onTap: () {
-                  STM().redirect2page(ctx, SetMedicReminder(remiderlist: medicationList,));
-                },
-                child: Text(
-                  'View all',
-                  style: Sty().mediumText.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Clr().primaryColor,
-                  ),
+                padding: EdgeInsets.symmetric(horizontal: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Medication Reminder',
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        STM().redirect2page(
+                            ctx,
+                            SetMedicReminder(
+                              remiderlist: medicationList,
+                            ));
+                      },
+                      child: Text(
+                        'View all',
+                        style: Sty().mediumText.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Clr().primaryColor,
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
         medicationList.isEmpty
             ? Container()
             : SizedBox(
-          height: Dim().d12,
-        ),
+                height: Dim().d12,
+              ),
         medicationList.isEmpty
             ? InkWell(
-          onTap: () {
-            STM().redirect2page(ctx, SetMedicReminder(remiderlist: medicationList,));
-          },
-          child: Container(
-            height: Dim().d52,
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Clr().white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Clr().shimmerColor.withOpacity(0.1),
-                    spreadRadius: 0.01,
-                    blurRadius: 12,
-                    offset: Offset(0, 0), // changes position of shadow
+                onTap: () {
+                  STM().redirect2page(
+                      ctx,
+                      SetMedicReminder(
+                        remiderlist: medicationList,
+                      ));
+                },
+                child: Container(
+                  height: Dim().d52,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Clr().white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Clr().shimmerColor.withOpacity(0.1),
+                          spreadRadius: 0.01,
+                          blurRadius: 12,
+                          offset: Offset(0, 0), // changes position of shadow
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(Dim().d12)),
+                  child: Center(
+                    child: Text(
+                      'Add Medicine Reminder',
+                      style: Sty().mediumBoldText,
+                    ),
                   ),
-                ],
-                borderRadius: BorderRadius.circular(Dim().d12)),
-            child: Center(
-              child: Text(
-                'Add Medicine Reminder',
-                style: Sty().mediumBoldText,
-              ),
-            ),
-          ),
-        )
+                ),
+              )
             : Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Clr().shimmerColor.withOpacity(0.1),
-                spreadRadius: 0.01,
-                blurRadius: 12,
-                offset: Offset(0, 0), // changes position of shadow
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Clr().shimmerColor.withOpacity(0.1),
+                      spreadRadius: 0.01,
+                      blurRadius: 12,
+                      offset: Offset(0, 0), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: Dim().d12, horizontal: Dim().d16),
+                      child: ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: medicationList.length,
+                          itemBuilder: (context, index) {
+                            List<dynamic> dayidList =
+                                medicationList[index]['day_id'] ?? [];
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${medicationList[index]['medicine']}',
+                                  style: Sty()
+                                      .mediumText
+                                      .copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(
+                                  height: Dim().d4,
+                                ),
+                                GridView.builder(
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 4,
+                                        mainAxisExtent: 32.0),
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    itemCount: dayidList.length,
+                                    itemBuilder: (context, index2) {
+                                      return Padding(
+                                        padding:
+                                            EdgeInsets.only(right: Dim().d4),
+                                        child: Text(
+                                          dayidList == null
+                                              ? ''
+                                              : dayList[int.parse(
+                                                          dayidList[index2]
+                                                              .toString())]
+                                                      ['name']
+                                                  .toString(),
+                                          style: Sty().smallText.copyWith(
+                                              color: Clr().primaryColor),
+                                        ),
+                                      );
+                                    }),
+                                SizedBox(
+                                  height: Dim().d4,
+                                ),
+                                Text(
+                                  medicationList[index]['time'].toString(),
+                                  style: Sty()
+                                      .smallText
+                                      .copyWith(color: Clr().primaryColor),
+                                ),
+                                SizedBox(
+                                  height: Dim().d4,
+                                ),
+                                const Divider(),
+                              ],
+                            );
+                          })),
+                ),
               ),
-            ],
-          ),
-          child: Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: Dim().d12, horizontal: Dim().d16),
-                child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: medicationList.length,
-                    itemBuilder: (context, index) {
-                      List<dynamic> dayidList = medicationList[index]['day_id'] ?? [];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${medicationList[index]['medicine']}',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          SizedBox(
-                            height: Dim().d4,
-                          ),
-                          SizedBox(
-                            height: Dim().d52,
-                            child: ListView.builder(
-                                itemCount: dayidList.length,
-                                physics: const NeverScrollableScrollPhysics(),
-                                scrollDirection: Axis.horizontal,
-                                shrinkWrap: true,
-                                itemBuilder: (context, index2) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(right: Dim().d4),
-                                    child: Text(
-                                        dayidList == null ? '' : dayList[int.parse(dayidList[index2].toString())]['name'].toString(),
-                                      style: Sty().smallText.copyWith(color: Clr().primaryColor),
-                                    ),
-                                  );
-                                }),
-                          ),
-                          SizedBox(
-                            height: Dim().d4,
-                          ),
-                          Text(
-                            medicationList[index]['time'].toString(),
-                            style: Sty().smallText.copyWith(color: Clr().primaryColor),
-                          ),
-                          SizedBox(
-                            height: Dim().d4,
-                          ),
-                          const Divider(),
-                        ],
-                      );
-                    })),
-          ),
-        ),
       ],
     );
   }
-
 
   //Health Care Services
   Widget servicesLayout(ctx, index, List) {
@@ -829,9 +853,9 @@ class _HomeState extends State<Home> {
                   child: Text(
                     userDetails == null
                         ? ''
-                        : userDetails['height'] == null
+                        : userDetails['height_in_feet'] == null
                             ? '0'
-                            : userDetails['height'].toString(),
+                            : '${userDetails['height_in_feet'].toString()}`${userDetails['height_in_inch'].toString()}"',
                     style: Sty().mediumText.copyWith(
                         fontWeight: FontWeight.w700, color: Clr().white),
                   )),
@@ -882,7 +906,9 @@ class _HomeState extends State<Home> {
   }
 
   //Doctors Near by
-  Widget doctorsLayout(ctx, index, List) {
+  Widget doctorsLayout(ctx, index, list) {
+    List typelist =[];
+    typelist = list[index]['appoitment_types'];
     return Card(
       elevation: 0.6,
       shape: RoundedRectangleBorder(
@@ -891,14 +917,16 @@ class _HomeState extends State<Home> {
       child: Container(
         width: MediaQuery.of(ctx).size.width / 1.15,
         padding: const EdgeInsets.all(8.0),
-        child: Column(
+        child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    'assets/dr.png',
+                SizedBox(
+                  height: Dim().d100,
+                  width: Dim().d100,
+                  child: Image.network(
+                    list[index]['profile_pic'],
+                    fit: BoxFit.cover,
                   ),
                 ),
                 SizedBox(
@@ -913,34 +941,43 @@ class _HomeState extends State<Home> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Dr.Devina Rajput',
+                              'Dr.${list[index]['first_name']} ${list[index]['last_name']}',
                               style: Sty()
                                   .mediumText
                                   .copyWith(fontWeight: FontWeight.w600),
                             ),
                           ),
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              SvgPicture.asset('assets/map_pin.svg'),
-                              SizedBox(
-                                width: 4,
-                              ),
-                              Text(
-                                '1 KM',
-                                style: Sty().smallText.copyWith(
-                                    color: Clr().primaryColor,
-                                    fontWeight: FontWeight.w600),
-                              )
-                            ],
-                          )
+                          // Wrap(
+                          //   crossAxisAlignment: WrapCrossAlignment.center,
+                          //   children: [
+                          //     SvgPicture.asset('assets/map_pin.svg'),
+                          //     SizedBox(
+                          //       width: 4,
+                          //     ),
+                          //     Text(
+                          //       '1 KM',
+                          //       style: Sty().smallText.copyWith(
+                          //           color: Clr().primaryColor,
+                          //           fontWeight: FontWeight.w600),
+                          //     )
+                          //   ],
+                          // )
                         ],
                       ),
                       SizedBox(
                         height: 6,
                       ),
                       Text(
-                        'General Physician',
+                       list[index]['professional'] == null ? '' : '${list[index]['professional']['speciality_name'][0]['name']}',
+                        style: Sty()
+                            .smallText
+                            .copyWith(fontWeight: FontWeight.w400),
+                      ),
+                      SizedBox(
+                        height: Dim().d4,
+                      ),
+                      list[index]['languages'] == null ? Container() : Text(
+                        'Speaks : ${list[index]['languages'].toString().replaceAll('[', '').replaceAll(']', '')}',
                         style: Sty()
                             .smallText
                             .copyWith(fontWeight: FontWeight.w400),
@@ -949,25 +986,14 @@ class _HomeState extends State<Home> {
                         height: 6,
                       ),
                       Text(
-                        'Speaks : English, Hindi, +1',
-                        style: Sty()
-                            .smallText
-                            .copyWith(fontWeight: FontWeight.w400),
+                        'Starts at : ₹ ${list[index]['appointment_details'][0]['charges']}',
+                        style: Sty().smallText.copyWith(fontWeight: FontWeight.w400),
                       ),
                       SizedBox(
                         height: 6,
                       ),
                       Text(
-                        'Starts at : ₹200',
-                        style: Sty()
-                            .smallText
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                      SizedBox(
-                        height: 6,
-                      ),
-                      Text(
-                        '13 Years of experience',
+                       list[index]['professional'] == null ? '' : '${list[index]['professional']['experience']} Years of experience',
                         style: Sty()
                             .smallText
                             .copyWith(fontWeight: FontWeight.w400),
@@ -982,8 +1008,8 @@ class _HomeState extends State<Home> {
             ),
             Row(
               children: [
-                Row(
-                  children: [
+                typelist.contains('Online Consultation') ?   Row(
+                       children: [
                     SvgPicture.asset('assets/online_consultation.svg'),
                     SizedBox(
                       width: 6,
@@ -995,11 +1021,11 @@ class _HomeState extends State<Home> {
                           .copyWith(fontWeight: FontWeight.w600),
                     ),
                   ],
-                ),
+                ) : Container(),
                 SizedBox(
                   width: 16,
                 ),
-                Row(
+                typelist.contains('OPD') ?  Row(
                   children: [
                     SvgPicture.asset('assets/opd.svg'),
                     SizedBox(
@@ -1012,13 +1038,13 @@ class _HomeState extends State<Home> {
                           .copyWith(fontWeight: FontWeight.w600),
                     ),
                   ],
-                ),
+                ) : Container(),
               ],
             ),
             SizedBox(
               height: 12,
             ),
-            Row(
+            typelist.contains('Home Visit') ? Row(
               children: [
                 SvgPicture.asset('assets/home_visit.svg'),
                 SizedBox(
@@ -1029,7 +1055,7 @@ class _HomeState extends State<Home> {
                   style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
-            ),
+            ) : Container(),
             SizedBox(
               height: 20,
             ),
@@ -1038,7 +1064,7 @@ class _HomeState extends State<Home> {
               width: 300,
               child: ElevatedButton(
                   onPressed: () {
-                    STM().redirect2page(ctx, DrName());
+                    STM().redirect2page(ctx, DrName(doctorDetails: list[index],id: list[index]['id'],));
                   },
                   style: ElevatedButton.styleFrom(
                       elevation: 0,
@@ -1069,94 +1095,92 @@ class _HomeState extends State<Home> {
         programList.length == 0
             ? Container()
             : Padding(
-          padding: EdgeInsets.symmetric(horizontal: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Enroll for program',
-                style: Sty()
-                    .mediumText
-                    .copyWith(fontWeight: FontWeight.w600),
-              ),
-              InkWell(
-                onTap: () {
-                  STM().redirect2page(ctx, EnrollForProgram());
-                },
-                child: Text(
-                  'View all',
-                  style: Sty().mediumText.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Clr().primaryColor,
-                  ),
+                padding: EdgeInsets.symmetric(horizontal: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Enroll for program',
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        STM().redirect2page(ctx, EnrollForProgram());
+                      },
+                      child: Text(
+                        'View all',
+                        style: Sty().mediumText.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Clr().primaryColor,
+                            ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
         programList.isEmpty
             ? Container()
             : SizedBox(
-          height: Dim().d12,
-        ),
+                height: Dim().d12,
+              ),
         programList.isEmpty
             ? Container()
             : ListView.builder(
-            itemCount: programList.length,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  STM().redirect2page(
-                      ctx,
-                      ProgramDetails(
-                          programId: programList[index]['id'].toString()));
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Clr().shimmerColor.withOpacity(0.1),
-                        spreadRadius: 0.01,
-                        blurRadius: 12,
-                        offset: Offset(0, 0), // changes position of shadow
-                      ),
-                    ],
-                  ),
-                  child: Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Clr().borderColor)),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: Dim().d16, vertical: Dim().d16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${programList[index]['name']}',
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              style: Sty().mediumText,
-                            ),
+                itemCount: programList.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () {
+                      STM().redirect2page(
+                          ctx,
+                          ProgramDetails(
+                              programId: programList[index]['id'].toString()));
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Clr().shimmerColor.withOpacity(0.1),
+                            spreadRadius: 0.01,
+                            blurRadius: 12,
+                            offset: Offset(0, 0), // changes position of shadow
                           ),
-                          SvgPicture.asset('assets/arrow.svg')
                         ],
                       ),
+                      child: Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: Clr().borderColor)),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: Dim().d16, vertical: Dim().d16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${programList[index]['name']}',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: Sty().mediumText,
+                                ),
+                              ),
+                              SvgPicture.asset('assets/arrow.svg')
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }),
+                  );
+                }),
       ],
     );
   }
-
-
 
 //Medicines
   Widget medicineLayout(ctx, index, List) {
@@ -1460,10 +1484,11 @@ class _HomeState extends State<Home> {
   void getHome() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     FormData body = FormData.fromMap({
-      'latitude':'19.2094',
-      'longitude':'73.0939'
+      'latitude': widget.Lat,
+      'longitude': widget.Lng,
     });
-    var result = await STM().postWithToken(ctx, Str().loading, 'homePageDetails', body,usertoken,'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().loading, 'homePageDetails', body, usertoken, 'customer');
     var status = result['status'];
     if (status == 500) {
       sp.clear();
@@ -1473,7 +1498,12 @@ class _HomeState extends State<Home> {
         userDetails = result['demographic'];
         programList = result['programs'];
         medicationList = result['reminders'];
+        doctorsList = result['near_by_doctors'];
       });
     }
   }
+  
+  
+
+
 }

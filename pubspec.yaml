@@ -37,7 +37,7 @@ dependencies:
   fluttertoast: ^8.2.1
   url_launcher: ^6.1.10
   shared_preferences: ^2.1.0
-  intl: ^0.18.0
+  intl: ^0.17.0
   pin_code_fields: ^7.4.0
   image_cropper: ^3.0.2
   carousel_slider: ^4.2.1
@@ -54,6 +54,7 @@ dependencies:
   flutter_html: ^3.0.0-alpha.5
   flutter_pdfview: 1.2.9
   flutter_cached_pdfview: ^0.4.1
+  calender_picker: ^2.0.1
 
 dev_dependencies:
   # rules and activating additional ones.

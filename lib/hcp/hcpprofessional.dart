@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:saarathi/hcp/hcpMyprofile.dart';
+import 'package:saarathi/hcp/hcppersonalinfo.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
@@ -94,6 +95,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
     controller.stream.listen(
       (event) {
         setState(() {
+          sLocation = null;
           sLocation = sLocation;
         });
       },
@@ -106,7 +108,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
   Widget build(BuildContext context) {
     ctx = context;
     return WillPopScope(onWillPop: ()async{
-      STM().back2Previous(ctx);
+     widget.pagetype =='edit'? STM().back2Previous(ctx) : STM().replacePage(ctx, hcp_Personalinfo());
       return false;
     },
       child: Scaffold(
@@ -115,7 +117,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              widget.pagetype =='edit'? STM().back2Previous(ctx) : STM().replacePage(ctx, hcp_Personalinfo());
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -218,7 +220,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 categoryerror == null
                     ? SizedBox.shrink()
                     : Text(categoryerror ?? '',
-                        style: Sty().mediumText.copyWith(color: Clr().errorRed)),
+                        style: Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
                 SizedBox(
                   height: 20,
                 ),
@@ -304,7 +306,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 specialitieserror == null
                     ? SizedBox.shrink()
                     : Text(specialitieserror ?? '',
-                        style: Sty().mediumText.copyWith(color: Clr().errorRed)),
+                        style: Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
                 SizedBox(
                   height: 20,
                 ),
@@ -455,7 +457,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 mapaddress == null
                     ? const SizedBox.shrink()
                     : Text(mapaddress ?? '',
-                        style: Sty().mediumText.copyWith(color: Clr().errorRed)),
+                        style: Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
                 SizedBox(height: Dim().d20),
                 RichText(
                   text: TextSpan(
@@ -508,7 +510,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                   ),
                 ),
                 SizedBox(
-                  height: 30,
+                  height: Dim().d32,
                 ),
                 Center(
                   child: SizedBox(
@@ -533,7 +535,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: Dim().d20,
                 ),
               ],
             ),
@@ -609,9 +611,6 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
     }
   }
 }
-
-
-
 
 class CustomSearchScaffold extends PlacesAutocompleteWidget {
   final String sMapKey;

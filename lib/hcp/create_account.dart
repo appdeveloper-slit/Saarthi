@@ -278,7 +278,7 @@ class createAccountState extends State<createAccount> {
                             EdgeInsets.only(left: Dim().d16, top: Dim().d8),
                         child: Text(
                           _dropdownError1 ?? "",
-                          style: const TextStyle(color: Colors.red),
+                          style: TextStyle(color: Colors.red,fontSize: Dim().d16),
                         ),
                       ),
                 SizedBox(
@@ -344,7 +344,7 @@ class createAccountState extends State<createAccount> {
                             EdgeInsets.only(left: Dim().d16, top: Dim().d8),
                         child: Text(
                           _dropdownError ?? "",
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(color: Colors.red,fontSize: Dim().d16),
                         ),
                       ),
                 SizedBox(

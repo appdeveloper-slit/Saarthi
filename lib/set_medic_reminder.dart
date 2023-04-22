@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:saarathi/home.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,52 +57,58 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-    return Scaffold(
-      bottomNavigationBar: bottomBarLayout(ctx, 0),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          STM().redirect2page(ctx, MedicationReminder());
-        },
-        backgroundColor: Clr().primaryColor,
-        child: Icon(
-          Icons.add,
-          size: Dim().d32,
-        ),
-      ),
-      backgroundColor: Clr().white,
-      appBar: AppBar(
-        elevation: 2,
-        backgroundColor: Clr().white,
-        leading: InkWell(
-          onTap: () {
-            STM().back2Previous(ctx);
+    return WillPopScope(onWillPop: () async{
+      STM().finishAffinity(ctx, Home());
+      return false;
+    },
+      child: Scaffold(
+        bottomNavigationBar: bottomBarLayout(ctx, 0),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            STM().redirect2page(ctx, MedicationReminder());
           },
+          backgroundColor: Clr().primaryColor,
           child: Icon(
-            Icons.arrow_back_rounded,
-            color: Clr().appbarTextColor,
+            Icons.add,
+            size: Dim().d32,
           ),
         ),
-        centerTitle: true,
-        title: Text(
-          'Set Medication Reminder',
-          style: Sty().largeText.copyWith(
+        backgroundColor: Clr().white,
+        appBar: AppBar(
+          elevation: 2,
+          backgroundColor: Clr().white,
+          leading: InkWell(
+            onTap: () {
+              STM().finishAffinity(ctx, Home());
+            },
+            child: Icon(
+              Icons.arrow_back_rounded,
               color: Clr().appbarTextColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w600),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(Dim().d16),
-        child: Column(
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.remiderlist!.length,
-              itemBuilder: (context, index) {
-                return reminderList(ctx, index, widget.remiderlist);
-              },
             ),
-          ],
+          ),
+          centerTitle: true,
+          title: Text(
+            'Set Medication Reminder',
+            style: Sty().largeText.copyWith(
+                color: Clr().appbarTextColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w600),
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(Dim().d16),
+          child: Column(
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: widget.remiderlist!.length,
+                itemBuilder: (context, index) {
+                  return reminderList(ctx, index, widget.remiderlist);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -205,8 +212,10 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
     var success = result['status'];
     var message = result['message'];
     if (success) {
-      STM().displayToast(message);
-      widget.remiderlist!.removeAt(index);
+      setState(() {
+        STM().displayToast(message);
+        widget.remiderlist!.removeAt(index);
+      });
     } else {
       STM().errorDialog(ctx, message);
     }

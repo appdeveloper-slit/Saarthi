@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saarathi/dr_name.dart';
 import 'package:saarathi/values/dimens.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
@@ -8,6 +12,8 @@ import 'values/colors.dart';
 import 'values/styles.dart';
 
 class AddNewPatient extends StatefulWidget {
+  final dynamic doctorDetails;
+  const AddNewPatient({super.key,  this.doctorDetails});
   @override
   State<AddNewPatient> createState() => _AddNewPatientState();
 }
@@ -44,35 +50,82 @@ class _AddNewPatientState extends State<AddNewPatient> {
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController dobCtrl = TextEditingController();
+  TextEditingController nameCtrl = TextEditingController();
 
-  String RelationValue = 'Relation';
-  List<String> RelationList = [
-    'Relation',
-    'Mother',
-    'Father',
-    'Sister',
-    'Brother',
+  int? RelationValue;
+  List<Map<String,dynamic>> RelationList = [
+    {
+      "id": 1,
+      "name": "Father"
+    },
+    {
+      "id": 2,
+      "name": "Mother"
+    },
+    {
+      "id": 3,
+      "name": "Brother"
+    },
+    {
+      "id": 4,
+      "name": "Sister"
+    },
+    {
+      "id": 5,
+      "name": "Husband"
+    },
+    {
+      "id": 6,
+      "name": "Wife"
+    },
+    {
+      "id": 7,
+      "name": "Daughter"
+    },
+    {
+      "id": 8,
+      "name": "Son"
+    },
+    {
+      "id": 9,
+      "name": "Other"
+    }
   ];
-  String t = "0";
 
-  String GenderValue = 'Gender';
+  String? GenderValue;
   List<String> GenderList = [
-    'Gender',
     'Male',
     'Female',
   ];
-  String v = "0";
+  String? usertoken;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
       appBar: AppBar(
-          elevation: 2,
-
+        elevation: 2,
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -100,7 +153,7 @@ class _AddNewPatientState extends State<AddNewPatient> {
               height: 8,
             ),
             TextFormField(
-              // controller: mobileCtrl,
+              controller: nameCtrl,
               keyboardType: TextInputType.name,
               decoration: InputDecoration(
                 fillColor: Clr().grey,
@@ -115,8 +168,8 @@ class _AddNewPatientState extends State<AddNewPatient> {
                 // label: Text('Enter Your Number'),
                 hintText: "Full name",
                 hintStyle: Sty().mediumText.copyWith(
-                      color: Clr().shimmerColor,
-                    ),
+                  color: Clr().shimmerColor,
+                ),
                 counterText: "",
               ),
             ),
@@ -129,29 +182,32 @@ class _AddNewPatientState extends State<AddNewPatient> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Clr().grey, width: 0.7)),
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
+                child: DropdownButton(
                   value: RelationValue,
                   isExpanded: true,
+                  hint: Text('Select Relation',style: Sty().smallText.copyWith(
+                    color: Clr().shimmerColor,
+                  ),),
                   icon: Icon(
                     Icons.keyboard_arrow_down,
                     size: 28,
                     color: Clr().grey,
                   ),
-                  style: TextStyle(color: Color(0xff787882)),
-                  items: RelationList.map((String string) {
-                    return DropdownMenuItem<String>(
-                      value: string,
+                  style: TextStyle(color:Clr().black),
+                  items: RelationList.map((string) {
+                    return DropdownMenuItem(
+                      value: string['id'],
                       child: Text(
-                        string,
+                        string['name'],
                         style:
-                            TextStyle(color: Color(0xff787882), fontSize: 14),
+                        TextStyle(color: Clr().black, fontSize: 14),
                       ),
                     );
                   }).toList(),
                   onChanged: (t) {
                     // STM().redirect2page(ctx, Home());
                     setState(() {
-                      RelationValue = t!;
+                      RelationValue = t as int? ;
                     });
                   },
                 ),
@@ -166,8 +222,10 @@ class _AddNewPatientState extends State<AddNewPatient> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Clr().grey, width: 0.7)),
               child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: GenderValue,
+                child: DropdownButton(
+                  hint: Text(GenderValue ?? 'Select Gender',style: Sty().smallText.copyWith(
+                    color: Clr().black,
+                  ),),
                   isExpanded: true,
                   icon: Icon(
                     Icons.keyboard_arrow_down,
@@ -175,20 +233,20 @@ class _AddNewPatientState extends State<AddNewPatient> {
                     color: Clr().grey,
                   ),
                   style: TextStyle(color: Color(0xff787882)),
-                  items: GenderList.map((String string) {
-                    return DropdownMenuItem<String>(
+                  items: GenderList.map((string) {
+                    return DropdownMenuItem(
                       value: string,
                       child: Text(
                         string,
                         style:
-                            TextStyle(color: Color(0xff787882), fontSize: 14),
+                        TextStyle(color: Color(0xff787882), fontSize: 14),
                       ),
                     );
                   }).toList(),
                   onChanged: (t) {
                     // STM().redirect2page(ctx, Home());
                     setState(() {
-                      GenderValue = v!;
+                      GenderValue = t as String;
                     });
                   },
                 ),
@@ -236,29 +294,18 @@ class _AddNewPatientState extends State<AddNewPatient> {
               width: 300,
               child: ElevatedButton(
                   onPressed: () {
-                    STM().redirect2page(ctx, OnlineConsultation());
-                    // if (formKey.currentState!
-                    //     .validate()) {
-                    //   STM()
-                    //       .checkInternet(
-                    //       context, widget)
-                    //       .then((value) {
-                    //     if (value) {
-                    //       sendOtp();
-                    //     }
-                    //   });
-                    // }
+                    addPatient();
                   },
-                  style: ElevatedButton.styleFrom( elevation: 0,
+                  style: ElevatedButton.styleFrom(elevation: 0,
                       backgroundColor: Clr().primaryColor,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10))),
                   child: Text(
                     'Submit',
                     style: Sty().mediumText.copyWith(
-                          color: Clr().white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: Clr().white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   )),
             ),
           ],
@@ -266,4 +313,25 @@ class _AddNewPatientState extends State<AddNewPatient> {
       ),
     );
   }
+
+  // add patient
+
+  void addPatient() async {
+    FormData body = FormData.fromMap({
+    'full_name':nameCtrl.text,
+    'relation_id':RelationValue,
+    'gender': GenderValue,
+    'dob': dobCtrl.text,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing, 'add_patient', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, DrName(doctorDetails: widget.doctorDetails,));
+    }else{
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+
 }

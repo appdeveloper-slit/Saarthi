@@ -33,17 +33,33 @@ class _SelectLocationState extends State<SelectLocation> {
   TextEditingController pincodeCtrl = TextEditingController();
   TextEditingController stateCtrl = TextEditingController();
   TextEditingController cityCtrl = TextEditingController();
+
+  int? cityValue;
+  int? stateValue;
+  String? _dropdownError;
+  String? _dropdownError1;
+  List<dynamic> cityList = [];
+  List<dynamic> stateList = [];
+
   String? Lat, Lng,customerID;
   late LocationPermission permission;
   late Position position;
   AwesomeDialog? dialog;
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       customerID = sp.getString('customerId') ?? '';
     });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getCity();
+        print(customerID);
+      }
+    });
     print(customerID);
   }
+
   @override
   void initState() {
     getSession();
@@ -74,7 +90,7 @@ class _SelectLocationState extends State<SelectLocation> {
       padding: EdgeInsets.all(Dim().d16),
       child: Form(
         key: formKey,
-        child: Column(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             box(h: Dim().d8),
             InkWell(
@@ -220,101 +236,161 @@ class _SelectLocationState extends State<SelectLocation> {
               height: Dim().d20,
             ),
             Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Clr().grey.withOpacity(0.1),
-                    spreadRadius: 0.5,
-                    blurRadius: 12,
-                    offset: Offset(0, 8), // changes position of shadow
+                  color: Clr().formfieldbg,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Clr().grey.withOpacity(0.1),
+                      spreadRadius: 0.5,
+                      blurRadius: 12,
+                      offset: Offset(0, 8), // changes position of shadow
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Clr().transparent)),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButtonFormField(
+                  value: stateValue,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
                   ),
-                ],
-              ),
-              child: TextFormField(
-                controller: stateCtrl,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Clr().formfieldbg,
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Clr().primaryColor, width: 1.0),
-                    borderRadius: BorderRadius.circular(10),
+                  hint: Text(
+                    'Select State',
+                    style: Sty().smallText.copyWith(
+                      color: Clr().shimmerColor,
+                    ),
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  // label: Text('Enter Your Number'),
-                  hintText: "State",
-                  hintStyle: Sty()
-                      .mediumText
-                      .copyWith(color: Clr().shimmerColor, fontSize: 14),
-                  counterText: "",
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 28,
+                    color: Clr().grey,
+                  ),
+                  style: TextStyle(color: Clr().black),
+                  items: stateList.map((string) {
+                    return DropdownMenuItem(
+                      value: string['id'],
+                      child: Text(
+                        string['name'],
+                        style: TextStyle(color: Clr().black, fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    // STM().redirect2page(ctx, Home());
+                    setState(() {
+                      stateValue = value as int?;
+                      _dropdownError1 = null;
+                      int position = int.parse(stateValue.toString());
+                      cityList = stateList[position - 1]['city'];
+                      cityValue = null;
+                    });
+                  },
                 ),
+              ),
+            ),
+            _dropdownError1 == null
+                ? const SizedBox.shrink()
+                : Padding(
+              padding:
+              EdgeInsets.only(left: Dim().d16, top: Dim().d8),
+              child: Text(
+                _dropdownError1 ?? "",
+                style: const TextStyle(color: Colors.red),
               ),
             ),
             SizedBox(
-              height: Dim().d20,
+              height: Dim().d24,
             ),
             Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: Dim().d16, vertical: Dim().d4),
               decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Clr().grey.withOpacity(0.1),
-                    spreadRadius: 0.5,
-                    blurRadius: 12,
-                    offset: Offset(0, 8), // changes position of shadow
+                  color: Clr().formfieldbg,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Clr().grey.withOpacity(0.1),
+                      spreadRadius: 0.5,
+                      blurRadius: 12,
+                      offset: Offset(0, 8), // changes position of shadow
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Clr().transparent)),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButtonFormField(
+                  value: cityValue,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
                   ),
-                ],
-              ),
-              child: TextFormField(
-                controller: cityCtrl,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Clr().formfieldbg,
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Clr().primaryColor, width: 1.0),
-                    borderRadius: BorderRadius.circular(10),
+                  hint: Text(
+                    'Select City',
+                    style: Sty().smallText.copyWith(
+                      color: Clr().shimmerColor,
+                    ),
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  // label: Text('Enter Your Number'),
-                  hintText: "City",
-                  hintStyle: Sty().mediumText.copyWith(
-                        color: Clr().shimmerColor,
-                        fontSize: 14,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 28,
+                    color: Clr().grey,
+                  ),
+                  style: TextStyle(color: Clr().black),
+                  items: cityList.map((string) {
+                    return DropdownMenuItem(
+                      value: string['id'],
+                      child: Text(
+                        string['name'],
+                        style: TextStyle(color: Clr().black, fontSize: 14),
                       ),
-                  counterText: "",
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    // STM().redirect2page(ctx, Home());
+                    setState(() {
+                      cityValue = value as int?;
+                      _dropdownError = null;
+                    });
+                  },
                 ),
+              ),
+            ),
+            _dropdownError == null
+                ? SizedBox.shrink()
+                : Padding(
+              padding:
+              EdgeInsets.only(left: Dim().d16, top: Dim().d8),
+              child: Text(
+                _dropdownError ?? "",
+                style: TextStyle(color: Colors.red),
               ),
             ),
             SizedBox(
               height: Dim().d52,
             ),
-            SizedBox(
-              height: 50,
-              width: 300,
-              child: ElevatedButton(
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      OtherDetails();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: Clr().primaryColor,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                  child: Text(
-                    'Save location',
-                    style: Sty().mediumText.copyWith(
-                          color: Clr().white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  )),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                height: 50,
+                width: 300,
+                child: ElevatedButton(
+                    onPressed: () {
+                      _validateForm(ctx);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Clr().primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                    child: Text(
+                      'Save location',
+                      style: Sty().mediumText.copyWith(
+                            color: Clr().white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    )),
+              ),
             ),
           ],
         ),
@@ -363,6 +439,23 @@ class _SelectLocationState extends State<SelectLocation> {
     }
   }
 
+  _validateForm(ctx) {
+    bool _isValid = formKey.currentState!.validate();
+
+    if (cityValue == null) {
+      setState(() => _dropdownError = "Please select city");
+      _isValid = false;
+    }
+    if (stateValue == null) {
+      setState(() {
+        _dropdownError1 = "Please select state";
+      });
+      _isValid = false;
+    }
+    if (_isValid) {
+      OtherDetails();
+    }
+  }
 
   // getLocation
   getLocation() async {
@@ -409,11 +502,22 @@ class _SelectLocationState extends State<SelectLocation> {
     var success = result['success'];
     if (success) {
       sp.setBool('login', true);
-      STM().finishAffinity(ctx, Home());
+      STM().finishAffinity(ctx, Home(Lat: Lat,Lng: Lng,));
       STM().displayToast(message);
     } else {
       var message = result['message'];
       STM().errorDialog(ctx, message);
+    }
+  }
+  // get state and city
+
+  void getCity() async {
+    var result = await STM().getOpen(ctx, Str().loading, 'get_cities');
+    var success = result['success'];
+    if(success){
+      setState(() {
+        stateList = result['cities'];
+      });
     }
   }
 }

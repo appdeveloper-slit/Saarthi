@@ -9,6 +9,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:saarathi/hcp/hcpMyprofile.dart';
+import 'package:saarathi/hcp/hcpprofessional.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
@@ -78,7 +79,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().back2Previous(ctx);
+        widget.pagetype =='edit'? STM().back2Previous(ctx) : STM().replacePage(ctx, ProfessionalInfo());
         return false;
       },
       child: Scaffold(
@@ -88,7 +89,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              widget.pagetype =='edit'? STM().back2Previous(ctx) : STM().replacePage(ctx, ProfessionalInfo());
             },
             child: Icon(
               Icons.arrow_back_rounded,
