@@ -495,7 +495,8 @@ class STM {
     }
     return result;
   }
-  Future<dynamic> getWithTokenUrl(ctx, title, name, token,Url) async {
+
+  Future<dynamic> getWithTokenUrl(ctx, title, name, token, Url) async {
     //Dialog
     AwesomeDialog dialog = STM().loadingDialog(ctx, title);
     dialog.show();
@@ -508,7 +509,7 @@ class STM {
         },
       ),
     );
-    String url = Url == 'hcp' ?  AppUrl.hcpUrl + name : AppUrl.mainUrl + name;
+    String url = Url == 'hcp' ? AppUrl.hcpUrl + name : AppUrl.mainUrl + name;
     dynamic result;
     try {
       Response response = await dio.get(url);
@@ -550,7 +551,7 @@ class STM {
     return result;
   }
 
-  Future<dynamic> post(ctx, title, name, body,Url) async {
+  Future<dynamic> post(ctx, title, name, body, Url) async {
     //Dialog
     AwesomeDialog dialog = STM().loadingDialog(ctx, title);
     dialog.show();
@@ -580,7 +581,6 @@ class STM {
     }
     return result;
   }
-
 
   Future<dynamic> postOpen(ctx, title, name, body) async {
     //Dialog
@@ -641,7 +641,7 @@ class STM {
     return result;
   }
 
-  Future<dynamic> postWithToken(ctx, title, name, body, token,Url) async {
+  Future<dynamic> postWithToken(ctx, title, name, body, token, Url) async {
     //Dialog
     AwesomeDialog dialog = STM().loadingDialog(ctx, title);
     dialog.show();
@@ -654,7 +654,7 @@ class STM {
         },
       ),
     );
-    String url = Url == 'hcp'? AppUrl.hcpUrl + name : AppUrl.mainUrl + name;
+    String url = Url == 'hcp' ? AppUrl.hcpUrl + name : AppUrl.mainUrl + name;
     if (kDebugMode) {
       print("Url = $url\nBody = ${body.fields}");
     }
@@ -712,20 +712,42 @@ class STM {
   Widget imageView(url, {width, height, fit = BoxFit.fill}) {
     return url.toString().contains('assets')
         ? Image.asset(
-      '$url',
-      width: width,
-      height: height,
-      fit: fit,
-    ) : CachedNetworkImage(
-      width: width,
-      height: height,
-      fit: fit,
-      imageUrl: url ??
-          'https://www.famunews.com/wp-content/themes/newsgamer/images/dummy.png',
-      placeholder: (context, url) => STM().loadingPlaceHolder(),
-    );
+            '$url',
+            width: width,
+            height: height,
+            fit: fit,
+          )
+        : CachedNetworkImage(
+            width: width,
+            height: height,
+            fit: fit,
+            imageUrl: url ??
+                'https://www.famunews.com/wp-content/themes/newsgamer/images/dummy.png',
+            placeholder: (context, url) => STM().loadingPlaceHolder(),
+          );
   }
+
   String nameShort(name) {
     return name.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
+  }
+
+  imageDisplay({list, url,h, w}) {
+    return SizedBox(
+        height: h,
+        width: w,
+        child: list.contains('jpg') ||
+                list.contains('jpeg') ||
+                list.contains('png')
+            ? Image.network(
+              url,
+                fit: BoxFit.cover,
+              )
+            : SizedBox(
+                height: h,
+                width: w,
+                child: Image.network(
+                    'https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg',
+                    fit: BoxFit.cover),
+              ));
   }
 }

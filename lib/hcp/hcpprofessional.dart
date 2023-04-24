@@ -34,29 +34,28 @@ class ProfessionalInfo extends StatefulWidget {
 class _ProfessionalInfoState extends State<ProfessionalInfo> {
   late BuildContext ctx;
   String? categoryValue;
-  List<Map<String, dynamic>> categoryList = [
-    {'id': 1, 'name': 'Nurse'},
-    {'id': 2, 'name': 'Doctor'},
-    {'id': 3, 'name': 'Physiotherapist'}
-  ];
+  List<dynamic> categoryList = [];
   TextEditingController mobileCtrl = TextEditingController();
   TextEditingController opdaddress = TextEditingController();
   TextEditingController experinceCtrl = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   String t = "0";
   List addspecialityList = [];
-  List<Map<String, dynamic>> specialList = [
-    {"id": 1, "name": 'Speciality 1 '},
-    {"id": 2, "name": 'Speciality 2'}
-  ];
+  List<dynamic> specialList = [];
   String v = "0";
-  String? categoryerror, specialitieserror, mapaddress,hcptoken;
+  String? categoryerror, specialitieserror, mapaddress, hcptoken;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     List professionalist = sp.getStringList('professionallist') ?? [];
     setState(() {
       hcptoken = sp.getString('hcptoken') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        print(hcptoken);
+        getCategories();
+      }
     });
     widget.data == null
         ? null
@@ -66,8 +65,10 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 widget.data['category_id'].toString());
             categoryValue = categoryList[position]['name'];
             addspecialityList = widget.data['speciality_id'];
-            mobileCtrl = TextEditingController(text: widget.data['contact_no'].toString());
-            opdaddress = TextEditingController(text: widget.data['address'].toString());
+            mobileCtrl = TextEditingController(
+                text: widget.data['contact_no'].toString());
+            opdaddress =
+                TextEditingController(text: widget.data['address'].toString());
             experinceCtrl = TextEditingController(
                 text: widget.data['experience'].toString());
             sLatitude = widget.data['latitude'].toString();
@@ -76,7 +77,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
           });
     setState(() {
       int position = categoryList.indexWhere((element) =>
-      element['id'].toString() == professionalist[0].toString());
+          element['id'].toString() == professionalist[0].toString());
       categoryValue = categoryList[position]['name'];
       addspecialityList = jsonDecode(professionalist[1]);
       mobileCtrl = TextEditingController(text: professionalist[2]);
@@ -95,7 +96,6 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
     controller.stream.listen(
       (event) {
         setState(() {
-          sLocation = null;
           sLocation = sLocation;
         });
       },
@@ -107,17 +107,22 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-    return WillPopScope(onWillPop: ()async{
-     widget.pagetype =='edit'? STM().back2Previous(ctx) : STM().replacePage(ctx, hcp_Personalinfo());
-      return false;
-    },
+    return WillPopScope(
+      onWillPop: () async {
+        widget.pagetype == 'edit'
+            ? STM().back2Previous(ctx)
+            : STM().replacePage(ctx, hcp_Personalinfo());
+        return false;
+      },
       child: Scaffold(
         appBar: AppBar(
           elevation: 2,
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              widget.pagetype =='edit'? STM().back2Previous(ctx) : STM().replacePage(ctx, hcp_Personalinfo());
+              widget.pagetype == 'edit'
+                  ? STM().back2Previous(ctx)
+                  : STM().replacePage(ctx, hcp_Personalinfo());
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -157,8 +162,9 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 RichText(
                   text: TextSpan(
                       text: 'Select Category',
-                      style:
-                          Sty().mediumText.copyWith(fontWeight: FontWeight.w500),
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w500),
                       children: [
                         TextSpan(text: ' *', style: TextStyle(color: Clr().red))
                       ]),
@@ -202,8 +208,8 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                           value: string['name'],
                           child: Text(
                             string['name'],
-                            style:
-                                TextStyle(color: Color(0xff787882), fontSize: 14),
+                            style: TextStyle(
+                                color: Color(0xff787882), fontSize: 14),
                           ),
                         );
                       }).toList(),
@@ -212,6 +218,10 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                         setState(() {
                           categoryValue = t.toString();
                           categoryerror = null;
+                          int position = categoryList.indexWhere((element) =>
+                              element['name'].toString() ==
+                              categoryValue.toString());
+                          specialList = categoryList[position]['specaility'];
                         });
                       },
                     ),
@@ -220,15 +230,17 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 categoryerror == null
                     ? SizedBox.shrink()
                     : Text(categoryerror ?? '',
-                        style: Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().errorRed, fontSize: Dim().d16)),
                 SizedBox(
                   height: 20,
                 ),
                 RichText(
                   text: TextSpan(
                       text: 'Specialities',
-                      style:
-                          Sty().mediumText.copyWith(fontWeight: FontWeight.w500),
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w500),
                       children: [
                         TextSpan(text: ' *', style: TextStyle(color: Clr().red))
                       ]),
@@ -238,33 +250,35 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 ),
                 InkWell(
                   onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (index2) {
-                          return MultiSelectDialog(
-                            items: specialList.map((e) {
-                              return MultiSelectItem(
-                                  e['id'].toString(), e['name'].toString());
-                            }).toList(),
-                            initialValue: addspecialityList,
-                            height: 350,
-                            width: 450,
-                            title: Text(
-                              "Select Speciality",
-                              style: Sty().mediumText.copyWith(
-                                    fontSize: Dim().d14,
-                                    color: Clr().hintColor,
-                                  ),
-                            ),
-                            selectedColor: Clr().black,
-                            onConfirm: (results) {
-                              setState(() {
-                                addspecialityList = results;
-                                specialitieserror = null;
-                              });
-                            },
-                          );
-                        });
+                    categoryValue == null
+                        ? STM().displayToast('Please select category first')
+                        : showDialog(
+                            context: context,
+                            builder: (index2) {
+                              return MultiSelectDialog(
+                                items: specialList.map((e) {
+                                  return MultiSelectItem(
+                                      e['id'].toString(), e['name'].toString());
+                                }).toList(),
+                                initialValue: addspecialityList,
+                                height: 350,
+                                width: 450,
+                                title: Text(
+                                  "Select Speciality",
+                                  style: Sty().mediumText.copyWith(
+                                        fontSize: Dim().d14,
+                                        color: Clr().hintColor,
+                                      ),
+                                ),
+                                selectedColor: Clr().black,
+                                onConfirm: (results) {
+                                  setState(() {
+                                    addspecialityList = results;
+                                    specialitieserror = null;
+                                  });
+                                },
+                              );
+                            });
                   },
                   child: Container(
                     height: Dim().d52,
@@ -294,9 +308,10 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                                     ? Clr().black
                                     : const Color(0xff787882)),
                           ),
-                          const Icon(
+                          Icon(
                             Icons.keyboard_arrow_down,
                             size: 28,
+                            color: Clr().grey,
                           ),
                         ],
                       ),
@@ -306,15 +321,17 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 specialitieserror == null
                     ? SizedBox.shrink()
                     : Text(specialitieserror ?? '',
-                        style: Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().errorRed, fontSize: Dim().d16)),
                 SizedBox(
                   height: 20,
                 ),
                 RichText(
                   text: TextSpan(
                       text: 'Official Contact No',
-                      style:
-                          Sty().mediumText.copyWith(fontWeight: FontWeight.w500),
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w500),
                       children: [
                         TextSpan(text: ' *', style: TextStyle(color: Clr().red))
                       ]),
@@ -419,7 +436,8 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                   onTap: () {
                     STM().redirect2page(
                         ctx,
-                        CustomSearchScaffold('AIzaSyCSs8od16tCpuiMK-QUpMrqRdKfPckrjYI'));
+                        CustomSearchScaffold(
+                            'AIzaSyCSs8od16tCpuiMK-QUpMrqRdKfPckrjYI'));
                     setState(() {
                       mapaddress = null;
                     });
@@ -457,13 +475,15 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 mapaddress == null
                     ? const SizedBox.shrink()
                     : Text(mapaddress ?? '',
-                        style: Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().errorRed, fontSize: Dim().d16)),
                 SizedBox(height: Dim().d20),
                 RichText(
                   text: TextSpan(
                       text: 'Experience (In Years)',
-                      style:
-                          Sty().mediumText.copyWith(fontWeight: FontWeight.w500),
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w500),
                       children: [
                         TextSpan(text: ' *', style: TextStyle(color: Clr().red))
                       ]),
@@ -518,7 +538,9 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                     width: 300,
                     child: ElevatedButton(
                         onPressed: () {
-                         widget.pagetype == 'edit' ? updateProffessionalinfo() : _validateForm(ctx);
+                          widget.pagetype == 'edit'
+                              ? updateProffessionalinfo()
+                              : _validateForm(ctx);
                         },
                         style: ElevatedButton.styleFrom(
                             elevation: 0,
@@ -589,25 +611,39 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
       STM().redirect2page(ctx, EducationalInfo());
     }
   }
+
   void updateProffessionalinfo() async {
-    int position = categoryList.indexWhere((element) => element['name'].toString() == categoryValue.toString());
+    int position = categoryList.indexWhere(
+        (element) => element['name'].toString() == categoryValue.toString());
     FormData body = FormData.fromMap({
-    'category_id':  categoryList[position]['id'].toString(),
-    'speciality_ids': jsonEncode(addspecialityList),
-    'contact_no':  mobileCtrl.text,
-    'address': opdaddress.text,
-    'experience': experinceCtrl.text,
-    'latitude': sLatitude.toString(),
-    'longitude': sLongitude.toString(),
-    'map_address':sLocation.toString(),
+      'category_id': categoryList[position]['id'].toString(),
+      'speciality_ids': jsonEncode(addspecialityList),
+      'contact_no': mobileCtrl.text,
+      'address': opdaddress.text,
+      'experience': experinceCtrl.text,
+      'latitude': sLatitude.toString(),
+      'longitude': sLongitude.toString(),
+      'map_address': sLocation.toString(),
     });
-    var result = await STM().postWithToken(ctx, Str().updating, 'update_professional', body, hcptoken, 'hcp');
+    var result = await STM().postWithToken(
+        ctx, Str().updating, 'update_professional', body, hcptoken, 'hcp');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       STM().successDialogWithReplace(ctx, message, MyProfile());
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
+    }
+  }
+
+  // getCtegories
+  void getCategories() async {
+    var result = await STM().getOpen(ctx, Str().loading, 'get_categories');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        categoryList = result['get_category'];
+      });
     }
   }
 }

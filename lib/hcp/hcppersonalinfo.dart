@@ -746,6 +746,12 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
       });
       _isValid = false;
     }
+    if(profile == null){
+      setState(() {
+        STM().displayToast('Profile photo is required');
+      });
+      _isValid = false;
+    }
     if (_isValid) {
       // createAccount();
       setState(() {

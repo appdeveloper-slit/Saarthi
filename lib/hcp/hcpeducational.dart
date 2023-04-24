@@ -40,11 +40,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
       registrationcertificateerror,
       registrationcertificate;
   List<String> dregreecertificat = [];
-  List<String> specialList = [
-    'Degree 1 ',
-    'Degree 2 ',
-    'Degree 3 ',
-  ];
+  List<dynamic> specialList = [];
   String v = "0";
 
   String? hcptoken;
@@ -61,7 +57,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
-        // getHome();
+        getDegree();
         print(hcptoken);
       }
     });
@@ -148,7 +144,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
                             return MultiSelectDialog(
                               items: specialList.map((e) {
                                 return MultiSelectItem(
-                                    e.toString(), e.toString());
+                                    e['name'].toString(), e['name'].toString());
                               }).toList(),
                               initialValue: adddegreeList,
                               height: 350,
@@ -525,4 +521,15 @@ class _EducationalInfoState extends State<EducationalInfo> {
       STM().errorDialog(ctx, message);
     }
   }
+
+  void getDegree() async {
+    var result = await STM().getOpen(ctx, Str().loading, 'get_degree');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        specialList = result['get_degree'];
+      });
+    }
+  }
+
 }

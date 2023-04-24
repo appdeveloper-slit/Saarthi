@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:saarathi/home.dart';
+import 'package:saarathi/review_apt_call.dart';
+import 'package:saarathi/review_apt_home_visit.dart';
+import 'package:saarathi/review_apt_ol.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,10 +30,11 @@ class DrName extends StatefulWidget {
 class _DrNameState extends State<DrName> {
   late BuildContext ctx;
 
-  int selected = -1;
-
+  int? selected;
+  String? slottime;
   bool isChecked = false;
   List idSelectedList = [];
+  List<Map<String, dynamic>> patientDetailsList = [];
   String? AppointmentValue;
   List<String> AppointmentList = [
     'Online Appointment',
@@ -52,7 +56,8 @@ class _DrNameState extends State<DrName> {
   String? usertoken;
   List<dynamic> patientlist = [];
   List<dynamic> slotlist = [];
-  int? total;
+  int? total, charges, gst;
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
@@ -114,27 +119,11 @@ class _DrNameState extends State<DrName> {
                 padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                 child: Row(
                   children: [
-                    Container(
-                      height: Dim().d160,
-                      width: Dim().d120,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: widget.doctorDetails['profile_pic']
-                                  .toString()
-                                  .contains('jpg') ||
-                              widget.doctorDetails['profile_pic']
-                                  .toString()
-                                  .contains('jpeg') ||
-                              widget.doctorDetails['profile_pic']
-                                  .toString()
-                                  .contains('png')
-                          ? Image.network(
-                              widget.doctorDetails['profile_pic'],
-                              fit: BoxFit.fitWidth,
-                            )
-                          : Container(),
-                    ),
+                    STM().imageDisplay(
+                        list: widget.doctorDetails['profile_pic'],
+                        url: widget.doctorDetails['profile_pic'],
+                        h: Dim().d160,
+                        w: Dim().d120),
                     SizedBox(
                       width: Dim().d20,
                     ),
@@ -150,7 +139,7 @@ class _DrNameState extends State<DrName> {
                                 .copyWith(fontWeight: FontWeight.w600),
                           ),
                           SizedBox(
-                            height: 6,
+                            height: Dim().d8,
                           ),
                           Text(
                             '${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
@@ -159,7 +148,7 @@ class _DrNameState extends State<DrName> {
                                 .copyWith(fontWeight: FontWeight.w400),
                           ),
                           SizedBox(
-                            height: 6,
+                            height: Dim().d8,
                           ),
                           Text(
                             '${widget.doctorDetails['city']['name']}',
@@ -168,7 +157,7 @@ class _DrNameState extends State<DrName> {
                                 .copyWith(fontWeight: FontWeight.w400),
                           ),
                           SizedBox(
-                            height: 6,
+                            height: Dim().d8,
                           ),
                           Text(
                             'Experience : ${widget.doctorDetails['professional']['experience']} Years',
@@ -197,14 +186,15 @@ class _DrNameState extends State<DrName> {
                 height: Dim().d100,
                 width: Dim().d80,
                 onDateChange: (date) {
-                 setState(() {
-                   dayno = date;
-                   int position = dayList.indexWhere((e) => e['name'].toString() == DateFormat.EEEE().format(date));
-                   if (dayList.contains(DateFormat.EEEE().format(date))) {
-                     dayList[position]['id'];
-                   }
-                   getSlots(id: dayList[position]['id']);
-                 });
+                  setState(() {
+                    dayno = date;
+                    int position = dayList.indexWhere((e) =>
+                        e['name'].toString() == DateFormat.EEEE().format(date));
+                    if (dayList.contains(DateFormat.EEEE().format(date))) {
+                      dayList[position]['id'];
+                    }
+                    getSlots(id: dayList[position]['id']);
+                  });
                 },
               ),
               SizedBox(
@@ -252,7 +242,8 @@ class _DrNameState extends State<DrName> {
                           value: string,
                           child: Text(
                             string,
-                            style: TextStyle(color: Color(0xff787882), fontSize: 14),
+                            style: TextStyle(
+                                color: Color(0xff787882), fontSize: 14),
                           ),
                         );
                       }).toList(),
@@ -261,8 +252,11 @@ class _DrNameState extends State<DrName> {
                           AppointmentValue = t!;
                         });
                         setState(() {
-                          int position = dayList.indexWhere((e) => e['name'].toString() == DateFormat.EEEE().format(dayno!));
-                          if (dayList.contains(DateFormat.EEEE().format(dayno!))) {
+                          int position = dayList.indexWhere((e) =>
+                              e['name'].toString() ==
+                              DateFormat.EEEE().format(dayno!));
+                          if (dayList
+                              .contains(DateFormat.EEEE().format(dayno!))) {
                             dayList[position]['id'];
                           }
                           getSlots(id: dayList[position]['id']);
@@ -349,60 +343,6 @@ class _DrNameState extends State<DrName> {
               SizedBox(
                 height: Dim().d32,
               ),
-              slotlist.isEmpty ? Container() : Padding(
-                padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: Clr().grey),
-                        ),
-                        SizedBox(
-                          width: Dim().d4,
-                        ),
-                        Text(
-                          'Booked',
-                          style: Sty()
-                              .smallText
-                              .copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: Clr().white,
-                              border: Border.all(color: Clr().primaryColor)),
-                        ),
-                        SizedBox(
-                          width: Dim().d4,
-                        ),
-                        Text(
-                          'Available',
-                          style: Sty()
-                              .smallText
-                              .copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                 child: GridView.builder(
@@ -427,6 +367,7 @@ class _DrNameState extends State<DrName> {
                           onTap: () {
                             setState(() {
                               selected = slotlist[index]['id'];
+                              slottime = slotlist[index]['slot'];
                             });
                             // STM().redirect2page(ctx, Electronics(categoryList[index]['id'].toString()));
                           },
@@ -484,7 +425,20 @@ class _DrNameState extends State<DrName> {
                         width: 100,
                         child: ElevatedButton(
                             onPressed: () {
-                              // advgbawrb
+                              patientDetailsList.isEmpty
+                                  ? STM().displayToast('Patient is required')
+                                  : AppointmentValue == null
+                                      ? STM().displayToast(
+                                          'Appointment type is required')
+                                      : selected == null
+                                          ? STM().displayToast(
+                                              'Slot time is required')
+                                          : Routes(AppointmentValue ==
+                                                  'Online Appointment'
+                                              ? 1
+                                              : AppointmentValue == 'Opd'
+                                                  ? 2
+                                                  : 3);
                             },
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
@@ -518,11 +472,11 @@ class _DrNameState extends State<DrName> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          idSelectedList.contains(list[index]['id'])
+          patientDetailsList.map((e) => e['id']).contains(list[index]['id'])
               ? InkWell(
                   onTap: () {
                     setState(() {
-                      idSelectedList.remove(list[index]['id']);
+                      patientDetailsList.clear();
                     });
                   },
                   child: Container(
@@ -537,8 +491,14 @@ class _DrNameState extends State<DrName> {
               : InkWell(
                   onTap: () {
                     setState(() {
-                      idSelectedList.add(list[index]['id']);
+                      patientDetailsList.clear();
+                      patientDetailsList.add({
+                        'id': list[index]['id'],
+                        'name': list[index]['full_name'],
+                        'age': list[index]['age'],
+                      });
                     });
+                    print(patientDetailsList);
                   },
                   child: Container(
                     height: Dim().d20,
@@ -552,20 +512,6 @@ class _DrNameState extends State<DrName> {
           SizedBox(
             width: Dim().d8,
           ),
-          // Container(
-          //   width: 50,
-          //   height: 50,
-          //   decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(50),
-          //       color: Clr().primaryColor),
-          //   child: Center(
-          //       child: Text(
-          //     'AM',
-          //     style: Sty()
-          //         .mediumText
-          //         .copyWith(color: Clr().white, fontWeight: FontWeight.w600),
-          //   )),
-          // ),
           SizedBox(
             width: Dim().d16,
           ),
@@ -577,7 +523,7 @@ class _DrNameState extends State<DrName> {
                 style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
               ),
               SizedBox(
-                height: 4,
+                height: Dim().d4,
               ),
               Text(
                 '${list[index]['gender']}, ${list[index]['age']} years',
@@ -604,6 +550,81 @@ class _DrNameState extends State<DrName> {
     }
   }
 
+  // route to book appointment
+  Routes(type) {
+    type == 1
+        ? STM().redirect2page(
+            ctx,
+            OnlineConsultation(
+              onlineDetails: [
+                {
+                  'hcpuserid': widget.doctorDetails['id'],
+                  'hcpprofilepic':
+                      widget.doctorDetails['profile_pic'].toString(),
+                  'hcpname':
+                      '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                  'speciality': widget.doctorDetails['professional']
+                      ['speciality_name'][0]['name'],
+                  'bookingtime': slottime,
+                  'bookingdate': dayno,
+                  'patientname': patientDetailsList[0]['name'],
+                  'patientage': patientDetailsList[0]['age'],
+                  'patientid': patientDetailsList[0]['id'],
+                  'slotid': selected,
+                  'charges': charges,
+                  'gst': gst,
+                  'total': total,
+                }
+              ],
+            ))
+        : type == 2
+            ? STM().redirect2page(
+                ctx,
+                TeleCallConsultation(
+                  aptdetails: [
+                    {
+                      'hcpuserid': widget.doctorDetails['id'],
+                      'hcpprofilepic':
+                          widget.doctorDetails['profile_pic'].toString(),
+                      'hcpname':
+                          '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                      'speciality': widget.doctorDetails['professional']
+                          ['speciality_name'][0]['name'],
+                      'bookingtime': slottime,
+                      'bookingdate': dayno,
+                      'patientname': patientDetailsList[0]['name'],
+                      'patientage': patientDetailsList[0]['age'],
+                      'patientid': patientDetailsList[0]['id'],
+                      'slotid': selected,
+                      'charges': charges,
+                      'gst': gst,
+                      'total': total,
+                    }
+                  ],
+                ))
+            : STM().redirect2page(
+                ctx,
+                HomeVisitConsultation(
+                  homedetails: [
+                    {
+                      'hcpuserid': widget.doctorDetails['id'],
+                      'hcpprofilepic': widget.doctorDetails['profile_pic'].toString(),
+                      'hcpname': '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                      'speciality': widget.doctorDetails['professional']['speciality_name'][0]['name'],
+                      'bookingtime': slottime,
+                      'bookingdate': dayno,
+                      'patientname': patientDetailsList[0]['name'],
+                      'patientage': patientDetailsList[0]['age'],
+                      'patientid': patientDetailsList[0]['id'],
+                      'slotid': selected,
+                      'charges': charges,
+                      'gst': gst,
+                      'total': total,
+                    }
+                  ],
+                ));
+  }
+
   // getSLots
   void getSlots({id}) async {
     FormData body = FormData.fromMap({
@@ -612,19 +633,24 @@ class _DrNameState extends State<DrName> {
           ? 1
           : AppointmentValue == 'Opd'
               ? 2
-              : AppointmentValue == 'Home Visit' ? 3 : null,
+              : AppointmentValue == 'Home Visit'
+                  ? 3
+                  : null,
       'day_no': id,
     });
     var result = await STM().postWithToken(
         ctx, Str().processing, 'get_hcp_details', body, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       setState(() {
         slotlist = result['slot_array'];
-        total = int.parse(result['doctor_details']['charges'].toString()) + int.parse(result['doctor_details']['gst'].toString());
+        charges = int.parse(result['doctor_details']['charges'].toString());
+        gst = int.parse(result['doctor_details']['gst'].toString());
+        total = int.parse(result['doctor_details']['charges'].toString()) +
+            int.parse(result['doctor_details']['gst'].toString());
       });
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
   }

@@ -26,7 +26,7 @@ class SetTime extends StatefulWidget {
 class _SetTimeState extends State<SetTime> {
   late BuildContext ctx;
   DateTime dateTime = DateTime.now();
-  List<String> timeList = [];
+  List<dynamic> timeList = [];
   var time;
   String? usertoken;
 

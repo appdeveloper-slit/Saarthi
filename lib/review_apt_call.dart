@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
+import 'package:saarathi/home.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
 import 'review_apt_home_visit.dart';
@@ -8,17 +12,38 @@ import 'values/dimens.dart';
 import 'values/styles.dart';
 
 class TeleCallConsultation extends StatefulWidget {
+  final dynamic aptdetails;
+  const TeleCallConsultation({super.key, this.aptdetails});
   @override
   State<TeleCallConsultation> createState() => _TeleCallConsultationState();
 }
 
 class _TeleCallConsultationState extends State<TeleCallConsultation> {
   late BuildContext ctx;
+  String? usertoken;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        print(widget.aptdetails);
+        print(usertoken);
+      }
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
@@ -53,26 +78,26 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 35,
-                    backgroundImage: AssetImage('assets/dr1.png'),
+                    radius: Dim().d56,
+                    backgroundImage: NetworkImage(widget.aptdetails[0]['hcpprofilepic'].toString()),
                   ),
                   SizedBox(
-                    width: 20,
+                    width: Dim().d20,
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Dr.Mansi Janl',
+                        'Dr.${widget.aptdetails[0]['hcpname'].toString()}',
                         style: Sty()
                             .mediumText
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                       SizedBox(
-                        height: 10,
+                        height: Dim().d12,
                       ),
                       Text(
-                        'General Physician',
+                        widget.aptdetails[0]['speciality'].toString(),
                         style: Sty()
                             .smallText
                             .copyWith(fontWeight: FontWeight.w400),
@@ -130,16 +155,16 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '01 : 00 PM',
+                            widget.aptdetails[0]['bookingtime'].toString(),
                             style: Sty().mediumText.copyWith(
                                 color: Clr().white,
                                 fontWeight: FontWeight.w600),
                           ),
                           SizedBox(
-                            height: 8,
+                            height: Dim().d8,
                           ),
                           Text(
-                            '28 Nov 2022',
+                            DateFormat('d MMM y').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString())),
                             style: Sty().mediumText.copyWith(
                                 color: Clr().white,
                                 fontWeight: FontWeight.w600),
@@ -151,47 +176,47 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 16,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: Text(
-                'Enter contact number',
-                style: Sty().largeText.copyWith(
-                    fontWeight: FontWeight.w600, color: Clr().primaryColor),
-              ),
-            ),
-            SizedBox(
-              height: 12,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: TextFormField(
-                // controller: mobileCtrl,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Clr().formfieldbg,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Clr().transparent)),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                    BorderSide(color: Clr().primaryColor, width: 1.0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  // label: Text('Enter Your Number'),
-                  hintText: "Enter Mobile Number",
-                  hintStyle: Sty()
-                      .mediumText
-                      .copyWith(color: Clr().shimmerColor, fontSize: 14),
-                  counterText: "",
-                ),
-              ),
-            ),
+            // SizedBox(
+            //   height: 16,
+            // ),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+            //   child: Text(
+            //     'Enter contact number',
+            //     style: Sty().largeText.copyWith(
+            //         fontWeight: FontWeight.w600, color: Clr().primaryColor),
+            //   ),
+            // ),
+            // SizedBox(
+            //   height: 12,
+            // ),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+            //   child: TextFormField(
+            //     // controller: mobileCtrl,
+            //     keyboardType: TextInputType.name,
+            //     decoration: InputDecoration(
+            //       filled: true,
+            //       fillColor: Clr().formfieldbg,
+            //       border: OutlineInputBorder(
+            //           borderRadius: BorderRadius.circular(10),
+            //           borderSide: BorderSide(color: Clr().transparent)),
+            //       focusedBorder: OutlineInputBorder(
+            //         borderSide:
+            //         BorderSide(color: Clr().primaryColor, width: 1.0),
+            //         borderRadius: BorderRadius.circular(10),
+            //       ),
+            //       contentPadding:
+            //       EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            //       // label: Text('Enter Your Number'),
+            //       hintText: "Enter Mobile Number",
+            //       hintStyle: Sty()
+            //           .mediumText
+            //           .copyWith(color: Clr().shimmerColor, fontSize: 14),
+            //       counterText: "",
+            //     ),
+            //   ),
+            // ),
             SizedBox(
               height: 20,
             ),
@@ -210,13 +235,11 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d16),
               child: Text(
-                'Tele call',
+                'OPD',
                 style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
-            SizedBox(height: 20,),
-
-
+            SizedBox(height: Dim().d20),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d16),
               child: Text(
@@ -231,7 +254,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d16),
               child: Text(
-                'Aniket Mahakal',
+                widget.aptdetails[0]['patientname'].toString(),
                 style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
@@ -241,7 +264,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d16),
               child: Text(
-                'Age : 22 Years',
+                'Age : ${widget.aptdetails[0]['patientage'].toString()} Years',
                 style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
               ),
             ),
@@ -342,7 +365,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                     Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                   ),
                   Text(
-                    '₹500',
+                    '₹ ${widget.aptdetails[0]['charges'].toString()}',
                     style:
                     Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                   ),
@@ -363,34 +386,34 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                     Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                   ),
                   Text(
-                    '₹90',
+                    '₹ ${widget.aptdetails[0]['gst'].toString()}',
                     style:
                     Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                   ),
                 ],
               ),
             ),
-            SizedBox(
-              height: 4,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Discount',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                  ),
-                  Text(
-                    '₹90',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                  ),
-                ],
-              ),
-            ),
+            // SizedBox(
+            //   height: 4,
+            // ),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       Text(
+            //         'Discount',
+            //         style:
+            //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+            //       ),
+            //       Text(
+            //         '₹90',
+            //         style:
+            //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             const Divider(),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d16),
@@ -403,7 +426,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                     Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                   ),
                   Text(
-                    '₹590',
+                    '₹ ${widget.aptdetails[0]['total'].toString()}',
                     style:
                     Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                   ),
@@ -437,7 +460,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '₹ 590',
+                          '₹ ${widget.aptdetails[0]['total'].toString()}',
                           style: Sty().mediumText.copyWith(
                               fontWeight: FontWeight.w600, color: Clr().white),
                         ),
@@ -453,7 +476,8 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                       width: 100,
                       child: ElevatedButton(
                           onPressed: () {
-                            STM().redirect2page(ctx, HomeVisitConsultation());
+                            // STM().redirect2page(ctx, HomeVisitConsultation());
+                            addAppoinment();
                           },
                           style: ElevatedButton.styleFrom( elevation: 0,
                             backgroundColor: Clr().white,
@@ -475,5 +499,31 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
         ),
       ),
     );
+  }
+
+
+  // add appoinment
+  void addAppoinment() async {
+    FormData body = FormData.fromMap({
+      'hcp_user_id': widget.aptdetails[0]['hcpuserid'],
+      'slot_id': widget.aptdetails[0]['slotid'],
+      'booking_date': DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString())),
+      'address': '',
+      'contact_number': '',
+      'appointment_type': 2,
+      'patient_id': widget.aptdetails[0]['patientid'],
+      'consultation_fee': widget.aptdetails[0]['charges'],
+      'gst': widget.aptdetails[0]['gst'],
+      'discount': '',
+      'total_amount': widget.aptdetails[0]['total'],
+    });
+    var result = await STM().postWithToken(ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
   }
 }
