@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -15,11 +17,30 @@ class Labs extends StatefulWidget {
 
 class _LabsState extends State<Labs> {
   late BuildContext ctx;
+  String? usertoken;
+  List labList = [];
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        labDetails();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
         bottomNavigationBar: bottomBarLayout(ctx, 0),
         backgroundColor: Clr().white,
@@ -49,7 +70,7 @@ class _LabsState extends State<Labs> {
                   child: SvgPicture.asset('assets/search.svg')),
             ),
             SizedBox(
-              width: 20,
+              width: Dim().d20,
             ),
           ],
           backgroundColor: Clr().white,
@@ -68,9 +89,9 @@ class _LabsState extends State<Labs> {
                     mainAxisSpacing: 8,
                   ),
                   shrinkWrap: true,
-                  itemCount: 16,
+                  itemCount: labList.length,
                   itemBuilder: (context, index) {
-                    return Container(
+                    return SizedBox(
                       width: MediaQuery.of(ctx).size.width / 2.5,
                       child: Stack(
                         children: [
@@ -83,13 +104,12 @@ class _LabsState extends State<Labs> {
                               padding: EdgeInsets.all(Dim().d12),
                               child: Column(
                                 children: [
-                                  Image.asset('assets/mybooking.png',
-                                      height: 65, width: 100),
+                                  Image.network(labList[index]['image_path'].toString(), height: 65, width: 100),
                                   SizedBox(
-                                    height: 12,
+                                    height: Dim().d12,
                                   ),
                                   Text(
-                                    'NirAmaya Pathlabs',
+                                    labList[index]['name'].toString(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: Sty().smallText.copyWith(
@@ -107,7 +127,7 @@ class _LabsState extends State<Labs> {
                                     height: Dim().d4,
                                   ),
                                   Text(
-                                    'Offers 20 Tests',
+                                    'Offers ${labList[index]['tests'].length} Tests',
                                     style: Sty().smallText.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: Clr().primaryColor),
@@ -115,12 +135,11 @@ class _LabsState extends State<Labs> {
                                   SizedBox(
                                     height: Dim().d4,
                                   ),
-
                                   Row(
                                     children: [
-                                      Icon(Icons.location_on_outlined),
+                                      const Icon(Icons.location_on_outlined),
                                       Text(
-                                        'Dombivli (w)',
+                                        labList[index]['location'].toString(),
                                         style: Sty().smallText.copyWith(
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -151,7 +170,7 @@ class _LabsState extends State<Labs> {
                               left: 4,
                               child: InkWell(
                                 onTap: () {
-                                  STM().redirect2page(context, LabsDetails());
+                                  STM().redirect2page(context, LabsDetails(labDetails: labList[index]));
                                 },
                                 child: Container(
                                   width:
@@ -190,5 +209,16 @@ class _LabsState extends State<Labs> {
             ],
           ),
         ));
+  }
+
+  // labs details
+  void labDetails() async {
+    var result = await STM().getWithTokenUrl(ctx, Str().loading, 'get_labs', usertoken, 'customer');
+    var success = result['success'];
+    if(success){
+      setState(() {
+        labList = result['labs'];
+      });
+    }
   }
 }

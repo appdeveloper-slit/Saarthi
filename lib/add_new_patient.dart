@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:saarathi/dr_name.dart';
+import 'package:saarathi/payment_summary.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,8 @@ import 'values/styles.dart';
 
 class AddNewPatient extends StatefulWidget {
   final dynamic doctorDetails;
-  const AddNewPatient({super.key,  this.doctorDetails});
+  final stype;
+  const AddNewPatient({super.key,  this.doctorDetails,this.stype});
   @override
   State<AddNewPatient> createState() => _AddNewPatientState();
 }
@@ -327,7 +329,8 @@ class _AddNewPatientState extends State<AddNewPatient> {
     var success = result['success'];
     var message = result['message'];
     if(success){
-      STM().successDialogWithReplace(ctx, message, DrName(doctorDetails: widget.doctorDetails,));
+     widget.stype == 'lab' ?  STM().back2Previous(ctx) : STM().successDialogWithReplace(ctx, message, DrName(doctorDetails: widget.doctorDetails,));
+     widget.stype == 'lab' ? controller.sink.add('update') : null;
     }else{
       STM().errorDialog(ctx, message);
     }

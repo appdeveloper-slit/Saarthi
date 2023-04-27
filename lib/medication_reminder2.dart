@@ -69,7 +69,6 @@ class _MedicationReminder2State extends State<MedicationReminder2> {
                     children: [
                       Checkbox(
                         checkColor: Colors.white,
-
                         fillColor: MaterialStateProperty.all(Clr().primaryColor),
                         value: isChecked,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

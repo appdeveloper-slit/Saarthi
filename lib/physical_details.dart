@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:double_back_to_close/double_back_to_close.dart';
 import 'package:flutter/material.dart';
+import 'package:saarathi/home.dart';
 import 'package:saarathi/select_location.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -373,12 +374,11 @@ class _PhysicalDetailsState extends State<PhysicalDetails> {
       'height_in_inch': selectedValue2,
       'diet': sDietValue,
     });
-    var result = await STM()
-        .postWithToken(ctx, Str().updating, 'customerEdit', body, usertoken,'customer');
+    var result = await STM().postWithToken(ctx, Str().updating, 'customerEdit', body, usertoken,'customer');
     var success = result['success'];
     var message = result['message'];
     if (success) {
-      STM().displayToast(message);
+      STM().successDialogWithAffinity(ctx, message, Home());
     } else {
       STM().errorDialog(ctx, message);
     }

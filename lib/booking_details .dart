@@ -1,4 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saarathi/home.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -8,17 +12,40 @@ import 'bottom_navigation/bottom_navigation.dart';
 
 
 class BookingDetails extends StatefulWidget {
+  final dynamic labdetails;
+  const BookingDetails({super.key, this.labdetails});
   @override
   State<BookingDetails> createState() => _BookingDetailsState();
 }
 
 class _BookingDetailsState extends State<BookingDetails> {
   late BuildContext ctx;
+  dynamic labdetails;
+  String? usertoken;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    labdetails = widget.labdetails;
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
@@ -58,7 +85,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      Image.asset('assets/BookingDetails1.png',height:85,width: 125),
+                      Image.network(labdetails['lab']['image_path'].toString(),height:Dim().d80,width: Dim().d120),
                       SizedBox(
                         width:Dim().d12,
                       ),
@@ -67,7 +94,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                             crossAxisAlignment:
                             CrossAxisAlignment.start,
                             children: [
-                              Text('NirAmaya Pathlabs',
+                              Text(labdetails['lab']['name'].toString(),
                                   style:
                                   Sty().mediumText.copyWith(
                                       fontWeight:
@@ -77,41 +104,35 @@ class _BookingDetailsState extends State<BookingDetails> {
                               SizedBox(
                                 height: Dim().d4,
                               ),
-                              Text('Mon - sat',style: TextStyle(fontSize: 16)),
+                              Text(labdetails['lab']['available_days'].toString(),style: TextStyle(fontSize: 16)),
                               SizedBox(
                                 height: Dim().d8,
                               ),
-                              Text('10:30 Am to 10:30 Pm',style: TextStyle(fontSize: 16)),
-
+                              Text(labdetails['lab']['available_time'].toString(),style: TextStyle(fontSize: 16)),
                               SizedBox(
                                 height: Dim().d8,
                               ),
                               Row(
                                 children: [
-                                  Text('Starts at',style: TextStyle(fontSize: 16)),
+                                  Text('Starts at',style: TextStyle(fontSize: Dim().d16)),
                                   SizedBox(width: Dim().d4,),
-                                  Text('₹500',style: TextStyle(fontSize: 16)),
-
+                                  Text('₹ ${labdetails['lab']['starts_at'].toString()}',style: TextStyle(fontSize: Dim().d16)),
                                 ],
                               ),
-
                               SizedBox(
                                 height: Dim().d8,
                               ),
-
-                              Text('Pending',
+                              Text(labdetails['type'] == '1' ? 'Completed' : labdetails['type'] == '2' ? 'Cancelled' : 'Pending',
                                   // 'Completed',
                                   style:
                                   Sty().mediumText.copyWith(
                                       fontWeight:
                                       FontWeight.w600,fontSize: 16,
-                                      color: Color(0xffFFC107)
+                                      color: labdetails['type'] == '1' ? Clr().green : labdetails['type'] == '2' ? Clr().red : Color(0xffFFC107)
                                   )),
                               SizedBox(
                                 height: Dim().d8,
                               ),
-
-
                             ],
                           ))
                     ],
@@ -158,7 +179,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                                     fontSize: 16, fontWeight: FontWeight.w400),
                               ),
                               Text(
-                                '₹1000',
+                                '₹ ${labdetails['charge']}',
                                 style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500),
@@ -221,7 +242,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                                 ),
                               ),
                               Text(
-                                '₹ 1000',
+                                '₹ ${labdetails['total']}',
                                 style: Sty().largeText.copyWith(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
@@ -233,7 +254,6 @@ class _BookingDetailsState extends State<BookingDetails> {
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -259,13 +279,11 @@ class _BookingDetailsState extends State<BookingDetails> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    SizedBox(height: Dim().d12),
                     Text(
-                      'Vasant Lawns, DP Road, Opp. TCS, Subhash Nagar, Thane West, Thane, Maharashtra 400606',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400),
+                      labdetails['lab']['address'].toString(),
+                      style: TextStyle(fontSize: Dim().d16, fontWeight: FontWeight.w400),
                     ),
-
                   ],
                 ),
               ),
@@ -273,23 +291,12 @@ class _BookingDetailsState extends State<BookingDetails> {
             SizedBox(
               height: Dim().d24,
             ),
-            SizedBox(
+            labdetails['type'] == '0' ? SizedBox(
               height: 50,
               width: 300,
               child: ElevatedButton(
                   onPressed: () {
-                    // STM().redirect2page(ctx, CheckOut());
-                    // if (formKey.currentState!
-                    //     .validate()) {
-                    //   STM()
-                    //       .checkInternet(
-                    //       context, widget)
-                    //       .then((value) {
-                    //     if (value) {
-                    //       sendOtp();
-                    //     }
-                    //   });
-                    // }
+                    AppointmentCancel(labdetails['id']);
                   },
                   style: ElevatedButton.styleFrom( elevation: 0,
                       backgroundColor: Clr().primaryColor,
@@ -303,7 +310,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                       color: Clr().white,
                       fontWeight: FontWeight.w600,),
                   )),
-            ),
+            ) : labdetails['type'] == '1' ? Container() : Container(),
             SizedBox(
               height: Dim().d24,
             ),
@@ -329,12 +336,26 @@ class _BookingDetailsState extends State<BookingDetails> {
             SizedBox(
               height: Dim().d32,
             ),
-
-
           ],
         ),
-
       ),
     );
   }
+
+  // appointment cancel
+
+ void AppointmentCancel(id) async {
+    FormData data = FormData.fromMap({
+      'appointment_id': id,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing, 'cancel_lab_appointment', data, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
+ }
+
 }

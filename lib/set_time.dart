@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:intl/intl.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/dimens.dart';
@@ -28,6 +29,7 @@ class _SetTimeState extends State<SetTime> {
   DateTime dateTime = DateTime.now();
   List<dynamic> timeList = [];
   var time;
+  var showtime;
   String? usertoken;
 
   getSession() async {
@@ -79,7 +81,25 @@ class _SetTimeState extends State<SetTime> {
             SizedBox(
               height: Dim().d52,
             ),
-            buildDatePicker(),
+            // buildDatePicker(),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround,children: [
+              Text('Hours',style: Sty().mediumText.copyWith(fontSize: Dim().d20)),
+              Text('Minutes',style: Sty().mediumText.copyWith(fontSize: Dim().d20)),
+              Text('Seconds',style: Sty().mediumText.copyWith(fontSize: Dim().d20)),
+            ],),
+            TimePickerSpinner(
+              is24HourMode: true,
+              isShowSeconds: true,
+              spacing: Dim().d80,
+              normalTextStyle: TextStyle(fontSize: Dim().d32),
+              highlightedTextStyle: TextStyle(color: Clr().primaryColor,fontSize: Dim().d32,),
+              onTimeChange: (value){
+                setState(() {
+                  time = DateFormat.Hm().format(value);
+                  print(DateFormat.Hm().format(value));
+                });
+              },
+            ),
             SizedBox(
               height: Dim().d14,
             ),
@@ -89,35 +109,39 @@ class _SetTimeState extends State<SetTime> {
                   itemCount: timeList.length + 1,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
-                    return index == timeList.length ?  ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                          Clr().primaryColor, // foreground (text) color
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            timeList.add(time);
-                            print(timeList);
-                          });
-                        },
-                        child: Text(
-                          'Add',
-                          style: Sty().mediumText.copyWith(color: Clr().white),
-                        )) : Padding(
+                    return index == timeList.length ?  Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                            Clr().primaryColor, // foreground (text) color
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              timeList.add(time);
+                              print(timeList);
+                            });
+                          },
+                          child: Text(
+                            'Add Time',
+                            style: Sty().mediumText.copyWith(color: Clr().white),
+                          )),
+                    ) : Padding(
                       padding: EdgeInsets.symmetric(horizontal: Dim().d8),
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(Dim().d12),
+                              borderRadius: BorderRadius.circular(Dim().d8),
                               border: Border.all(color: Clr().hintColor),
+                              color: Clr().lightGrey,
                             ),
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                   horizontal: Dim().d12, vertical: Dim().d4),
                               child: Text(
-                                timeList[index],
+                                timeList[index].toString(),
                                 style: Sty().mediumText,
                               ),
                             ),
@@ -130,8 +154,7 @@ class _SetTimeState extends State<SetTime> {
                                 timeList.removeAt(index);
                               });
                             },
-                              child: Icon(Icons.dangerous,
-                                  color: Clr().primaryColor),
+                              child: Icon(Icons.dangerous_rounded, color: Clr().primaryColor),
                             ),
                           )
                         ],
@@ -148,7 +171,7 @@ class _SetTimeState extends State<SetTime> {
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      addReminder();
+                      timeList.isEmpty ? STM().displayToast('Add time for medication reminder') : addReminder();
                       print(jsonEncode(widget.days));
                       print(jsonEncode(timeList));
                       print(widget.medicine);

@@ -55,6 +55,7 @@ dependencies:
   flutter_pdfview: 1.2.9
   flutter_cached_pdfview: ^0.4.1
   calender_picker: ^2.0.1
+  flutter_time_picker_spinner: ^2.0.0
 
 dev_dependencies:
   # rules and activating additional ones.

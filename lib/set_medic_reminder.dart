@@ -57,10 +57,11 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-    return WillPopScope(onWillPop: () async{
-      STM().finishAffinity(ctx, Home());
-      return false;
-    },
+    return WillPopScope(
+      onWillPop: () async {
+        STM().finishAffinity(ctx, Home());
+        return false;
+      },
       child: Scaffold(
         bottomNavigationBar: bottomBarLayout(ctx, 0),
         floatingActionButton: FloatingActionButton(
@@ -139,30 +140,23 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Wrap(
+              Row(
                 children: [
-                  Wrap(
-                    children: [
-                      Text(
+                  Expanded(
+                      flex: 3,
+                      child: Text(
                         list[index]['medicine'].toString(),
                         style: Sty()
                             .mediumText
                             .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                      SizedBox(
-                        width: Dim().d12,
-                      ),
-                      Text(
-                        list[index]['time'].toString(),
-                        style:
-                            Sty().smallText.copyWith(color: Clr().primaryColor),
-                      ),
-                    ],
-                  ),
-                  SizedBox(width: Dim().d20),
-                  Wrap(
+                      )),
+                  Row(
                     children: [
-                      SvgPicture.asset('assets/edit.svg'),
+                      InkWell(
+                          onTap: () {
+                            STM().redirect2page(ctx, MedicationReminder(medicationDetails: list[index]));
+                          },
+                          child: SvgPicture.asset('assets/edit.svg')),
                       SizedBox(
                         width: Dim().d12,
                       ),
@@ -175,25 +169,83 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: Dim().d4,
-              ),
-              ListView.builder(
-                  itemCount: dayidList.length,
+              const Divider(),
+              GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 6, childAspectRatio: 14 / 6),
                   physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
+                  itemCount: dayidList.length,
                   itemBuilder: (context, index2) {
-                    return Row(
-                      children: [
-                        Text(
-                          dayList[int.parse(dayidList[index2])]['name'].toString(),
-                          style: Sty()
-                              .smallText
-                              .copyWith(color: Clr().primaryColor),
-                        ),
-                      ],
+                    return Text(
+                      dayList[int.parse(dayidList[index2])]['name']
+                          .toString()
+                          .substring(0, 3),
+                      style: Sty().mediumText,
                     );
                   }),
+              Text(
+                list[index]['time']
+                    .toString()
+                    .replaceAll('[', '')
+                    .replaceAll(']', ''),
+                style: Sty().smallText.copyWith(color: Clr().primaryColor),
+              ),
+              // Wrap(
+              //   children: [
+              //     Wrap(
+              //       children: [
+              //         Text(
+              //           list[index]['medicine'].toString(),
+              //           style: Sty()
+              //               .mediumText
+              //               .copyWith(fontWeight: FontWeight.w400),
+              //         ),
+              //         SizedBox(
+              //           width: Dim().d12,
+              //         ),
+              //         Text(
+              //           list[index]['time'].toString(),
+              //           style:
+              //               Sty().smallText.copyWith(color: Clr().primaryColor),
+              //         ),
+              //       ],
+              //     ),
+              //     SizedBox(width: Dim().d20),
+              //     Wrap(
+              //       children: [
+              //         SvgPicture.asset('assets/edit.svg'),
+              //         SizedBox(
+              //           width: Dim().d12,
+              //         ),
+              //         InkWell(
+              //             onTap: () {
+              //               deleteReminder(id: list[index]['id'], index: index);
+              //             },
+              //             child: SvgPicture.asset('assets/delete.svg')),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+              // SizedBox(
+              //   height: Dim().d4,
+              // ),
+              // ListView.builder(
+              //     itemCount: dayidList.length,
+              //     physics: const NeverScrollableScrollPhysics(),
+              //     shrinkWrap: true,
+              //     itemBuilder: (context, index2) {
+              //       return Row(
+              //         children: [
+              //           Text(
+              //             dayList[int.parse(dayidList[index2])]['name'].toString(),
+              //             style: Sty()
+              //                 .smallText
+              //                 .copyWith(color: Clr().primaryColor),
+              //           ),
+              //         ],
+              //       );
+              //     }),
             ],
           ),
         ),
@@ -207,8 +259,8 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
     FormData body = FormData.fromMap({
       'id': id,
     });
-    var result = await STM()
-        .postWithToken(ctx, Str().deleting, 'deleteReminder', body, usertoken,'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().deleting, 'deleteReminder', body, usertoken, 'customer');
     var success = result['status'];
     var message = result['message'];
     if (success) {
@@ -220,5 +272,4 @@ class _SetMedicReminderState extends State<SetMedicReminder> {
       STM().errorDialog(ctx, message);
     }
   }
-
 }

@@ -666,6 +666,7 @@ class _HomeState extends State<Home> {
               )
             : Container(
                 decoration: BoxDecoration(
+                  color: Clr().white,
                   boxShadow: [
                     BoxShadow(
                       color: Clr().shimmerColor.withOpacity(0.1),
@@ -675,92 +676,72 @@ class _HomeState extends State<Home> {
                     ),
                   ],
                 ),
-                child: Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: Dim().d12, horizontal: Dim().d16),
-                      child: ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: medicationList.length,
-                          itemBuilder: (context, index) {
-                            List<dynamic> dayidList =
-                                medicationList[index]['day_id'] ?? [];
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${medicationList[index]['medicine']}',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: Sty()
-                                      .mediumText
-                                      .copyWith(fontWeight: FontWeight.w600),
-                                ),
-                                SizedBox(
-                                  height: Dim().d4,
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    GridView.builder(
-                                        gridDelegate:
-                                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 6,
-                                                childAspectRatio: 14 / 4),
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        shrinkWrap: true,
-                                        itemCount: dayidList.length,
-                                        itemBuilder: (context, index2) {
-                                          return Text(
-                                            dayidList.isEmpty
-                                                ? ''
-                                                : dayList[int.parse(
-                                                            dayidList[index2]
-                                                                .toString())]
-                                                        ['name']
-                                                    .toString()
-                                                    .substring(0, 3),
-                                            style: Sty().mediumText,
-                                          );
-                                        }),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: Dim().d4,
-                                ),
-                                GridView.builder(
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,childAspectRatio: 14/4),
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: medicationList.length,
-                                    itemBuilder: (context, index2) {
-                                      return Text(
-                                        medicationList[index]['time'].toString(),
-                                        style: Sty()
-                                            .smallText
-                                            .copyWith(color: Clr().primaryColor),
-                                      );
-                                    }),
-                                // Text(
-                                //   medicationList[index]['time'].toString(),
-                                //   style: Sty()
-                                //       .smallText
-                                //       .copyWith(color: Clr().primaryColor),
-                                // ),
-                                SizedBox(
-                                  height: Dim().d4,
-                                ),
-                                const Divider(),
-                              ],
-                            );
-                          })),
-                ),
+                child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: Dim().d12, horizontal: Dim().d16),
+                    child: ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: medicationList.length,
+                        itemBuilder: (context, index) {
+                          List<dynamic> dayidList = medicationList[index]['day_id'] ?? [];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${medicationList[index]['medicine']}',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(
+                                height: Dim().d4,
+                              ),
+                              GridView.builder(
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, childAspectRatio: 14 / 4),
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount: dayidList.length,
+                                  itemBuilder: (context, index2) {
+                                    return Text(
+                                      dayidList.isEmpty
+                                          ? ''
+                                          : dayList[int.parse(
+                                                      dayidList[index2]
+                                                          .toString())]
+                                                  ['name']
+                                              .toString()
+                                              .substring(0, 3),
+                                      style: Sty().mediumText,
+                                    );
+                                  }),
+                              SizedBox(
+                                height: Dim().d16,
+                              ),
+                              // GridView.builder(
+                              //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              //             crossAxisCount: 3,
+                              //             childAspectRatio: 28/ 4),
+                              //     physics: const NeverScrollableScrollPhysics(),
+                              //     shrinkWrap: true,
+                              //     itemCount: medicationList[index]['time'].length,
+                              //     itemBuilder: (context, index2) {
+                              //       return Text(
+                              //         medicationList[index]['time'][index2].toString(),
+                              //         style: Sty().smallText.copyWith(
+                              //             color: Clr().primaryColor),
+                              //       );
+                              //     }),
+                              Text(
+                                medicationList[index]['time'].toString().replaceAll('[', '').replaceAll(']', ''),
+                                style: Sty()
+                                    .smallText
+                                    .copyWith(color: Clr().primaryColor),
+                              ),
+                              const Divider(),
+                            ],
+                          );
+                        })),
               ),
       ],
     );
@@ -936,7 +917,12 @@ class _HomeState extends State<Home> {
   //Doctors Near by
   Widget doctorsLayout(ctx, index, list) {
     List typelist = [];
+    List specialityList = [];
     typelist = list[index]['appoitment_types'];
+
+    for (int a = 0; a < list[index]['professional']['speciality_name'].length; a++) {
+      specialityList.add(list[index]['professional']['speciality_name'][a]['name']);
+    }
     return Card(
       elevation: 0.6,
       shape: RoundedRectangleBorder(
@@ -991,16 +977,19 @@ class _HomeState extends State<Home> {
                         ],
                       ),
                       SizedBox(
-                        height: 6,
+                        height: Dim().d4,
                       ),
-                      Text(
-                        list[index]['professional'] == null
-                            ? ''
-                            : '${list[index]['professional']['speciality_name'][0]['name']}',
-                        style: Sty()
-                            .smallText
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
+                      list[index]['professional'] == null
+                          ? Container()
+                          : GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: specialityList.length > 1 ? 2 : specialityList.length,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,mainAxisExtent: 20.0),
+                              itemBuilder: (context, index2) {
+                                return Text(specialityList[index2],
+                                    style: Sty().smallText.copyWith(fontWeight: FontWeight.w400));
+                              }),
                       SizedBox(
                         height: Dim().d4,
                       ),
@@ -1008,12 +997,14 @@ class _HomeState extends State<Home> {
                           ? Container()
                           : Text(
                               'Speaks : ${list[index]['languages'].toString().replaceAll('[', '').replaceAll(']', '')}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: Sty()
                                   .smallText
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
                       SizedBox(
-                        height: 6,
+                        height: Dim().d4,
                       ),
                       Text(
                         'Starts at : ₹ ${list[index]['appointment_details'][0]['charges']}',
@@ -1022,7 +1013,7 @@ class _HomeState extends State<Home> {
                             .copyWith(fontWeight: FontWeight.w400),
                       ),
                       SizedBox(
-                        height: 6,
+                        height: Dim().d4,
                       ),
                       Text(
                         list[index]['professional'] == null
@@ -1038,7 +1029,7 @@ class _HomeState extends State<Home> {
               ],
             ),
             SizedBox(
-              height: 8,
+              height: Dim().d8,
             ),
             Row(
               children: [
