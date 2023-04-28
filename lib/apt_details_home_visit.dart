@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:saarathi/home.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
@@ -8,12 +12,42 @@ import 'values/dimens.dart';
 import 'values/styles.dart';
 
 class HomeVisitAptDetails extends StatefulWidget {
+  final dynamic details;
+  const HomeVisitAptDetails({super.key, this.details});
   @override
   State<HomeVisitAptDetails> createState() => _HomeVisitAptDetailsState();
 }
 
 class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
   late BuildContext ctx;
+  String? usertoken;
+  TextEditingController mobileCtrl = TextEditingController();
+  var v;
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    setState(() {
+      v = widget.details;
+      mobileCtrl = TextEditingController(text: v['contact_number']);
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getSession();
+    super.initState();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,45 +87,43 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage('assets/dr1.png'),
+                  backgroundImage: NetworkImage(v['hcp']['profile_pic'].toString()),
                 ),
                 SizedBox(
-                  width: 24,
+                  width: Dim().d24,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Appointment ID : #12234',
-                      style: Sty().mediumText.copyWith(
+                      'Appointment ID : #${v['appointment_uid']}',
+                      style: Sty()
+                          .mediumText
+                          .copyWith(
                           color: Clr().primaryColor,
                           fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(
-                      height: Dim().d4,
-                    ),
+                    SizedBox(height: Dim().d4,),
                     Text(
-                      'Dr.Mansi Janl',
+                      '${v['hcp']['first_name']} ${v['hcp']['last_name']}',
                       style: Sty()
                           .mediumText
                           .copyWith(fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(
-                      height: Dim().d4,
-                    ),
+                    SizedBox(height: Dim().d4,),
                     Text(
-                      'Nutritionist',
+                      v['hcp']['professional']['speciality_name'][0]['name'],
                       style: Sty()
                           .mediumText
                           .copyWith(fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(
-                      height: Dim().d4,
-                    ),
+                    SizedBox(height: Dim().d4,),
                     Text(
-                      'Pending',
-                      style: Sty().mediumText.copyWith(
-                          color: Color(0xffFFC107),
+                      v['status'] == '0' ? 'Pending' :  v['status'] == '1' ? 'Completed' : 'Cancelled',
+                      style: Sty()
+                          .mediumText
+                          .copyWith(
+                          color: v['status'] == '0' ? Color(0xffFFC107) : v['status'] == '1' ? Clr().green : Clr().red,
                           fontWeight: FontWeight.w500),
                     ),
                   ],
@@ -142,17 +174,19 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '01 : 00 PM',
+                          v['slot']['slot'],
                           style: Sty().mediumText.copyWith(
-                              color: Clr().white, fontWeight: FontWeight.w600),
+                              color: Clr().white,
+                              fontWeight: FontWeight.w600),
                         ),
                         SizedBox(
                           height: 8,
                         ),
                         Text(
-                          '28 Nov 2022',
+                          v['booking_date'],
                           style: Sty().mediumText.copyWith(
-                              color: Clr().white, fontWeight: FontWeight.w600),
+                              color: Clr().white,
+                              fontWeight: FontWeight.w600),
                         )
                       ],
                     ),
@@ -187,13 +221,12 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               height: 12,
             ),
             Text(
-              'Shop No 1ganesh Nagar, Manpada, Thane West, Mumbai, Maharashtra 400607',
+              v['address'],
               style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
             ),
             SizedBox(
               height: 20,
             ),
-
             Text(
               'Doctor Contact ',
               style: Sty().largeText.copyWith(
@@ -204,7 +237,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             ),
             TextFormField(
               readOnly: true,
-              // controller: mobileCtrl,
+              controller: mobileCtrl,
               keyboardType: TextInputType.name,
               decoration: InputDecoration(
                 filled: true,
@@ -220,7 +253,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                 contentPadding:
                 EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 // label: Text('Enter Your Number'),
-                hintText: "1447852235",
+                hintText: "Mobile Number",
                 hintStyle: Sty()
                     .mediumText
                     .copyWith(color: Clr().black, fontSize: 14),
@@ -244,11 +277,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 Text(
                   'Consultation Fee',
-                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style:
+                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
-                  '₹500',
-                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  '₹ ${v['consultation_fee']}',
+                  style:
+                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -260,11 +295,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 Text(
                   'GST',
-                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style:
+                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
-                  '₹90',
-                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  '₹ ${v['gst']}',
+                  style:
+                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -276,11 +313,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 Text(
                   'Discount',
-                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style:
+                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
-                  '₹90',
-                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  '₹ ${v['discount'] == null ? 0 : v['discount']}',
+                  style:
+                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -293,7 +332,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                   style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  '₹590',
+                  '₹ ${v['total_amount']}',
                   style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
@@ -340,24 +379,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             SizedBox(
               height: 30,
             ),
-            Center(
+           v['status'] == '1' ? Container() : v['status'] == '2' ? Container() : Center(
               child: SizedBox(
                 height: 50,
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      // STM().redirect2page(ctx, OnlineConsultation());
-                      // if (formKey.currentState!
-                      //     .validate()) {
-                      //   STM()
-                      //       .checkInternet(
-                      //       context, widget)
-                      //       .then((value) {
-                      //     if (value) {
-                      //       sendOtp();
-                      //     }
-                      //   });
-                      // }
+                      AppointmentCancel(v['id']);
                     },
                     style: ElevatedButton.styleFrom( elevation: 0,
                         backgroundColor: Clr().primaryColor,
@@ -397,5 +425,20 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
         ),
       ),
     );
+  }
+  // appointment cancel
+
+  void AppointmentCancel(id) async {
+    FormData data = FormData.fromMap({
+      'appointment_id': id,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing, 'cancel_appointment', data, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
   }
 }

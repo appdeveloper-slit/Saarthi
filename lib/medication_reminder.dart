@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:saarathi/set_time.dart';
 import 'package:saarathi/values/dimens.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
 import 'medication_reminder2.dart';
@@ -36,6 +37,29 @@ class _MedicationReminderState extends State<MedicationReminder> {
   bool isChecked4 = false;
   bool isChecked5 = false;
   bool isChecked6 = false;
+  String? usertoken;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+      medicineCtrl = TextEditingController(text: widget.medicationDetails['medicine']);
+      daySelectedList = widget.medicationDetails['day_id'];
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        // getHome();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    print(widget.medicationDetails);
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,6 +214,8 @@ class _MedicationReminderState extends State<MedicationReminder> {
                                   SetTime(
                                     days: daySelectedList,
                                     medicine: medicineCtrl.text,
+                                    timelist: widget.medicationDetails == null ? [] : widget.medicationDetails['time'],
+                                    id: widget.medicationDetails == null ? null : widget.medicationDetails['id'].toString(),
                                   ));
                         }
                       },

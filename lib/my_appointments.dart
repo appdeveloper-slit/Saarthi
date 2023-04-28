@@ -1,4 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:saarathi/apt_details_home_visit.dart';
+import 'package:saarathi/apt_details_telecall.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -17,10 +23,28 @@ class _MyAppointmentsState extends State<MyAppointments>
   late BuildContext ctx;
 
   late TabController _tabController;
+  String? usertoken, patientvalue;
+  List<dynamic> patientlist = [];
+  List<dynamic> upcominglabList = [];
+  List<dynamic> completedlabList = [];
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getPatient();
+        print(usertoken);
+      }
+    });
+  }
 
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
+    getSession();
     super.initState();
   }
 
@@ -33,16 +57,16 @@ class _MyAppointmentsState extends State<MyAppointments>
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
-    return WillPopScope(onWillPop: () async {
-      STM().back2Previous(ctx);
-      return false;
-    },
+    return WillPopScope(
+      onWillPop: () async {
+        STM().back2Previous(ctx);
+        return false;
+      },
       child: Scaffold(
         bottomNavigationBar: bottomBarLayout(ctx, 1),
         backgroundColor: Clr().white,
         appBar: AppBar(
-            elevation: 2,
+          elevation: 2,
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
@@ -104,613 +128,417 @@ class _MyAppointmentsState extends State<MyAppointments>
                   ),
                 ),
               ),
+              SizedBox(height: Dim().d16),
+              Container(
+                padding: EdgeInsets.symmetric(
+                    horizontal: Dim().d16, vertical: Dim().d4),
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Clr().grey.withOpacity(0.1),
+                        spreadRadius: 0.5,
+                        blurRadius: 12,
+                        offset: Offset(0, 8), // changes position of shadow
+                      ),
+                    ],
+                    color: Clr().formfieldbg,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Clr().transparent)),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButtonFormField(
+                    value: patientvalue,
+                    isExpanded: true,
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Select Patient Name';
+                      }
+                    },
+                    decoration: Sty().textFieldOutlineStyle.copyWith(
+                        contentPadding: EdgeInsets.zero,
+                        errorBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none),
+                    hint: Text('Select Patient Name',
+                        style: Sty().mediumText.copyWith(color: Clr().black)),
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 28,
+                      color: Clr().grey,
+                    ),
+                    style: const TextStyle(color: Color(0xff787882)),
+                    items: patientlist.map((string) {
+                      return DropdownMenuItem(
+                        value: string['full_name'],
+                        child: Text(
+                          string['full_name'],
+                          style: const TextStyle(
+                              color: Color(0xff787882), fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (t) {
+                      int position = patientlist.indexWhere((element) => element['full_name'].toString() == t.toString());
+                      setState(() {
+                        patientvalue = t as String;
+                        getBooking(patientlist[position]['id']);
+                      });
+                    },
+                  ),
+                ),
+              ),
               // tab bar view here
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    // first tab bar view widget
-                    Center(
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: Dim().d20,
-                          ),
-                          Card(
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            margin: EdgeInsets.only(
-                                left: Dim().d12, right: Dim().d12),
-                            child: ExpansionTile(
-                              collapsedIconColor: Colors.black,
-                              iconColor: Colors.black,
-                              textColor: Colors.black,
-                              collapsedTextColor: Colors.black,
-                              backgroundColor: Clr().background,
-                              collapsedBackgroundColor: Clr().background,
-                              title: Text(
-                                "Aniket Mahakal",
-                                style: TextStyle(
-                                    fontSize: 16.0, fontWeight: FontWeight.w500),
-                              ),
-                              children: <Widget>[
-                                ListTile(
-                                  title: Text(
-                                    "demo2",
-                                    style: TextStyle(fontWeight: FontWeight.w700),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: Dim().d4,
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: 4,
-                              physics: BouncingScrollPhysics(),
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 3),
-                                      child: InkWell(
-                                        onTap: () {
-                                          STM().redirect2page(
-                                              ctx, AppointmentDetails());
-                                        },
-                                        child:  Container(
-                                          decoration: BoxDecoration(
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Clr().grey.withOpacity(0.1),
-                                                spreadRadius: 0.1,
-                                                blurRadius: 12,
-                                                offset: Offset(0, 8), // changes position of shadow
-                                              ),
-                                            ],
-                                          ),
-                                          child: Card(
-                                            color: Clr().formfieldbg,
-                                            margin: EdgeInsets.only(top: Dim().d12),
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(
-                                                    Dim().d12),
-                                                side: BorderSide(
-                                                    color: Clr().borderColor)),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(12.0),
-                                              child: Row(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(10),
-                                                    child: Image.asset(
-                                                      'assets/dr.png',
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: Dim().d12,
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.start,
+                    patientvalue == null
+                        ? Center(
+                            child: Text('Select Patient Name',
+                                style: Sty().mediumBoldText),
+                          )
+                        : upcominglabList.isEmpty
+                            ? Center(
+                                child: Text('No Bookings',
+                                    style: Sty().mediumBoldText),
+                              )
+                            : Column(
+                                children: [
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount: upcominglabList.length,
+                                      physics: BouncingScrollPhysics(),
+                                      scrollDirection: Axis.vertical,
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) {
+                                        return Column(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 3),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  upcominglabList[index][
+                                                  'appointment_type'] ==
+                                                      "2"
+                                                      ? STM().redirect2page(
+                                                      ctx,
+                                                      TeleCallAppointmentDetails(
+                                                          details:
+                                                          upcominglabList[
+                                                          index]))
+                                                      : upcominglabList[index][
+                                                  'appointment_type'] ==
+                                                      "1"
+                                                      ? STM().redirect2page(
+                                                      ctx,
+                                                      AppointmentolDetails(
+                                                          details:
+                                                          upcominglabList[
+                                                          index]))
+                                                      : STM().redirect2page(
+                                                      ctx,
+                                                      HomeVisitAptDetails(
+                                                          details:
+                                                          upcominglabList[
+                                                          index]));
+                                                },
+                                                child: Card(
+                                                  color: Clr().background,
+                                                  margin: EdgeInsets.only(
+                                                      top: Dim().d12),
+                                                  elevation: 3,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              Dim().d12)),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(
+                                                        Dim().d8),
+                                                    child: Row(
                                                       children: [
-                                                        Text(
-                                                          'Dr.Mansi Janl',
-                                                          style: Sty()
-                                                              .mediumText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Nutritionist',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Text(
-                                                              '18-07-2022',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                            ),
-                                                            Text(
-                                                              '11:30 AM',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Pending',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                fontWeight:
-                                                                    FontWeight.w600,
-                                                                color: Color(
-                                                                    0xffFFC107),
-                                                              ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 3),
-                                      child: InkWell(
-                                        onTap: () {
-                                          STM().redirect2page(
-                                              ctx, AppointmentDetails());
-                                        },
-                                        child:  Container(
-                                          decoration: BoxDecoration(
-
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Clr().grey.withOpacity(0.1),
-                                                spreadRadius: 0.1,
-                                                blurRadius: 12,
-                                                offset: Offset(0, 8), // changes position of shadow
-                                              ),
-                                            ],
-                                          ),
-                                          child: Card(
-                                            color: Clr().formfieldbg,
-                                            margin: EdgeInsets.only(top: Dim().d12),
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(
-                                                    Dim().d12),
-                                                side: BorderSide(
-                                                    color: Clr().borderColor)),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(12.0),
-                                              child: Row(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(10),
-                                                    child: Image.asset(
-                                                      'assets/dr.png',
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: Dim().d20,
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.start,
-                                                      children: [
-                                                        Text(
-                                                          'Dr.Mansi Janl',
-                                                          style: Sty()
-                                                              .mediumText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Nutritionist',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Text(
-                                                              '18-07-2022',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                            ),
-                                                            Text(
-                                                              '11:30 AM',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Pending',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                fontWeight:
-                                                                    FontWeight.w600,
-                                                                color: Color(
-                                                                    0xffFFC107),
-                                                              ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // second tab bar view widget
-                    Center(
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: Dim().d20,
-                          ),
-                          Card(
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            margin: EdgeInsets.only(
-                                left: Dim().d12, right: Dim().d12),
-                            child: ExpansionTile(
-                              collapsedIconColor: Colors.black,
-                              iconColor: Colors.black,
-                              textColor: Colors.black,
-                              collapsedTextColor: Colors.black,
-                              backgroundColor: Clr().background,
-                              collapsedBackgroundColor: Clr().background,
-                              title: Text(
-                                "Aniket Mahakal",
-                                style: TextStyle(
-                                    fontSize: 16.0, fontWeight: FontWeight.w500),
-                              ),
-                              children: <Widget>[
-                                ListTile(
-                                  title: Text(
-                                    "Darshan Jadhav",
-                                    style: TextStyle(fontWeight: FontWeight.w700),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: Dim().d4,
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: 4,
-                              physics: BouncingScrollPhysics(),
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 3),
-                                      child: InkWell(
-                                        onTap: () {
-                                          STM().redirect2page(
-                                              ctx, AppointmentDetails());
-                                        },
-                                        child:  Container(
-                                          decoration: BoxDecoration(
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Clr().grey.withOpacity(0.1),
-                                                spreadRadius: 0.1,
-                                                blurRadius: 12,
-                                                offset: Offset(0, 8), // changes position of shadow
-                                              ),
-                                            ],
-                                          ),
-                                          child: Card(
-                                            color: Clr().formfieldbg,
-                                            margin: EdgeInsets.only(top: Dim().d12),
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(
-                                                    Dim().d12),
-                                                side: BorderSide(color: Clr().borderColor)),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(12.0),
-                                              child: Row(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(10),
-                                                    child: Image.asset(
-                                                      'assets/dr.png',
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: Dim().d12,
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.start,
-                                                      children: [
-                                                        Text(
-                                                          'Dr.Mansi Janl',
-                                                          style: Sty()
-                                                              .mediumText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Nutritionist',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Text(
-                                                              '18-07-2022',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                            ),
-                                                            Text(
-                                                              '11:30 AM',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Completed',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
+                                                        Container(
+                                                          height: Dim().d140,
+                                                          width: Dim().d100,
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          Dim()
+                                                                              .d12),
+                                                              border: Border.all(
                                                                   color: Clr()
-                                                                      .primaryColor),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 3),
-                                      child: InkWell(
-                                        onTap: () {
-                                          STM().redirect2page(
-                                              ctx, AppointmentDetails());
-                                        },
-                                        child:  Container(
-                                          decoration: BoxDecoration(
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Clr().grey.withOpacity(0.1),
-                                                spreadRadius: 0.1,
-                                                blurRadius: 12,
-                                                offset: Offset(0, 8), // changes position of shadow
-                                              ),
-                                            ],
-                                          ),
-                                          child: Card(
-                                            color: Clr().formfieldbg,
-                                            margin: EdgeInsets.only(top: Dim().d12),
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(
-                                                    Dim().d12),
-                                                side: BorderSide(color: Clr().borderColor)
-                                             ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(12.0),
-                                              child: Row(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(10),
-                                                    child: Image.asset(
-                                                      'assets/dr.png',
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: Dim().d20,
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.start,
-                                                      children: [
-                                                        Text(
-                                                          'Dr.Mansi Janl',
-                                                          style: Sty()
-                                                              .mediumText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600),
+                                                                      .hintColor),
+                                                              image: DecorationImage(
+                                                                  image: NetworkImage(
+                                                                      upcominglabList[index]['hcp']['profile_pic']
+                                                                          .toString()),
+                                                                  fit: BoxFit
+                                                                      .cover)),
                                                         ),
                                                         SizedBox(
-                                                          height: 6,
+                                                          width: Dim().d8,
                                                         ),
-                                                        Text(
-                                                          'Nutritionist',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
+                                                        Expanded(
+                                                            child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
                                                           children: [
-                                                            Text(
-                                                              '18-07-2022',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                    '${upcominglabList[index]['hcp']['first_name']} ${upcominglabList[index]['hcp']['last_name']}',
+                                                                    style: Sty()
+                                                                        .mediumText
+                                                                        .copyWith(
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                            color: Color(0xff2D2D2D))),
+                                                              ],
                                                             ),
-                                                            Text(
-                                                              '11:30 AM',
-                                                              style: Sty()
-                                                                  .smallText
-                                                                  .copyWith(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400),
+                                                            SizedBox(
+                                                              height: Dim().d4,
+                                                            ),
+                                                            Text(upcominglabList[index]['hcp']['professional']['speciality_name'][0]['name'],
+                                                                style: TextStyle(
+                                                                    fontSize: Dim()
+                                                                        .d14)),
+                                                            SizedBox(
+                                                              height: Dim().d8,
+                                                            ),
+                                                            Wrap(
+                                                              children: [
+                                                                Text(
+                                                                    DateFormat(
+                                                                            'dd-MM-yyyy')
+                                                                        .format(DateTime.parse(upcominglabList[index]['booking_date']
+                                                                            .toString())),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            Dim().d14)),
+                                                                SizedBox(
+                                                                    width: Dim()
+                                                                        .d8),
+                                                                Text(
+                                                                    upcominglabList[index]['slot']
+                                                                            [
+                                                                            'slot']
+                                                                        .toString(),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            Dim().d14)),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                              height: Dim().d8,
+                                                            ),
+                                                            Text('Pending',
+                                                                style: Sty().mediumText.copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    fontSize:
+                                                                        Dim()
+                                                                            .d14,
+                                                                    color: Color(
+                                                                        0xffFFC107))),
+                                                            SizedBox(
+                                                              height: Dim().d8,
                                                             ),
                                                           ],
-                                                        ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
-                                                        Text(
-                                                          'Cancelled',
-                                                          style: Sty()
-                                                              .smallText
-                                                              .copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  color: Clr().red),
-                                                        ),
+                                                        ))
                                                       ],
                                                     ),
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                      ),
+                                          ],
+                                        );
+                                      },
                                     ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                                  ),
+                                ],
+                              ),
+                    // second tab bar view widget
+                    patientvalue == null
+                        ? Center(
+                            child: Text('Select Patient Name',
+                                style: Sty().mediumBoldText),
+                          )
+                        : completedlabList.isEmpty
+                            ? Center(
+                                child: Text('No Bookings',
+                                    style: Sty().mediumBoldText),
+                              )
+                            : Column(
+                                children: [
+                                  Expanded(
+                                    child: ListView.builder(
+                                      itemCount: completedlabList.length,
+                                      physics: BouncingScrollPhysics(),
+                                      scrollDirection: Axis.vertical,
+                                      shrinkWrap: true,
+                                      itemBuilder: (context, index) {
+                                        return Column(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 3),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  completedlabList[index][
+                                                              'appointment_type'] ==
+                                                          "2"
+                                                      ? STM().redirect2page(
+                                                          ctx,
+                                                          TeleCallAppointmentDetails(
+                                                              details:
+                                                                  completedlabList[
+                                                                      index]))
+                                                      : completedlabList[index][
+                                                                  'appointment_type'] ==
+                                                              "1"
+                                                          ? STM().redirect2page(
+                                                              ctx,
+                                                              AppointmentolDetails(
+                                                                  details:
+                                                                      completedlabList[
+                                                                          index]))
+                                                          : STM().redirect2page(
+                                                              ctx,
+                                                              HomeVisitAptDetails(
+                                                                  details:
+                                                                      completedlabList[
+                                                                          index]));
+                                                },
+                                                child: Card(
+                                                  color: Clr().background,
+                                                  margin: EdgeInsets.only(
+                                                      top: Dim().d12),
+                                                  elevation: 3,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              Dim().d12)),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(
+                                                        Dim().d8),
+                                                    child: Row(
+                                                      children: [
+                                                        Container(
+                                                          height: Dim().d140,
+                                                          width: Dim().d100,
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          Dim()
+                                                                              .d12),
+                                                              border: Border.all(
+                                                                  color: Clr()
+                                                                      .hintColor),
+                                                              image: DecorationImage(
+                                                                  image: NetworkImage(
+                                                                      completedlabList[index]['hcp']['profile_pic']
+                                                                          .toString()),
+                                                                  fit: BoxFit
+                                                                      .cover)),
+                                                        ),
+                                                        SizedBox(
+                                                          width: Dim().d8,
+                                                        ),
+                                                        Expanded(
+                                                            child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                    '${completedlabList[index]['hcp']['first_name']} ${completedlabList[index]['hcp']['last_name']}',
+                                                                    style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600, color: Color(0xff2D2D2D))),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                              height: Dim().d4,
+                                                            ),
+                                                            Text(
+                                                                completedlabList[index]['hcp']['professional']['speciality_name'][0]['name'],
+                                                                style: TextStyle(
+                                                                    fontSize: Dim()
+                                                                        .d14)),
+                                                            SizedBox(
+                                                              height: Dim().d8,
+                                                            ),
+                                                            Wrap(
+                                                              children: [
+                                                                Text(
+                                                                    DateFormat(
+                                                                            'dd-MM-yyyy')
+                                                                        .format(DateTime.parse(completedlabList[index]['booking_date']
+                                                                            .toString())),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            Dim().d14)),
+                                                                SizedBox(
+                                                                    width: Dim()
+                                                                        .d8),
+                                                                Text(
+                                                                    completedlabList[index]['slot']
+                                                                            [
+                                                                            'slot']
+                                                                        .toString(),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            Dim().d14)),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                              height: Dim().d8,
+                                                            ),
+                                                            Text(
+                                                                completedlabList[index][
+                                                                            'status'] ==
+                                                                        "1"
+                                                                    ? 'Completed'
+                                                                    : 'Cancelled',
+                                                                style: Sty().mediumText.copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: completedlabList[index]['type'] ==
+                                                                            "1"
+                                                                        ? Clr()
+                                                                            .green
+                                                                        : Clr()
+                                                                            .red)),
+                                                            SizedBox(
+                                                              height: Dim().d8,
+                                                            ),
+                                                          ],
+                                                        ))
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
                   ],
                 ),
               ),
@@ -719,5 +547,32 @@ class _MyAppointmentsState extends State<MyAppointments>
         ),
       ),
     );
+  }
+
+  void getBooking(id) async {
+    FormData body = FormData.fromMap({
+      'patient_id': id,
+    });
+    var result = await STM().postWithToken(
+        ctx, Str().loading, 'appointment_history', body, usertoken, 'customer');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        upcominglabList = result['upcoming_appointments'];
+        completedlabList = result['completed_appointments'];
+      });
+    }
+  }
+
+  // getPatient
+  void getPatient() async {
+    var result = await STM().getWithTokenUrl(
+        ctx, Str().loading, 'get_patient', usertoken, 'customer');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        patientlist = result['patients'];
+      });
+    }
   }
 }

@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:saarathi/hcp/preview_prescription.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';

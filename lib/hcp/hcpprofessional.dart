@@ -57,28 +57,10 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
         getCategories();
       }
     });
-    widget.data == null
-        ? null
-        : setState(() {
-            int position = categoryList.indexWhere((element) =>
-                element['id'].toString() ==
-                widget.data['category_id'].toString());
-            categoryValue = categoryList[position]['name'];
-            addspecialityList = widget.data['speciality_id'];
-            mobileCtrl = TextEditingController(
-                text: widget.data['contact_no'].toString());
-            opdaddress =
-                TextEditingController(text: widget.data['address'].toString());
-            experinceCtrl = TextEditingController(
-                text: widget.data['experience'].toString());
-            sLatitude = widget.data['latitude'].toString();
-            sLongitude = widget.data['longitude'].toString();
-            sLocation = widget.data['map_address'].toString();
-          });
-    setState(() {
-      int position = categoryList.indexWhere((element) =>
-          element['id'].toString() == professionalist[0].toString());
+      widget.pagetype == 'edit' ? null : setState(() {
+      int position = categoryList.indexWhere((element) => element['id'].toString() == professionalist[0].toString());
       categoryValue = categoryList[position]['name'];
+      specialList = categoryList[position]['specaility'];
       addspecialityList = jsonDecode(professionalist[1]);
       mobileCtrl = TextEditingController(text: professionalist[2]);
       opdaddress = TextEditingController(text: professionalist[3]);
@@ -218,9 +200,10 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                         setState(() {
                           categoryValue = t.toString();
                           categoryerror = null;
+                          specialList.clear();
+                          addspecialityList.clear();
                           int position = categoryList.indexWhere((element) =>
-                              element['name'].toString() ==
-                              categoryValue.toString());
+                              element['name'].toString() == categoryValue.toString());
                           specialList = categoryList[position]['specaility'];
                         });
                       },
@@ -643,6 +626,23 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
     if (success) {
       setState(() {
         categoryList = result['get_category'];
+        widget.data == null
+            ? null
+            : setState(() {
+          int position = categoryList.indexWhere((element) => element['id'].toString() == widget.data['category_id'].toString());
+          categoryValue = categoryList[position]['name'];
+          specialList = categoryList[position]['specaility'];
+          addspecialityList = widget.data['speciality_id'];
+          mobileCtrl = TextEditingController(
+              text: widget.data['contact_no'].toString());
+          opdaddress =
+              TextEditingController(text: widget.data['address'].toString());
+          experinceCtrl = TextEditingController(
+              text: widget.data['experience'].toString());
+          sLatitude = widget.data['latitude'].toString();
+          sLongitude = widget.data['longitude'].toString();
+          sLocation = widget.data['map_address'].toString();
+        });
       });
     }
   }

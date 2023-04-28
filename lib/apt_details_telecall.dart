@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:saarathi/home.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'apt_details_home_visit.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
@@ -9,12 +12,37 @@ import 'values/dimens.dart';
 import 'values/styles.dart';
 
 class TeleCallAppointmentDetails extends StatefulWidget {
+  final dynamic details;
+  const TeleCallAppointmentDetails({super.key, this.details});
   @override
   State<TeleCallAppointmentDetails> createState() => _TeleCallAppointmentDetailsState();
 }
 
 class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails> {
   late BuildContext ctx;
+  String? usertoken;
+  var v;
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    setState(() {
+      v = widget.details;
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +53,6 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
       backgroundColor: Clr().white,
       appBar: AppBar(
           elevation: 2,
-
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -55,16 +82,16 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage('assets/dr1.png'),
+                  backgroundImage: NetworkImage(v['hcp']['profile_pic'].toString()),
                 ),
                 SizedBox(
-                  width: 24,
+                  width: Dim().d24,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Appointment ID : #12234',
+                      'Appointment ID : #${v['appointment_uid']}',
                       style: Sty()
                           .mediumText
                           .copyWith(
@@ -73,25 +100,25 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                     ),
                     SizedBox(height: Dim().d4,),
                     Text(
-                      'Dr.Mansi Janl',
+                      '${v['hcp']['first_name']} ${v['hcp']['last_name']}',
                       style: Sty()
                           .mediumText
                           .copyWith(fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: Dim().d4,),
                     Text(
-                      'Nutritionist',
+                      v['hcp']['professional']['speciality_name'][0]['name'],
                       style: Sty()
                           .mediumText
                           .copyWith(fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: Dim().d4,),
                     Text(
-                      'Pending',
+                      v['status'] == '0' ? 'Pending' :  v['status'] == '1' ? 'Completed' : 'Cancelled',
                       style: Sty()
                           .mediumText
                           .copyWith(
-                          color: Color(0xffFFC107),
+                          color: v['status'] == '0' ? Color(0xffFFC107) : v['status'] == '1' ? Clr().green : Clr().red,
                           fontWeight: FontWeight.w500),
                     ),
                   ],
@@ -144,7 +171,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '01 : 00 PM',
+                          v['slot']['slot'],
                           style: Sty().mediumText.copyWith(
                               color: Clr().white,
                               fontWeight: FontWeight.w600),
@@ -153,7 +180,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                           height: 8,
                         ),
                         Text(
-                          '28 Nov 2022',
+                          v['booking_date'],
                           style: Sty().mediumText.copyWith(
                               color: Clr().white,
                               fontWeight: FontWeight.w600),
@@ -176,7 +203,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               height: 12,
             ),
             Text(
-              'Tele call',
+              'OPD',
               style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
             ),
             SizedBox(
@@ -199,7 +226,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
-                  '₹500',
+                  '₹ ${v['consultation_fee']}',
                   style:
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
@@ -217,7 +244,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
-                  '₹90',
+                  '₹ ${v['gst']}',
                   style:
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
@@ -235,7 +262,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
-                  '₹90',
+                  '₹ ${v['discount'] == null ? 0 : v['discount']}',
                   style:
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
@@ -251,7 +278,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                 ),
                 Text(
-                  '₹590',
+                  '₹ ${v['total_amount']}',
                   style:
                   Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
                 ),
@@ -291,35 +318,24 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
             SizedBox(
               height: 30,
             ),
-            Center(
+            v['status'] == '1' ? Container() : v['status'] == '2' ? Container() : Center(
               child: SizedBox(
                 height: 50,
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      STM().redirect2page(ctx, HomeVisitAptDetails());
-                      // if (formKey.currentState!
-                      //     .validate()) {
-                      //   STM()
-                      //       .checkInternet(
-                      //       context, widget)
-                      //       .then((value) {
-                      //     if (value) {
-                      //       sendOtp();
-                      //     }
-                      //   });
-                      // }
+                      AppointmentCancel(v['id']);
                     },
                     style: ElevatedButton.styleFrom( elevation: 0,
                         backgroundColor: Clr().primaryColor,
                         shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(10))),
+                            borderRadius: BorderRadius.circular(10))),
                     child: Text(
                       'Cancel Appointment',
                       style: Sty().mediumText.copyWith(
                         color: Clr().white,
-                        fontWeight: FontWeight.w600,),
+                        fontWeight: FontWeight.w600,
+                      ),
                     )),
               ),
             ),
@@ -345,5 +361,21 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
         ),
       ),
     );
+  }
+
+  // appointment cancel
+
+  void AppointmentCancel(id) async {
+    FormData data = FormData.fromMap({
+      'appointment_id': id,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing, 'cancel_appointment', data, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
   }
 }

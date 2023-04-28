@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cached_pdfview/flutter_cached_pdfview.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
@@ -30,7 +29,7 @@ class PreviewPage extends State<Preview> {
         if (Navigator.of(ctx).canPop()) {
           Navigator.of(ctx).pop();
         } else {
-          STM().replacePage(ctx, HomeVisit());
+          STM().finishAffinity(ctx, HomeVisit());
         }
         return true;
       },

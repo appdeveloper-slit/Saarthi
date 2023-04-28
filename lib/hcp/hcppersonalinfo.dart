@@ -98,7 +98,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                 TextEditingController(text: widget.data['dob'].toString());
             addlanguageList = widget.data['languages'];
           });
-    setState(() {
+    widget.pagetype == 'edit' ? null : setState(() {
       GenderValue = personalList[0];
       dobCtrl = TextEditingController(text: personalList[1]);
       addlanguageList = jsonDecode(personalList[2]);
@@ -243,7 +243,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                       ? const SizedBox.shrink()
                       : Text(gendererror ?? '',
                           style:
-                              Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                              Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d12)),
                   SizedBox(
                     height: Dim().d20,
                   ),
@@ -306,7 +306,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                       ? SizedBox.shrink()
                       : Text(birtherror ?? '',
                           style:
-                              Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                              Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d12)),
                   SizedBox(height: Dim().d20),
                   InkWell(
                     onTap: () {
@@ -459,7 +459,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                         : Text(adharcarderror ?? '',
                             style: Sty()
                                 .mediumText
-                                .copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                                .copyWith(color: Clr().errorRed,fontSize: Dim().d12)),
                   ),
                   InkWell(
                     onTap: () {
@@ -535,7 +535,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                         : Text(adharcardbackerror ?? '',
                             style: Sty()
                                 .mediumText
-                                .copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                                .copyWith(color: Clr().errorRed,fontSize: Dim().d12)),
                   ),
                   InkWell(
                     onTap: () {
@@ -611,7 +611,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                       ? SizedBox.shrink()
                       : Text(signatureerror ?? '',
                           style:
-                              Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d16)),
+                              Sty().mediumText.copyWith(color: Clr().errorRed,fontSize: Dim().d12)),
                   SizedBox(
                     height: Dim().d40,
                   )

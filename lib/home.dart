@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:saarathi/add_new_patient.dart';
 import 'package:saarathi/blood_glucose.dart';
 import 'package:saarathi/heart_rate.dart';
@@ -116,17 +118,22 @@ class _HomeState extends State<Home> {
   String t = "0";
   String? sValue = 'Home';
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey<ScaffoldState>();
-  String? usertoken;
+  String? usertoken,sUUID;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
+    await Permission.camera.request();
+    await Permission.microphone.request();
+    var status = await OneSignal.shared.getDeviceState();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      sUUID = status?.userId;
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getHome();
         print(usertoken);
+        print(sUUID);
       }
     });
   }
@@ -698,7 +705,7 @@ class _HomeState extends State<Home> {
                                 height: Dim().d4,
                               ),
                               GridView.builder(
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, childAspectRatio: 14 / 4),
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6,childAspectRatio: 12/7),
                                   physics: const NeverScrollableScrollPhysics(),
                                   shrinkWrap: true,
                                   itemCount: dayidList.length,
@@ -1522,6 +1529,7 @@ class _HomeState extends State<Home> {
   void getHome() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     FormData body = FormData.fromMap({
+      'uuid': sUUID ?? "",
       'latitude': widget.Lat,
       'longitude': widget.Lng,
     });

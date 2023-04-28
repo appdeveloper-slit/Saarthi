@@ -5,7 +5,7 @@ class Clr {
   Color primaryDarkColor = const Color(0xFF23297A);
   Color accentColor = const Color(0xFFDE5425);
   Color card = const Color(0xFFF3F3F3);
-
+  Color lightgreen = const Color(0xFF90EE90);
   Color transparent = const Color(0x0000FFFF);
   Color black = const Color(0xFF000000);
   Color red = const Color(0xFFFF0000);

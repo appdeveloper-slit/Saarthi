@@ -17,8 +17,9 @@ import 'values/styles.dart';
 class SetTime extends StatefulWidget {
   final String? medicine;
   final List<dynamic>? days;
-
-  const SetTime({super.key, this.medicine, this.days});
+  final List<dynamic>? timelist;
+  final String? id;
+  const SetTime({super.key, this.medicine, this.days,this.timelist,this.id});
 
   @override
   State<SetTime> createState() => _SetTimeState();
@@ -36,6 +37,7 @@ class _SetTimeState extends State<SetTime> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      timeList = widget.timelist ?? [];
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -171,7 +173,7 @@ class _SetTimeState extends State<SetTime> {
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      timeList.isEmpty ? STM().displayToast('Add time for medication reminder') : addReminder();
+                      timeList.isEmpty ? STM().displayToast('Add time for medication reminder') : widget.id == null ? addReminder() : editaddReminder(widget.id);
                       print(jsonEncode(widget.days));
                       print(jsonEncode(timeList));
                       print(widget.medicine);
@@ -182,7 +184,7 @@ class _SetTimeState extends State<SetTime> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10))),
                     child: Text(
-                      'Done',
+                      widget.id == null ? 'Done' : 'Update',
                       style: Sty().mediumText.copyWith(
                             color: Clr().white,
                             fontWeight: FontWeight.w600,
@@ -233,7 +235,7 @@ class _SetTimeState extends State<SetTime> {
       "reminder_time_id": id,
     });
     var result = await STM().postWithToken(ctx, Str().updating, 'editReminder', body, usertoken,'customer');
-    var success = result['success'];
+    var success = result['status'];
     var message = result['message'];
     if(success){
       STM().successDialogWithAffinity(ctx, message, Home());

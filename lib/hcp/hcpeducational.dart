@@ -50,11 +50,7 @@ class _EducationalInfoState extends State<EducationalInfo> {
     setState(() {
       hcptoken = sp.getString('hcptoken') ?? '';
     });
-    widget.data == null ? null : setState((){
-      adddegreeList = widget.data['degree_name'];
-      registerCtrl = TextEditingController(text: widget.professionaldata['registration_number'].toString());
 
-    });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getDegree();
@@ -528,6 +524,10 @@ class _EducationalInfoState extends State<EducationalInfo> {
     if (success) {
       setState(() {
         specialList = result['get_degree'];
+        widget.data == null ? null : setState((){
+          adddegreeList = widget.data['degree_name'];
+          registerCtrl = TextEditingController(text: widget.professionaldata['registration_number'].toString());
+        });
       });
     }
   }
