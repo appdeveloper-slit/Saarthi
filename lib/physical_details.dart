@@ -148,7 +148,7 @@ class _PhysicalDetailsState extends State<PhysicalDetails> {
                   flex: 3,
                   child: DropdownButtonFormField<String>(
                     value: selectedValue,
-                    hint: Text(selectedValue ?? 'height_ft'),
+                    hint: Text(selectedValue ?? 'Height_ft'),
                     isExpanded: true,
                     decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
                         contentPadding: EdgeInsets.symmetric(
@@ -191,7 +191,7 @@ class _PhysicalDetailsState extends State<PhysicalDetails> {
                   flex: 3,
                   child: DropdownButtonFormField<String>(
                     value: selectedValue2,
-                    hint: Text(selectedValue2 ?? 'height_in'),
+                    hint: Text(selectedValue2 ?? 'Height_in'),
                     isExpanded: true,
                     decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
                         contentPadding: EdgeInsets.symmetric(

@@ -368,7 +368,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
               child: ElevatedButton(
                   onPressed: () {
                     if(formKey.currentState!.validate()){
-                      register();
+                      profile == null ?  STM().displayToast('Profile picture is required') : register();
                     }
                   },
                   style: ElevatedButton.styleFrom(

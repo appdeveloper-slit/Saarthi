@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:double_back_to_close/double_back_to_close.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -147,13 +148,16 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-    return Scaffold(
-      bottomNavigationBar: bottomBarLayout(ctx, 0),
-      key: scaffoldState,
-      backgroundColor: Clr().white,
-      appBar: appbarLayout(),
-      drawer: navbar(ctx, scaffoldState),
-      body: homeLayout(),
+    return DoubleBack(
+      message: 'Please Press back again to exit',
+      child: Scaffold(
+        bottomNavigationBar: bottomBarLayout(ctx, 0),
+        key: scaffoldState,
+        backgroundColor: Clr().white,
+        appBar: appbarLayout(),
+        drawer: navbar(ctx, scaffoldState),
+        body: homeLayout(),
+      ),
     );
   }
 

@@ -2,13 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:saarathi/hcp/add_prescription.dart';
 import 'package:saarathi/hcp/callpage.dart';
 import 'package:saarathi/hcp/hcphome.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/styles.dart';
@@ -26,7 +26,6 @@ class AptDetailState extends State<AptDetail> {
   late BuildContext ctx;
   String? sToken;
   Map<String, dynamic> v = {};
-
   @override
   void initState() {
     v = widget.data;
@@ -305,19 +304,10 @@ class AptDetailState extends State<AptDetail> {
                 height: 50,
                 width: 300,
                 child: ElevatedButton(
-                    onPressed: () {
-                      // STM().redirect2page(ctx, PersonalInfo());
-                      // if (formKey.currentState!
-                      //     .validate()) {
-                      //   STM()
-                      //       .checkInternet(
-                      //       context, widget)
-                      //       .then((value) {
-                      //     if (value) {
-                      //       sendOtp();
-                      //     }
-                      //   });
-                      // }
+                    onPressed: () async{
+                      await Permission.camera.request();
+                      await Permission.microphone.request();
+                      getToken();
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Clr().primaryColor,
@@ -511,35 +501,33 @@ class AptDetailState extends State<AptDetail> {
     return name.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
   }
 
-  //Api method
-  // void getToken() async {
-  //   //Input
-  //   FormData body = FormData.fromMap({
-  //     'doctor_id': sID,
-  //     'customer_id': v['customer_id'],
-  //   });
-  //   //Output
-  //   var result =
-  //   await STM().post(ctx, Str().loading, "doctor/agora/token", body);
-  //   if (!mounted) return;
-  //   var error = result['error'];
-  //   if (!error) {
-  //     Map<String, dynamic> map = {
-  //       'id': sID,
-  //       'name': v['patient_name'],
-  //       'customer_id': v['customer_id'],
-  //       'channel': result['channel'],
-  //       'token': result['token'],
-  //     };
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder: (context) => CallPage(map),
-  //       ),
-  //     );
-  //   } else {
-  //     var message = result['message'];
-  //     STM().errorDialog(ctx, message);
-  //   }
-  // }
+ // Api method
+  void getToken() async {
+    //Input
+    FormData body = FormData.fromMap({
+      'customer_id': v['customer_id'],
+    });
+    //Output
+    var result = await STM().postWithToken(ctx, Str().loading, "agora/token", body,sToken,'hcp');
+    if (!mounted) return;
+    var error = result['success'];
+    if (error) {
+      Map<String, dynamic> map = {
+        'id': v['id'],
+        'name': v['customer']['name'],
+        'customer_id': v['customer_id'],
+        'channel': result['channel'],
+        'token': result['token'],
+      };
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CallPage(map),
+        ),
+      );
+    } else {
+      var message = result['message'];
+      STM().errorDialog(ctx, message);
+    }
+  }
 }
