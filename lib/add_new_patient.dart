@@ -5,10 +5,8 @@ import 'package:saarathi/payment_summary.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
-import 'review_apt_ol.dart';
 import 'values/colors.dart';
 import 'values/styles.dart';
 
@@ -329,8 +327,15 @@ class _AddNewPatientState extends State<AddNewPatient> {
     var success = result['success'];
     var message = result['message'];
     if(success){
-     widget.stype == 'lab' ?  STM().back2Previous(ctx) : STM().successDialogWithReplace(ctx, message, DrName(doctorDetails: widget.doctorDetails,));
-     widget.stype == 'lab' ? controller.sink.add('update') : null;
+      if( widget.stype == 'lab'){
+        STM().back2Previous(ctx);
+        controller.sink.add('update');
+      }else if(widget.stype == 'edit'){
+        STM().back2Previous(ctx);
+        DrNamepage.controller1.sink.add('update');
+      }else{
+        STM().successDialogWithReplace(ctx, message, DrName(doctorDetails: widget.doctorDetails));
+      }
     }else{
       STM().errorDialog(ctx, message);
     }

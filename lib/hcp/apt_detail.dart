@@ -9,6 +9,7 @@ import 'package:saarathi/hcp/hcphome.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/styles.dart';
@@ -327,14 +328,33 @@ class AptDetailState extends State<AptDetail> {
                 v['is_prescription']
                 ? true
                 : v['is_prescription'])
-              SizedBox(
-                height: Dim().d20,
+              SizedBox(height: Dim().d12),
+            v['prescription'].isEmpty ? Container() : Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: Dim().d300,
+                  child: ElevatedButton(
+                    style: Sty().primaryButton,
+                    onPressed: () async {
+                      await launchUrl(
+                      Uri.parse(v['prescription'][0]['pdf_path']),
+                      mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    child: Text(
+                      'Download Prescription',
+                      style: Sty().largeText.copyWith(
+                        color: Clr().white,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             //When apt is complete , apt type is online & prescription not added
             if (v['status'].toString() == "1" &&
                 v['appointment_type'].toString() == "1" &&
                 v['is_prescription']
-                ? true
+                ? false
                 : v['is_prescription'])
               Align(
                 alignment: Alignment.center,
@@ -460,7 +480,7 @@ class AptDetailState extends State<AptDetail> {
   void complete() async {
     //Input
     FormData body = FormData.fromMap({
-      'type': v['appointment_type'],
+      'type': 1,
       'appointment_id': v['id'],
     });
     //Output

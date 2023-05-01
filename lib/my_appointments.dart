@@ -515,7 +515,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                                             .w600,
                                                                     fontSize:
                                                                         16,
-                                                                    color: completedlabList[index]['type'] ==
+                                                                    color: completedlabList[index]['status'] ==
                                                                             "1"
                                                                         ? Clr()
                                                                             .green

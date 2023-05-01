@@ -30,6 +30,7 @@ Future<void> main() async {
 
   OneSignal.shared.setAppId("cde5a8cc-c64f-484d-b552-7800c0c52ef9");
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   OneSignal.shared.setNotificationWillShowInForegroundHandler(
       (OSNotificationReceivedEvent event1) {
     if (event1.notification.additionalData != null) {
@@ -71,6 +72,7 @@ Future<void> main() async {
   await Future.delayed(const Duration(seconds: 3));
   runApp(
     MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       home: login
           ? Home()
@@ -93,7 +95,7 @@ Future<void> main() async {
   );
 
   FlutterIncomingCall.configure(
-      appName: 'RMC',
+      appName: 'Saarthi',
       duration: 30000,
       android: ConfigAndroid(
         vibration: true,

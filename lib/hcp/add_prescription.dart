@@ -87,10 +87,9 @@ class AddPrescriptionPage extends State<AddPrescription> {
     //Output
     var result = await STM().postWithToken(
         ctx, Str().loading, "add_prescription", body, sToken, 'hcp');
-    if (!mounted) return;
-    var error = result['error'];
+    var error = result['success'];
     var message = result['message'];
-    if (!error) {
+    if (error) {
       STM().successDialogWithAffinity(
           ctx, message, Preview(result['prescription']));
     } else {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:calender_picker/calender_picker.dart';
 import 'package:calender_picker/extra/style.dart';
 import 'package:dio/dio.dart';
@@ -17,6 +18,7 @@ import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/styles.dart';
 
+
 class DrName extends StatefulWidget {
   final dynamic doctorDetails;
   final int? id;
@@ -24,12 +26,15 @@ class DrName extends StatefulWidget {
   const DrName({super.key, this.doctorDetails, this.id});
 
   @override
-  State<DrName> createState() => _DrNameState();
+  State<StatefulWidget> createState() {
+    return DrNamepage();
+  }
 }
 
-class _DrNameState extends State<DrName> {
+class DrNamepage extends State<DrName> {
   late BuildContext ctx;
-
+  static StreamController<String?> controller1 =
+  StreamController<String?>.broadcast();
   int? selected;
   String? slottime;
   bool isChecked = false;
@@ -50,6 +55,7 @@ class _DrNameState extends State<DrName> {
     {"id": "5", "name": "Friday"},
     {"id": "6", "name": "Saturday"},
   ];
+
   String t = "0";
   DateTime dayno = DateTime.now();
   List<dynamic> dateList = [];
@@ -74,6 +80,13 @@ class _DrNameState extends State<DrName> {
 
   @override
   void initState() {
+    controller1.stream.listen(
+          (event) {
+        setState(() {
+          getPatient();
+        });
+      },
+    );
     getSession();
     super.initState();
   }
@@ -288,6 +301,7 @@ class _DrNameState extends State<DrName> {
                                   ctx,
                                   AddNewPatient(
                                     doctorDetails: widget.doctorDetails,
+                                    stype: 'edit',
                                   ));
                             },
                             child: Wrap(
@@ -318,6 +332,7 @@ class _DrNameState extends State<DrName> {
                               ctx,
                               AddNewPatient(
                                 doctorDetails: widget.doctorDetails,
+                                stype: 'edit',
                               ));
                         },
                         child: Container(
