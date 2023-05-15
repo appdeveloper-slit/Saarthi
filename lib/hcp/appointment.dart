@@ -30,7 +30,7 @@ class _AppointmentState extends State<Appointment>
   List<dynamic> upcomingList = [];
   List<dynamic> historyList = [];
 
-  String? sToken;
+  String? sToken,time;
 
   Map<String, dynamic> v = {};
 
@@ -70,6 +70,7 @@ class _AppointmentState extends State<Appointment>
         todayList = result['today_appointments'];
         upcomingList = result['upcoming_appointments'];
         historyList = result['completed_appointments'];
+        time = result['time'];
       });
     } else {
       var message = result['message'];
@@ -284,7 +285,7 @@ class _AppointmentState extends State<Appointment>
               child: ElevatedButton(
                 onPressed: () {
                   // v.addEntries(this.v.entries);
-                  STM().redirect2page(ctx, AptDetail(v));
+                  STM().redirect2page(ctx, AptDetail(v,time));
                 },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,

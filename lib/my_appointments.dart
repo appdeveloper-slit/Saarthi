@@ -5,7 +5,6 @@ import 'package:saarathi/apt_details_home_visit.dart';
 import 'package:saarathi/apt_details_telecall.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
@@ -27,7 +26,7 @@ class _MyAppointmentsState extends State<MyAppointments>
   List<dynamic> patientlist = [];
   List<dynamic> upcominglabList = [];
   List<dynamic> completedlabList = [];
-
+  var time;
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
@@ -226,9 +225,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                       ? STM().redirect2page(
                                                       ctx,
                                                       TeleCallAppointmentDetails(
-                                                          details:
-                                                          upcominglabList[
-                                                          index]))
+                                                          details: upcominglabList[index],time: time,))
                                                       : upcominglabList[index][
                                                   'appointment_type'] ==
                                                       "1"
@@ -237,13 +234,13 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                       AppointmentolDetails(
                                                           details:
                                                           upcominglabList[
-                                                          index]))
+                                                          index],time: time,))
                                                       : STM().redirect2page(
                                                       ctx,
                                                       HomeVisitAptDetails(
                                                           details:
                                                           upcominglabList[
-                                                          index]));
+                                                          index],time: time,));
                                                 },
                                                 child: Card(
                                                   color: Clr().background,
@@ -560,6 +557,7 @@ class _MyAppointmentsState extends State<MyAppointments>
       setState(() {
         upcominglabList = result['upcoming_appointments'];
         completedlabList = result['completed_appointments'];
+        time = result['time'];
       });
     }
   }

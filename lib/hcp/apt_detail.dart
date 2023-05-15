@@ -1,11 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saarathi/hcp/add_prescription.dart';
 import 'package:saarathi/hcp/callpage.dart';
 import 'package:saarathi/hcp/hcphome.dart';
+import 'package:saarathi/hcp/preview_prescription.dart';
+import 'package:saarathi/home.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,8 +22,9 @@ import '../values/styles.dart';
 
 class AptDetail extends StatefulWidget {
   final Map<String, dynamic> data;
+  final String? time;
 
-  const AptDetail(this.data, {Key? key}) : super(key: key);
+  const AptDetail(this.data, this.time, {Key? key}) : super(key: key);
 
   @override
   State<AptDetail> createState() => AptDetailState();
@@ -26,7 +33,25 @@ class AptDetail extends StatefulWidget {
 class AptDetailState extends State<AptDetail> {
   late BuildContext ctx;
   String? sToken;
+  var stypeValue;
+  List<dynamic> arrayList = [];
+  TextEditingController canCtrl = TextEditingController();
+  DateTime now = DateTime.now();
   Map<String, dynamic> v = {};
+  File? imageFile;
+  String? profile;
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      sToken = sp.getString('hcptoken') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getReason();
+      }
+    });
+  }
+
   @override
   void initState() {
     v = widget.data;
@@ -34,12 +59,6 @@ class AptDetailState extends State<AptDetail> {
     super.initState();
   }
 
-  getSession() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    setState(() {
-      sToken = sp.getString('hcptoken') ?? '';
-    });
-  }
   @override
   Widget build(BuildContext context) {
     ctx = context;
@@ -78,7 +97,11 @@ class AptDetailState extends State<AptDetail> {
                       borderRadius: BorderRadius.circular(Dim().d52),
                       // border: Border.all(color: Clr().hintColor)
                     ),
-                    child: Center(child: Text(nameShort(v['patient']['full_name'].toString()),style: Sty().mediumBoldText.copyWith(fontSize: Dim().d52,color: Clr().white)))),
+                    child: Center(
+                        child: Text(
+                            nameShort(v['patient']['full_name'].toString()),
+                            style: Sty().mediumBoldText.copyWith(
+                                fontSize: Dim().d52, color: Clr().white)))),
                 SizedBox(
                   width: Dim().d20,
                 ),
@@ -219,8 +242,8 @@ class AptDetailState extends State<AptDetail> {
                   Text(
                     "Patient Address",
                     style: Sty().largeText.copyWith(
-                      color: Clr().primaryColor,
-                    ),
+                          color: Clr().primaryColor,
+                        ),
                   ),
                   Card(
                     elevation: 2,
@@ -305,7 +328,7 @@ class AptDetailState extends State<AptDetail> {
                 height: 50,
                 width: 300,
                 child: ElevatedButton(
-                    onPressed: () async{
+                    onPressed: () async {
                       await Permission.camera.request();
                       await Permission.microphone.request();
                       getToken();
@@ -317,70 +340,73 @@ class AptDetailState extends State<AptDetail> {
                     child: Text(
                       'Video Call',
                       style: Sty().mediumText.copyWith(
-                        color: Clr().white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: Clr().white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     )),
               ),
+            v['status'].toString() == "2" ? Container() : v['status'].toString() == "1" ? Container() : Padding(
+              padding: EdgeInsets.only(top: Dim().d20),
+              child: CancelButton(),
+            ),
             //When apt is complete , apt type is online & prescription not added
-            if (v['status'].toString() == "1" &&
-                v['appointment_type'].toString() == "1" &&
-                v['is_prescription']
-                ? true
-                : v['is_prescription'])
-              SizedBox(height: Dim().d12),
-            v['prescription'].isEmpty ? Container() : Align(
-                alignment: Alignment.center,
-                child: SizedBox(
-                  width: Dim().d300,
-                  child: ElevatedButton(
-                    style: Sty().primaryButton,
-                    onPressed: () async {
-                      await launchUrl(
+            // if (v['status'].toString() == "2" &&
+            //         v['appointment_type'].toString() == "1" &&
+            //         v['is_prescription'] == true)
+            v['status'].toString() == "1" && v['is_prescription']
+                ? Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: Dim().d300,
+                child: ElevatedButton(
+                  style: Sty().primaryButton,
+                  onPressed: () async {
+                    v['prescription'][0]['type'] == "2" ? STM().openWeb(v['prescription'][0]['pdf_path']) : await launchUrl(
                       Uri.parse(v['prescription'][0]['pdf_path']),
                       mode: LaunchMode.externalApplication,
-                      );
-                    },
-                    child: Text(
-                      'Download Prescription',
-                      style: Sty().largeText.copyWith(
-                        color: Clr().white,
-                      ),
+                    );
+                  },
+                  child: Text(
+                    'View Prescription',
+                    style: Sty().largeText.copyWith(
+                      color: Clr().white,
                     ),
                   ),
                 ),
               ),
+            ) : Container(),
             //When apt is complete , apt type is online & prescription not added
-            if (v['status'].toString() == "1" &&
-                v['appointment_type'].toString() == "1" &&
-                v['is_prescription']
-                ? false
-                : v['is_prescription'])
-              Align(
-                alignment: Alignment.center,
-                child: SizedBox(
-                  width: Dim().d300,
-                  child: ElevatedButton(
-                    style: Sty().primaryButton,
-                    onPressed: () {
-                      STM().redirect2page(
-                          ctx,
-                          AddPrescription(
-                            {
-                              'id': v['id'],
-                              'apt_id': v['appointment_type'],
-                            },
-                          ));
-                    },
-                    child: Text(
-                      'Add Prescription',
-                      style: Sty().largeText.copyWith(
-                        color: Clr().white,
+            // if (v['status'].toString() == "2" &&
+            //         v['appointment_type'].toString() == "1" &&
+            //         v['prescription'] == [])
+              v['status'].toString() == "1" &&  v['is_prescription'] == false ? Padding(
+                padding:  EdgeInsets.only(top: Dim().d20),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: Dim().d300,
+                    child: ElevatedButton(
+                      style: Sty().primaryButton,
+                      onPressed: () {
+                        STM().redirect2page(
+                            ctx,
+                            AddPrescription(
+                              {
+                                'id': v['id'],
+                                'apt_id': v['appointment_type'],
+                              },
+                            ));
+                      },
+                      child: Text(
+                        'Add Prescription',
+                        style: Sty().largeText.copyWith(
+                              color: Clr().white,
+                            ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ) : Container(),
             if (v['status'].toString() == "0")
               const SizedBox(
                 height: 30,
@@ -403,8 +429,8 @@ class AptDetailState extends State<AptDetail> {
                             title: Text(
                               "Confirmation",
                               style: Sty().largeText.copyWith(
-                                color: Clr().errorRed,
-                              ),
+                                    color: Clr().errorRed,
+                                  ),
                             ),
                             content: Text(
                               "Are you sure you want to complete?",
@@ -413,7 +439,7 @@ class AptDetailState extends State<AptDetail> {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  complete();
+                                  complete(v['appointment_type']);
                                 },
                                 child: Text(
                                   "Yes",
@@ -445,9 +471,9 @@ class AptDetailState extends State<AptDetail> {
                     child: Text(
                       'Complete Appointment',
                       style: Sty().mediumText.copyWith(
-                        color: Clr().white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: Clr().white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     )),
               ),
             const SizedBox(
@@ -464,9 +490,9 @@ class AptDetailState extends State<AptDetail> {
             Text(
               'Contact Support',
               style: Sty().mediumText.copyWith(
-                color: Clr().primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
+                    color: Clr().primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(
               height: 30,
@@ -476,43 +502,48 @@ class AptDetailState extends State<AptDetail> {
       ),
     );
   }
+
   //Api method
-  void complete() async {
+  void complete(type) async {
     //Input
     FormData body = FormData.fromMap({
-      'type': 1,
+      'type': type,
       'appointment_id': v['id'],
     });
     //Output
-    var result = await STM().postWithToken(
-        ctx, Str().loading, "change_appointment_status", body, sToken, 'hcp');
+    var result = await STM().postWithToken(ctx, Str().loading, "change_appointment_status", body, sToken, 'hcp');
     if (!mounted) return;
     var success = result['success'];
     var message = result['message'];
     if (success) {
-      if (v['appointment_type'].toString() == "1") {
-        STM().successDialogWithReplace(
-          ctx,
-          message,
-          AddPrescription(
-            {
-              'id': v['id'],
-              'apt_id': v['appointment_type'],
-            },
-          ),
-        );
-      } else {
-        setState(() {
-          v['status'] = "1";
-        });
-        STM().successDialogWithAffinity(
-          ctx,
-          message,
-          HomeVisit(),
-        );
-      }
-    } else {
-      var message = result['message'];
+      //   if (v['appointment_type'].toString() == "1") {
+      //     STM().successDialogWithReplace(
+      //       ctx,
+      //       message,
+      //       AddPrescription(
+      //         {
+      //           'id': v['id'],
+      //           'apt_id': v['appointment_type'],
+      //         },
+      //       ),
+      //     );
+      //   } else {
+      //     setState(() {
+      //       v['status'] = "1";
+      //     });
+      //     STM().successDialogWithAffinity(
+      //       ctx,
+      //       message,
+      //       HomeVisit(),
+      //     );
+      //   }
+      // } else {
+      //   var message = result['message'];
+      //   STM().errorDialog(ctx, message);
+      // }
+      STM().back2Previous(ctx);
+      _addPrescriptionDialog();
+    }else{
       STM().errorDialog(ctx, message);
     }
   }
@@ -521,14 +552,23 @@ class AptDetailState extends State<AptDetail> {
     return name.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
   }
 
- // Api method
+  // get reasons
+  void getReason() async {
+    var result = await STM().getWithoutDialogToken(ctx, 'get_reason', sToken,'hcp');
+    setState(() {
+      arrayList = result['reasons'];
+    });
+  }
+
+  // Api method
   void getToken() async {
     //Input
     FormData body = FormData.fromMap({
       'customer_id': v['customer_id'],
     });
     //Output
-    var result = await STM().postWithToken(ctx, Str().loading, "agora/token", body,sToken,'hcp');
+    var result = await STM()
+        .postWithToken(ctx, Str().loading, "agora/token", body, sToken, 'hcp');
     if (!mounted) return;
     var error = result['success'];
     if (error) {
@@ -547,6 +587,236 @@ class AptDetailState extends State<AptDetail> {
       );
     } else {
       var message = result['message'];
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  // appointment cancel
+  void AppointmentCancel(id) async {
+    FormData data = FormData.fromMap({
+      'appointment_id': id,
+      'reason': canCtrl.text.isEmpty ? stypeValue : canCtrl.text,
+    });
+    var result = await STM().postWithToken(
+        ctx, Str().processing, 'cancel_appointment', data, sToken, 'hcp');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      STM().successDialogWithReplace(ctx, message, HomeVisit());
+    } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  // Cancel appointment and condition is if before 5 minutes slot time can't cancel appointment( appintment 18:00 user can't cancel appoitmnet 17:55)
+  Widget CancelButton() {
+    DateTime slotDate =
+        DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
+    DateTime startTime =
+        slotDate.subtract(Duration(minutes: int.parse(widget.time.toString())));
+    DateTime endTime = startTime.add(Duration(minutes: 5));
+    // Duration diff = beforeTime.difference(afterTime);
+    now.isAfter(startTime) && now.isBefore(endTime)
+        ? print('cancel not show')
+        : print('cancel button show');
+    return now.isAfter(startTime)
+        ? Container()
+        : Center(
+            child: SizedBox(
+              height: 50,
+              width: 300,
+              child: ElevatedButton(
+                  onPressed: () {
+                    _CancelDialog();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Clr().primaryColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                  child: Text(
+                    'Cancel Appointment',
+                    style: Sty().mediumText.copyWith(
+                          color: Clr().white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  )),
+            ),
+          );
+  }
+
+  _CancelDialog() {
+    return showDialog(
+        context: context,
+        builder: (index) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setstate) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Dim().d12),
+                      border: Border.all(color: Clr().black),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Dim().d8),
+                      child: DropdownButton(
+                        value: stypeValue,
+                        isExpanded: true,
+                        hint: Text('Select Type',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(color: Clr().shimmerColor)),
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 28,
+                          color: Clr().grey,
+                        ),
+                        underline: Container(),
+                        style: TextStyle(color: Color(0xff787882)),
+                        items: arrayList.map((string) {
+                          return DropdownMenuItem(
+                            value: string['name'],
+                            child: Text(
+                              string['name'],
+                              style: const TextStyle(
+                                  color: Color(0xff787882), fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (t) {
+                          setstate(() {
+                            stypeValue = t!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: Dim().d12),
+                  stypeValue == 'Other'
+                      ? TextFormField(
+                          decoration: Sty()
+                              .TextFormFieldOutlineDarkStyle
+                              .copyWith(
+                                  hintText: 'Enter The Reason',
+                                  hintStyle: Sty()
+                                      .mediumText
+                                      .copyWith(color: Clr().hintColor)),
+                          style: Sty().mediumText,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          controller: canCtrl,
+                        )
+                      : Container(),
+                ],
+              ),
+              actions: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d44),
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Clr().primaryColor)),
+                      onPressed: () {
+                        AppointmentCancel(v['id']);
+                      },
+                      child: Center(child: Text('Submit'))),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+
+  _addPrescriptionDialog() {
+    return showDialog(
+        context: context,
+        builder: (index) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setstate) {
+                return AlertDialog(
+                  title: Text('Select Prescription Type:-',style: Sty().mediumBoldText,),
+                  content: Row(
+                    children: [
+                      Expanded(child: InkWell(
+                        onTap: (){
+                          _getFromCamera();
+                          STM().back2Previous(ctx);
+                        },
+                        child: Container(height: Dim().d60,decoration: BoxDecoration(
+                          color: Clr().primaryColor,
+                          borderRadius: BorderRadius.circular(Dim().d12),
+                          border: Border.all(color: Clr().black),
+                        ),child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                           child: Text('Upload Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
+                          ),
+                        )),
+                      )),
+                      SizedBox(width: Dim().d12,),
+                      Expanded(child: InkWell(onTap: (){
+                        STM().redirect2page(ctx, AddPrescription(
+                          {
+                            'id': v['id'],
+                            'apt_id': v['appointment_type'],
+                          },
+                        ),);
+                      },
+                        child: Container(height: Dim().d60,decoration: BoxDecoration(
+                          color: Clr().primaryColor,
+                          borderRadius: BorderRadius.circular(Dim().d12),
+                          border: Border.all(color: Clr().black),
+                        ),child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Text('Create Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
+                          ),
+                        )),
+                      )),
+                    ],
+                  ),
+                );
+              });
+        });
+  }
+
+
+  _getFromCamera() async {
+    PickedFile? pickedFile = await ImagePicker().getImage(
+      source: ImageSource.camera,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        imageFile = File(pickedFile.path);
+        var image = imageFile!.readAsBytesSync();
+        profile = base64Encode(image);
+        profile!.isNotEmpty ? addData() : null;
+      });
+    }
+  }
+  //Api method
+  void addData() async {
+    //Input
+    FormData body = FormData.fromMap({
+      'appointment_id': v['id'],
+      'type':2,
+      'image':profile,
+    });
+    //Output
+    var result = await STM().postWithToken(
+        ctx, Str().loading, "add_prescription", body, sToken, 'hcp');
+    var error = result['success'];
+    var message = result['message'];
+    if (error) {
+      STM().successDialogWithAffinity(ctx, message, HomeVisit());
+    } else {
       STM().errorDialog(ctx, message);
     }
   }

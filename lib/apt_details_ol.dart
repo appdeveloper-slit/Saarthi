@@ -1,12 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'apt_details_telecall.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'dr_name.dart';
 import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/dimens.dart';
@@ -14,8 +16,9 @@ import 'values/styles.dart';
 
 class AppointmentolDetails extends StatefulWidget {
   final dynamic details;
+  final String? time;
 
-  const AppointmentolDetails({super.key, this.details});
+  const AppointmentolDetails({super.key, this.details, this.time});
 
   @override
   State<AppointmentolDetails> createState() => _AppointmentolDetailsState();
@@ -25,21 +28,34 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
   late BuildContext ctx;
   String? usertoken;
   var v;
-
+  TextEditingController canCtrl = TextEditingController();
+  DateTime now = DateTime.now();
+  var earlier, before, stypeValue;
+  List<dynamic> arrayList = [];
+  DateTime? slotDate;
+  DateTime? startTime;
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
-    });
-    setState(() {
       v = widget.details;
+      before = now.add(Duration(days: 10));
+      DateTime slotDate =
+      DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
+      DateTime startTime =
+      slotDate.subtract(Duration(minutes: int.parse(widget.time.toString())));
+      DateTime endTime = startTime.add(Duration(minutes: 5));
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
+        getReason();
         print(usertoken);
+        setState(() {});
       }
     });
   }
+
+  bool? yes;
 
   @override
   void initState() {
@@ -85,8 +101,7 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage:
-                      NetworkImage(v['hcp']['profile_pic'].toString()),
+                  backgroundImage: NetworkImage(v['hcp']['profile_pic'].toString()),
                 ),
                 SizedBox(
                   width: Dim().d24,
@@ -375,28 +390,7 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
                 ? Container()
                 : v['status'] == '2'
                     ? Container()
-                    : Center(
-                        child: SizedBox(
-                          height: 50,
-                          width: 300,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                AppointmentCancel(v['id']);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: Clr().primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              child: Text(
-                                'Cancel Appointment',
-                                style: Sty().mediumText.copyWith(
-                                      color: Clr().white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              )),
-                        ),
-                      ),
+                    : CancelButton(), // cancel appointment
             SizedBox(
               height: 20,
             ),
@@ -406,7 +400,7 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
               style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
             ),
             SizedBox(
-              height: 20,
+              height: Dim().d20,
             ),
             Center(
               child: Text(
@@ -416,7 +410,23 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
               ),
             ),
             SizedBox(
-              height: 20,
+              height: Dim().d20,
+            ),
+            InkWell(onTap: (){
+              STM().redirect2page(ctx, DrName(doctorDetails: widget.details,reshedule: 'yes',));
+            },
+              child: Container(
+                height: Dim().d52,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(Dim().d12),
+                    border: Border.all(color: Color(0xff80C342))),
+                child: Center(
+                  child: Text('Appointment Reschedule',
+                      style: Sty()
+                          .mediumBoldText
+                          .copyWith(color: Clr().primaryColor)),
+                ),
+              ),
             ),
           ],
         ),
@@ -425,10 +435,10 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
   }
 
   // appointment cancel
-
   void AppointmentCancel(id) async {
     FormData data = FormData.fromMap({
       'appointment_id': id,
+      'reason': canCtrl.text.isEmpty ? stypeValue : canCtrl.text,
     });
     var result = await STM().postWithToken(ctx, Str().processing,
         'cancel_appointment', data, usertoken, 'customer');
@@ -439,5 +449,128 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
     } else {
       STM().errorDialog(ctx, message);
     }
+  }
+
+  // Cancel appointment and condition is if before 5 minutes slot time can't cancel appointment( appintment 18:00 user can't cancel appoitmnet 17:55)
+  Widget CancelButton() {
+    // Duration diff = beforeTime.difference(afterTime);
+    return now.isAfter(startTime!)
+        ? Container()
+        : Center(
+            child: SizedBox(
+              height: 50,
+              width: 300,
+              child: ElevatedButton(
+                  onPressed: () {
+                    _CancelDialog();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Clr().primaryColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                  child: Text(
+                    'Cancel Appointment',
+                    style: Sty().mediumText.copyWith(
+                          color: Clr().white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  )),
+            ),
+          );
+  }
+
+  _CancelDialog() {
+    return showDialog(
+        context: context,
+        builder: (index) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setstate) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Dim().d12),
+                      border: Border.all(color: Clr().black),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Dim().d8),
+                      child: DropdownButton(
+                        value: stypeValue,
+                        isExpanded: true,
+                        hint: Text('Select Type',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(color: Clr().shimmerColor)),
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 28,
+                          color: Clr().grey,
+                        ),
+                        underline: Container(),
+                        style: TextStyle(color: Color(0xff787882)),
+                        items: arrayList.map((string) {
+                          return DropdownMenuItem(
+                            value: string['name'],
+                            child: Text(
+                              string['name'],
+                              style: const TextStyle(
+                                  color: Color(0xff787882), fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (t) {
+                          setstate(() {
+                            stypeValue = t!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: Dim().d12),
+                  stypeValue == 'Other'
+                      ? TextFormField(
+                          decoration: Sty()
+                              .TextFormFieldOutlineDarkStyle
+                              .copyWith(
+                                  hintText: 'Enter The Reason',
+                                  hintStyle: Sty()
+                                      .mediumText
+                                      .copyWith(color: Clr().hintColor)),
+                          style: Sty().mediumText,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          controller: canCtrl,
+                        )
+                      : Container(),
+                ],
+              ),
+              actions: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d44),
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Clr().primaryColor)),
+                      onPressed: () {
+                        AppointmentCancel(v['id']);
+                      },
+                      child: Center(child: Text('Submit'))),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  void getReason() async {
+    var result = await STM()
+        .getWithoutDialogToken(ctx, 'get_reason', usertoken, 'customer');
+    setState(() {
+      arrayList = result['reasons'];
+    });
   }
 }

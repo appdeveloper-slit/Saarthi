@@ -154,7 +154,7 @@ class Sty {
     fillColor: Clr().formfieldbg,
     contentPadding: EdgeInsets.symmetric(
       horizontal: Dim().d14,
-      vertical: Dim().d12,
+      vertical: Dim().d14,
     ),
     enabledBorder: OutlineInputBorder(
       borderSide: BorderSide(

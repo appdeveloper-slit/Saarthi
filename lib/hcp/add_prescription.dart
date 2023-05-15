@@ -26,20 +26,48 @@ class AddPrescriptionPage extends State<AddPrescription> {
   late BuildContext ctx;
   bool isLoaded = false;
   String? sToken;
-
   Map<String, dynamic> v = {};
-
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
   TextEditingController symptomsCtrl = TextEditingController();
-
   List<dynamic> medicineList = [];
-
   List<dynamic> testList = [];
   List<dynamic> labList = [null];
   List<dynamic> labArray = [];
-
   TextEditingController reasonCtrl = TextEditingController();
+  TextEditingController diagnoCtrl = TextEditingController();
+  TextEditingController nextFollowCtrl = TextEditingController();
+  Future datePicker() async {
+    DateTime? picked = await showDatePicker(
+      context: ctx,
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData(
+            colorScheme: ColorScheme.light(primary: Clr().primaryColor),
+          ),
+          child: child!,
+        );
+      },
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(3000),
+      //Disabled past date
+      // firstDate: DateTime.now().subtract(Duration(days: 1)),
+      // Disabled future date
+      // lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        String s = STM().dateFormat('yyyy-MM-dd', picked);
+        nextFollowCtrl = TextEditingController(text: s);
+      });
+    }
+  }
+  List<Map<String, dynamic>> diagonisticsList = [
+    {
+      'test': TextEditingController(text: ''),
+    }
+  ];
+  List<dynamic> diagnosisTest = [];
 
   @override
   void initState() {
@@ -75,14 +103,19 @@ class AddPrescriptionPage extends State<AddPrescription> {
 
   //Api method
   void addData() async {
+    for(int a =0 ;a <diagonisticsList.length;a++){
+      diagnosisTest.add(diagonisticsList[a]['test'].text);
+    }
     //Input
     FormData body = FormData.fromMap({
       'appointment_id': v['id'],
-      'prescription': symptomsCtrl.text.trim(),
       'symptoms': symptomsCtrl.text.trim(),
       'medicines': jsonEncode(medicineList),
       // 'test_ids': jsonEncode(labArray),
       'hospitalization': reasonCtrl.text.trim(),
+      'diagnostic_test': jsonEncode(diagnosisTest),
+      'next_follow_up_date': nextFollowCtrl.text,
+      'type': 1,
     });
     //Output
     var result = await STM().postWithToken(
@@ -118,8 +151,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
         title: Text(
           'Add Prescription',
           style: Sty().largeText.copyWith(
-            color: Clr().black,
-          ),
+                color: Clr().black,
+              ),
         ),
       ),
       body: Visibility(
@@ -155,13 +188,13 @@ class AddPrescriptionPage extends State<AddPrescription> {
               keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.next,
               decoration: Sty().textFieldWhiteStyle.copyWith(
-                filled: true,
-                fillColor: const Color(0xFFFBFBFB),
-                hintStyle: Sty().mediumText.copyWith(
-                  color: Clr().lightGrey,
-                ),
-                hintText: "Enter Symptoms",
-              ),
+                    filled: true,
+                    fillColor: const Color(0xFFFBFBFB),
+                    hintStyle: Sty().mediumText.copyWith(
+                          color: Clr().lightGrey,
+                        ),
+                    hintText: "Enter Symptoms",
+                  ),
               validator: (value) {
                 if (value!.isEmpty) {
                   return Str().invalidEmpty;
@@ -193,8 +226,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                     Dim().d12,
                   ),
                   decoration: Sty().outlineWhiteBoxStyle.copyWith(
-                    color: const Color(0xFFFBFBFB),
-                  ),
+                        color: const Color(0xFFFBFBFB),
+                      ),
                   child: Text(
                     'Name : ${medicineList[index]['name']}\nDosage : ${medicineList[index]['dosage']}',
                     style: Sty().mediumText,
@@ -219,24 +252,24 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 label: Text(
                   "Add more",
                   style: Sty().smallText.copyWith(
-                    color: Clr().primaryColor,
-                  ),
+                        color: Clr().primaryColor,
+                      ),
                 ),
               ),
             ),
             SizedBox(
               height: Dim().d12,
             ),
-            if(false)
+            if (false)
               Text(
                 "Add Lab Test",
                 style: Sty().largeText,
               ),
-            if(false)
+            if (false)
               SizedBox(
                 height: Dim().d4,
               ),
-            if(false)
+            if (false)
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -266,8 +299,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                           hint: Text(
                             v ?? 'Select Test',
                             style: Sty().mediumText.copyWith(
-                              color: Clr().lightGrey,
-                            ),
+                                  color: Clr().lightGrey,
+                                ),
                           ),
                           value: v,
                           isExpanded: true,
@@ -293,7 +326,7 @@ class AddPrescriptionPage extends State<AddPrescription> {
                   );
                 },
               ),
-            if(false)
+            if (false)
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
@@ -308,8 +341,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                   label: Text(
                     "Add more",
                     style: Sty().smallText.copyWith(
-                      color: Clr().primaryColor,
-                    ),
+                          color: Clr().primaryColor,
+                        ),
                   ),
                 ),
               ),
@@ -329,8 +362,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 vertical: Dim().d4,
               ),
               decoration: Sty().outlineWhiteBoxStyle.copyWith(
-                color: const Color(0xFFFBFBFB),
-              ),
+                    color: const Color(0xFFFBFBFB),
+                  ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -354,6 +387,118 @@ class AddPrescriptionPage extends State<AddPrescription> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            SizedBox(height: Dim().d12),
+            Text(
+              'Diagnostic Test',
+              style: Sty().largeText,
+            ),
+            SizedBox(
+              height: Dim().d4,
+            ),
+            ListView.builder(
+                itemCount: diagonisticsList.length,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: Dim().d8),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Dim().d12,
+                        vertical: Dim().d4,
+                      ),
+                      decoration: Sty().outlineWhiteBoxStyle.copyWith(
+                        color: const Color(0xFFFBFBFB),
+                      ),
+                      child: TextFormField(
+                        controller: diagonisticsList[index]['test'],
+                        cursorColor: Clr().primaryColor,
+                        style: Sty().mediumText,
+                        maxLines: 2,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.done,
+                        decoration: const InputDecoration(
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          focusedErrorBorder: InputBorder.none,
+                          hintText: "Enter Test",
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            SizedBox(height: Dim().d8),
+            Row(mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    icon: SvgPicture.asset(
+                      "assets/plus.svg",
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        diagonisticsList.add({
+                          'test': TextEditingController(text: ''),
+                        });
+                      });
+                      print(diagonisticsList);
+                    },
+                    label: Align(
+                      alignment:
+                      Alignment.centerRight,
+                      child: Text(
+                        'Add more',
+                        style: Sty()
+                            .smallText
+                            .copyWith(
+                            color: Clr()
+                                .primaryDarkColor),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            SizedBox(height: Dim().d12),
+            Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Clr().grey.withOpacity(0.1),
+                    spreadRadius: 0.5,
+                    blurRadius: 12,
+                    offset: Offset(0, 4), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: TextFormField(
+                readOnly: true,
+                onTap: () {
+                  datePicker();
+                },
+                controller: nextFollowCtrl,
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
+                  filled: true,
+                  prefixIcon: const Icon(
+                    Icons.calendar_month,
+                  ),
+                  fillColor: Clr().formfieldbg,
+                  border: InputBorder.none,
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Clr().transparent)),
+                  focusColor: Clr().primaryColor,
+                  contentPadding: EdgeInsets.all(18),
+                  // label: Text('Enter Your Number'),
+                  hintText: "Next FollowUp Date",
+                  hintStyle: Sty().smallText.copyWith(color: Clr().grey),
+                  counterText: "",
+                ),
               ),
             ),
             SizedBox(
@@ -384,10 +529,10 @@ class AddPrescriptionPage extends State<AddPrescription> {
                   }
                 },
                 child: Text(
-                  'Preview',
+                  'Submit',
                   style: Sty().largeText.copyWith(
-                    color: Clr().white,
-                  ),
+                        color: Clr().white,
+                      ),
                 ),
               ),
             ),
@@ -414,8 +559,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 child: Text(
                   'Add Medicine',
                   style: Sty().largeText.copyWith(
-                    color: Clr().primaryColor,
-                  ),
+                        color: Clr().primaryColor,
+                      ),
                 ),
               ),
               SizedBox(
@@ -435,14 +580,14 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
                 decoration: Sty().textFieldWhiteStyle.copyWith(
-                  filled: true,
-                  fillColor: const Color(0xFFFBFBFB),
-                  hintStyle: Sty().mediumText.copyWith(
-                    color: Clr().lightGrey,
-                  ),
-                  counterText: "",
-                  hintText: "Enter Name",
-                ),
+                      filled: true,
+                      fillColor: const Color(0xFFFBFBFB),
+                      hintStyle: Sty().mediumText.copyWith(
+                            color: Clr().lightGrey,
+                          ),
+                      counterText: "",
+                      hintText: "Enter Name",
+                    ),
                 validator: (value) {
                   if (value!.isEmpty) {
                     return Str().invalidEmpty;
@@ -469,13 +614,13 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.done,
                 decoration: Sty().textFieldWhiteStyle.copyWith(
-                  filled: true,
-                  fillColor: const Color(0xFFFBFBFB),
-                  hintStyle: Sty().mediumText.copyWith(
-                    color: Clr().lightGrey,
-                  ),
-                  hintText: "Enter Dosage",
-                ),
+                      filled: true,
+                      fillColor: const Color(0xFFFBFBFB),
+                      hintStyle: Sty().mediumText.copyWith(
+                            color: Clr().lightGrey,
+                          ),
+                      hintText: "Enter Dosage",
+                    ),
                 validator: (value) {
                   if (value!.isEmpty) {
                     return Str().invalidEmpty;
@@ -506,8 +651,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                     child: Text(
                       'Add',
                       style: Sty().largeText.copyWith(
-                        color: Clr().white,
-                      ),
+                            color: Clr().white,
+                          ),
                     ),
                   ),
                 ),

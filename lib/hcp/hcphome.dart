@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:double_back_to_close/double_back_to_close.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:saarathi/hcp/appointment.dart';
 import 'package:saarathi/hcp/hcpWallet.dart';
 import 'package:saarathi/hcp/hcpnotification.dart';
@@ -23,17 +24,20 @@ class HomeVisit extends StatefulWidget {
 
 class _HomeVisitState extends State<HomeVisit> {
   late BuildContext ctx;
-  String? hcptoken;
+  String? hcptoken,sUUID;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
+    var status = await OneSignal.shared.getDeviceState();
     setState(() {
       hcptoken = sp.getString('hcptoken') ?? '';
+      sUUID = status?.userId;
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getHomeDetails();
         print(hcptoken);
+        print(sUUID);
       }
     });
   }
@@ -746,7 +750,9 @@ class _HomeVisitState extends State<HomeVisit> {
 
   // api home details
   void getHomeDetails() async {
-    FormData body = FormData.fromMap({});
+    FormData body = FormData.fromMap({
+      'uuid': sUUID ?? "",
+    });
     var result = await STM().postWithToken(ctx, Str().loading, 'home', body, hcptoken, 'hcp');
     setState(() {
       allcount = result;

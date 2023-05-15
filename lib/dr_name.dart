@@ -22,8 +22,8 @@ import 'values/styles.dart';
 class DrName extends StatefulWidget {
   final dynamic doctorDetails;
   final int? id;
-
-  const DrName({super.key, this.doctorDetails, this.id});
+  final String? reshedule;
+  const DrName({super.key, this.doctorDetails, this.id,this.reshedule});
 
   @override
   State<StatefulWidget> createState() {
@@ -40,7 +40,7 @@ class DrNamepage extends State<DrName> {
   bool isChecked = false;
   List idSelectedList = [];
   List<Map<String, dynamic>> patientDetailsList = [];
-  String? AppointmentValue;
+  String AppointmentValue = 'Online Appointment';
   List<String> AppointmentList = [
     'Online Appointment',
     'Opd',
@@ -68,6 +68,14 @@ class DrNamepage extends State<DrName> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      widget.reshedule == 'yes' ? dayno = DateTime.parse(widget.doctorDetails['booking_date']) : dayno = DateTime.now();
+      print(dayno);
+      widget.reshedule == 'yes' ? AppointmentValue = widget.doctorDetails['appointment_type'] == "1" ? 'Online Appointment' : widget.doctorDetails['appointment_type'] == "2" ? 'Opd' : 'Home Visit' : null;
+      widget.reshedule == 'yes'? patientDetailsList.add({
+        'id': widget.doctorDetails['patient']['id'],
+        'name': widget.doctorDetails['patient']['full_name'],
+        'age': widget.doctorDetails['patient']['age'],
+      }): null;
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -96,7 +104,7 @@ class DrNamepage extends State<DrName> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().finishAffinity(ctx, Home());
+      widget.reshedule =='yes'? STM().back2Previous(ctx) : STM().finishAffinity(ctx, Home());
         return false;
       },
       child: Scaffold(
@@ -107,7 +115,7 @@ class DrNamepage extends State<DrName> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().finishAffinity(ctx, Home());
+              widget.reshedule =='yes'? STM().back2Previous(ctx) : STM().finishAffinity(ctx, Home());
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -116,7 +124,7 @@ class DrNamepage extends State<DrName> {
           ),
           centerTitle: true,
           title: Text(
-            'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+           widget.reshedule == 'yes' ?  'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}' : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
             style: Sty().largeText.copyWith(
                 color: Clr().appbarTextColor,
                 fontSize: 20,
@@ -132,7 +140,11 @@ class DrNamepage extends State<DrName> {
                 padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                 child: Row(
                   children: [
-                    STM().imageDisplay(
+                 widget.reshedule == 'yes' ? STM().imageDisplay(
+                     list: widget.doctorDetails['hcp']['profile_pic'],
+                     url: widget.doctorDetails['hcp']['profile_pic'],
+                     h: Dim().d160,
+                     w: Dim().d120) : STM().imageDisplay(
                         list: widget.doctorDetails['profile_pic'],
                         url: widget.doctorDetails['profile_pic'],
                         h: Dim().d160,
@@ -146,7 +158,7 @@ class DrNamepage extends State<DrName> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                        widget.reshedule == 'yes' ? 'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}' : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
                             style: Sty()
                                 .mediumText
                                 .copyWith(fontWeight: FontWeight.w600),
@@ -155,7 +167,7 @@ class DrNamepage extends State<DrName> {
                             height: Dim().d8,
                           ),
                           Text(
-                            '${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
+                           widget.reshedule == 'yes' ? '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}' :'${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -164,7 +176,7 @@ class DrNamepage extends State<DrName> {
                             height: Dim().d8,
                           ),
                           Text(
-                            '${widget.doctorDetails['city']['name']}',
+                            widget.reshedule == 'yes' ? '${widget.doctorDetails['hcp']['city']['name']}' : '${widget.doctorDetails['city']['name']}',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -173,7 +185,7 @@ class DrNamepage extends State<DrName> {
                             height: Dim().d8,
                           ),
                           Text(
-                            'Experience : ${widget.doctorDetails['professional']['experience']} Years',
+                            widget.reshedule == 'yes' ? 'Experience : ${widget.doctorDetails['hcp']['professional']['experience']} Years' :  'Experience : ${widget.doctorDetails['professional']['experience']} Years',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -193,7 +205,7 @@ class DrNamepage extends State<DrName> {
               ),
               CalenderPicker(
                 DateTime.now(),
-                initialSelectedDate: DateTime.now(),
+                initialSelectedDate: widget.reshedule =='yes' ? dayno : DateTime.now(),
                 selectionColor: Clr().primaryColor,
                 selectedTextColor: Colors.white,
                 height: Dim().d100,
@@ -643,14 +655,12 @@ class DrNamepage extends State<DrName> {
   // getSLots
   void getSlots({id}) async {
     FormData body = FormData.fromMap({
-      'hcp_user_id': widget.id,
-      'type': AppointmentValue == 'Online Appointment'
-          ? 1
-          : AppointmentValue == 'Opd'
+      'hcp_user_id': widget.id ?? widget.doctorDetails['hcp']['id'],
+      'type':  AppointmentValue == 'Opd'
               ? 2
               : AppointmentValue == 'Home Visit'
                   ? 3
-                  : null,
+                  : 1,
       'day_no': id,
     });
     var result = await STM().postWithToken(

@@ -6,6 +6,7 @@ import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'apt_details_home_visit.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'dr_name.dart';
 import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/dimens.dart';
@@ -13,25 +14,35 @@ import 'values/styles.dart';
 
 class TeleCallAppointmentDetails extends StatefulWidget {
   final dynamic details;
-  const TeleCallAppointmentDetails({super.key, this.details});
+  final String? time;
+  const TeleCallAppointmentDetails({super.key, this.details,this.time});
   @override
   State<TeleCallAppointmentDetails> createState() => _TeleCallAppointmentDetailsState();
 }
 
 class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails> {
   late BuildContext ctx;
+  TextEditingController canCtrl = TextEditingController();
+  DateTime now = DateTime.now();
   String? usertoken;
-  var v;
+  DateTime? slotDate;
+  DateTime? startTime;
+  List<dynamic> arrayList = [];
+  var v,stypeValue;
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      DateTime slotDate = DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
+      DateTime startTime = slotDate.subtract(Duration(minutes: int.parse(widget.time.toString())));
+      DateTime endTime = startTime.add(Duration(minutes: 5));
     });
     setState(() {
       v = widget.details;
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
+        getReason();
         print(usertoken);
       }
     });
@@ -318,27 +329,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
             SizedBox(
               height: 30,
             ),
-            v['status'] == '1' ? Container() : v['status'] == '2' ? Container() : Center(
-              child: SizedBox(
-                height: 50,
-                width: 300,
-                child: ElevatedButton(
-                    onPressed: () {
-                      AppointmentCancel(v['id']);
-                    },
-                    style: ElevatedButton.styleFrom( elevation: 0,
-                        backgroundColor: Clr().primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
-                    child: Text(
-                      'Cancel Appointment',
-                      style: Sty().mediumText.copyWith(
-                        color: Clr().white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )),
-              ),
-            ),
+            v['status'] == '1' ? Container() : v['status'] == '2' ? Container() : CancelButton(),
             SizedBox(height: 20,),
             Text(
               'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum ',
@@ -357,10 +348,140 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               ),
             ),
             SizedBox(height: 20,),
+            InkWell(onTap: (){
+              STM().redirect2page(ctx, DrName(doctorDetails: widget.details,reshedule: 'yes',));
+            },
+              child: Container(
+                height: Dim().d52,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(Dim().d12),
+                    border: Border.all(color: Color(0xff80C342))),
+                child: Center(
+                  child: Text('Appointment Reschedule',
+                      style: Sty()
+                          .mediumBoldText
+                          .copyWith(color: Clr().primaryColor)),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+
+  // Cancel appointment and condition is if before 5 minutes slot time can't cancel appointment( appintment 18:00 user can't cancel appoitmnet 17:55)
+  Widget CancelButton() {
+
+    // Duration diff = beforeTime.difference(afterTime);
+    // now.isAfter(startTime) && now.isBefore(endTime) ? print('cancel not show') : print('cancel button show');
+    return now.isAfter(startTime!)
+        ? Container()
+        : Center(
+      child: SizedBox(
+        height: 50,
+        width: 300,
+        child: ElevatedButton(
+            onPressed: () {
+              _CancelDialog();
+            },
+            style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Clr().primaryColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10))),
+            child: Text(
+              'Cancel Appointment',
+              style: Sty().mediumText.copyWith(
+                color: Clr().white,
+                fontWeight: FontWeight.w600,
+              ),
+            )),
+      ),
+    );
+  }
+
+  _CancelDialog(){
+    return showDialog(context: context, builder: (index){
+      return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setstate) {
+            return AlertDialog(
+              content: Column(mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Dim().d12),
+                      border: Border.all(color: Clr().black),
+                    ),
+                    child: Padding(
+                      padding:  EdgeInsets.symmetric(horizontal: Dim().d8),
+                      child: DropdownButton(
+                        value: stypeValue,
+                        isExpanded: true,
+                        hint: Text('Select Type',
+                            style: Sty().mediumText.copyWith(
+                                color: Clr().shimmerColor)),
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 28,
+                          color: Clr().grey,
+                        ),
+                        underline: Container(),
+                        style: TextStyle(color: Color(0xff787882)),
+                        items: arrayList.map((string) {
+                          return DropdownMenuItem(
+                            value: string['name'],
+                            child: Text(
+                              string['name'],
+                              style: const TextStyle(
+                                  color: Color(0xff787882),
+                                  fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (t) {
+                          setstate(() {
+                            stypeValue = t!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: Dim().d12),
+                  stypeValue == 'Other' ? TextFormField(
+                    decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
+                        hintText: 'Enter The Reason',
+                        hintStyle: Sty().mediumText.copyWith(color: Clr().hintColor)
+                    ),
+                    style: Sty().mediumText,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    controller: canCtrl,
+                  ) :Container(),
+                ],
+              ),
+              actions: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d44),
+                  child: ElevatedButton(style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Clr().primaryColor)),onPressed: (){
+                    AppointmentCancel(v['id']);
+                  }, child: Center(child: Text('Submit'))),
+                )
+              ],
+            );
+          }
+      );
+    });
+  }
+
+
+  void getReason() async {
+    var result = await STM().getWithoutDialogToken(ctx, 'get_reason',usertoken,'customer');
+    setState(() {
+      arrayList = result['reasons'];
+    });
   }
 
   // appointment cancel
@@ -368,6 +489,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
   void AppointmentCancel(id) async {
     FormData data = FormData.fromMap({
       'appointment_id': id,
+      'reason': canCtrl.text.isEmpty ? stypeValue : canCtrl.text,
     });
     var result = await STM().postWithToken(ctx, Str().processing, 'cancel_appointment', data, usertoken, 'customer');
     var success = result['success'];

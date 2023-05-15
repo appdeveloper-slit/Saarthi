@@ -550,6 +550,33 @@ class STM {
     }
     return result;
   }
+  Future<dynamic> getWithoutDialogToken(ctx, name,token,Url) async {
+    Dio dio = Dio(
+      BaseOptions(
+        headers: {
+          "Content-Type": "application/json",
+          "responseType": "ResponseType.plain",
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+    String url = Url == 'hcp' ? AppUrl.hcpUrl + name : AppUrl.mainUrl + name;
+    dynamic result;
+    try {
+      Response response = await dio.get(url);
+      if (kDebugMode) {
+        print("Response = $response");
+      }
+      if (response.statusCode == 200) {
+        result = response.data;
+        // result = json.decode(response.data.toString());
+      }
+    } on DioError catch (e) {
+      // dialog.dismiss();
+      // STM().errorDialog(ctx, e.message);
+    }
+    return result;
+  }
 
   Future<dynamic> post(ctx, title, name, body, Url) async {
     //Dialog
@@ -731,16 +758,18 @@ class STM {
     return name.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
   }
 
-  imageDisplay({list, url,h, w}) {
+  imageDisplay({list, url, h, w}) {
     return SizedBox(
         height: h,
         width: w,
         child: list.contains('jpg') ||
                 list.contains('jpeg') ||
                 list.contains('png')
-            ? Image.network(
-              url,
+            ? CachedNetworkImage(
                 fit: BoxFit.cover,
+                imageUrl: url ??
+                    'https://www.famunews.com/wp-content/themes/newsgamer/images/dummy.png',
+                placeholder: (context, url) => STM().loadingPlaceHolder(),
               )
             : SizedBox(
                 height: h,
