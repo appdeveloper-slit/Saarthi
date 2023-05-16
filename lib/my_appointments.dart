@@ -219,9 +219,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                       vertical: 3),
                                               child: InkWell(
                                                 onTap: () {
-                                                  upcominglabList[index][
-                                                  'appointment_type'] ==
-                                                      "2"
+                                                  upcominglabList[index]['appointment_type'] == "2"
                                                       ? STM().redirect2page(
                                                       ctx,
                                                       TeleCallAppointmentDetails(
@@ -238,9 +236,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                       : STM().redirect2page(
                                                       ctx,
                                                       HomeVisitAptDetails(
-                                                          details:
-                                                          upcominglabList[
-                                                          index],time: time,));
+                                                          details: upcominglabList[index],time: time,));
                                                 },
                                                 child: Card(
                                                   color: Clr().background,
@@ -550,8 +546,7 @@ class _MyAppointmentsState extends State<MyAppointments>
     FormData body = FormData.fromMap({
       'patient_id': id,
     });
-    var result = await STM().postWithToken(
-        ctx, Str().loading, 'appointment_history', body, usertoken, 'customer');
+    var result = await STM().postWithToken(ctx, Str().loading, 'appointment_history', body, usertoken, 'customer');
     var success = result['success'];
     if (success) {
       setState(() {

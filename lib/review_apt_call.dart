@@ -477,7 +477,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                       child: ElevatedButton(
                           onPressed: () {
                             // STM().redirect2page(ctx, HomeVisitConsultation());
-                            addAppoinment();
+                            widget.aptdetails[0]['appointment_id'].toString().isNotEmpty ? resheduleAppoitnment() : addAppoinment();
                           },
                           style: ElevatedButton.styleFrom( elevation: 0,
                             backgroundColor: Clr().white,
@@ -526,4 +526,23 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
       STM().errorDialog(ctx, message);
     }
   }
+
+  // reshedule appointment
+
+ void resheduleAppoitnment() async {
+    FormData body = FormData.fromMap({
+    'appointment_id': widget.aptdetails[0]['appointment_id'],
+    'reschedule_slot_id': widget.aptdetails[0]['slotid'],
+    'reschedule_date': DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString()))
+    });
+    var result = await STM().postWithToken(ctx, Str().uploading, 'reschedule', body, usertoken,'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
+ }
+
 }

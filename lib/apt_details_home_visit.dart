@@ -15,7 +15,9 @@ import 'values/styles.dart';
 class HomeVisitAptDetails extends StatefulWidget {
   final dynamic details;
   final String? time;
-  const HomeVisitAptDetails({super.key, this.details,this.time});
+
+  const HomeVisitAptDetails({super.key, this.details, this.time});
+
   @override
   State<HomeVisitAptDetails> createState() => _HomeVisitAptDetailsState();
 }
@@ -29,17 +31,17 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
   DateTime now = DateTime.now();
   DateTime? slotDate;
   DateTime? startTime;
-  var v,stypeValue;
+  var v, stypeValue;
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
-      usertoken = sp.getString('customerId') ?? '';
-      DateTime slotDate = DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
-      DateTime startTime = slotDate.subtract(Duration(minutes: int.parse(widget.time.toString())));
-      DateTime endTime = startTime.add(Duration(minutes: 5));
-    });
-    setState(() {
       v = widget.details;
+      usertoken = sp.getString('customerId') ?? '';
+      slotDate = DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
+      startTime = slotDate!
+          .subtract(Duration(minutes: int.parse(widget.time.toString())));
+      DateTime endTime = startTime!.add(Duration(minutes: 5));
       mobileCtrl = TextEditingController(text: v['contact_number']);
     });
     STM().checkInternet(context, widget).then((value) {
@@ -57,8 +59,6 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     ctx = context;
@@ -67,7 +67,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
       appBar: AppBar(
-          elevation: 2,
+        elevation: 2,
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -97,7 +97,8 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: NetworkImage(v['hcp']['profile_pic'].toString()),
+                  backgroundImage:
+                      NetworkImage(v['hcp']['profile_pic'].toString()),
                 ),
                 SizedBox(
                   width: Dim().d24,
@@ -107,33 +108,43 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                   children: [
                     Text(
                       'Appointment ID : #${v['appointment_uid']}',
-                      style: Sty()
-                          .mediumText
-                          .copyWith(
+                      style: Sty().mediumText.copyWith(
                           color: Clr().primaryColor,
                           fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: Dim().d4,),
+                    SizedBox(
+                      height: Dim().d4,
+                    ),
                     Text(
                       '${v['hcp']['first_name']} ${v['hcp']['last_name']}',
                       style: Sty()
                           .mediumText
                           .copyWith(fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: Dim().d4,),
+                    SizedBox(
+                      height: Dim().d4,
+                    ),
                     Text(
                       v['hcp']['professional']['speciality_name'][0]['name'],
                       style: Sty()
                           .mediumText
                           .copyWith(fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: Dim().d4,),
+                    SizedBox(
+                      height: Dim().d4,
+                    ),
                     Text(
-                      v['status'] == '0' ? 'Pending' :  v['status'] == '1' ? 'Completed' : 'Cancelled',
-                      style: Sty()
-                          .mediumText
-                          .copyWith(
-                          color: v['status'] == '0' ? Color(0xffFFC107) : v['status'] == '1' ? Clr().green : Clr().red,
+                      v['status'] == '0'
+                          ? 'Pending'
+                          : v['status'] == '1'
+                              ? 'Completed'
+                              : 'Cancelled',
+                      style: Sty().mediumText.copyWith(
+                          color: v['status'] == '0'
+                              ? Color(0xffFFC107)
+                              : v['status'] == '1'
+                                  ? Clr().green
+                                  : Clr().red,
                           fontWeight: FontWeight.w500),
                     ),
                   ],
@@ -147,63 +158,21 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             SizedBox(
               height: 12,
             ),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              color: Clr().primaryColor,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: Dim().d16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BOOKING TIME',
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white, fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          'BOOKING DATE',
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white, fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    ),
-                    Container(
-                      height: 50,
-                      width: 1.5,
-                      decoration: BoxDecoration(color: Color(0xffECFFDB)),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          v['slot']['slot'],
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          v['booking_date'],
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white,
-                              fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            v['is_reschedule'] == 1
+                ? Text('Appointment Date and Time', style: Sty().mediumText)
+                : Container(),
+            v['is_reschedule'] == 1
+                ? Text('${v['booking_date']} ${v['slot']['slot']}',
+                    style: Sty().mediumText.copyWith(
+                      fontSize: Dim().d12,
+                        decoration: TextDecoration.lineThrough,
+                        color: Color(0xffB7B7B7)))
+                : Container(),
+            v['is_reschedule'] == 1
+                ? Text('Rescheduled Date and Time',
+                    style: Sty().largeText.copyWith(color: Clr().primaryColor))
+                : Container(),
+            resheduleAndFirstBooking(),
             SizedBox(
               height: 16,
             ),
@@ -256,21 +225,18 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(color: Clr().transparent)),
                 focusedBorder: OutlineInputBorder(
-                  borderSide:
-                  BorderSide(color: Clr().borderColor, width: 1.0),
+                  borderSide: BorderSide(color: Clr().borderColor, width: 1.0),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 contentPadding:
-                EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 // label: Text('Enter Your Number'),
                 hintText: "Mobile Number",
-                hintStyle: Sty()
-                    .mediumText
-                    .copyWith(color: Clr().black, fontSize: 14),
+                hintStyle:
+                    Sty().mediumText.copyWith(color: Clr().black, fontSize: 14),
                 counterText: "",
               ),
             ),
-
             SizedBox(
               height: 20,
             ),
@@ -287,13 +253,11 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 Text(
                   'Consultation Fee',
-                  style:
-                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
                   '₹ ${v['consultation_fee']}',
-                  style:
-                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -305,13 +269,11 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 Text(
                   'GST',
-                  style:
-                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
                   '₹ ${v['gst']}',
-                  style:
-                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -323,13 +285,11 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               children: [
                 Text(
                   'Discount',
-                  style:
-                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
                 Text(
                   '₹ ${v['discount'] == null ? 0 : v['discount']}',
-                  style:
-                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -389,7 +349,11 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             SizedBox(
               height: 30,
             ),
-           v['status'] == '1' ? Container() : v['status'] == '2' ? Container() : CancelButton(),
+            v['status'] == '1'
+                ? Container()
+                : v['status'] == '2'
+                    ? Container()
+                    : CancelButton(),
             SizedBox(
               height: 20,
             ),
@@ -411,22 +375,30 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             SizedBox(
               height: 20,
             ),
-            InkWell(onTap: (){
-              STM().redirect2page(ctx, DrName(doctorDetails: widget.details,reshedule: 'yes',));
-            },
-              child: Container(
-                height: Dim().d52,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Dim().d12),
-                    border: Border.all(color: Color(0xff80C342))),
-                child: Center(
-                  child: Text('Appointment Reschedule',
-                      style: Sty()
-                          .mediumBoldText
-                          .copyWith(color: Clr().primaryColor)),
-                ),
-              ),
-            ),
+            now.isAfter(startTime!)
+                ? Container()
+                : InkWell(
+                    onTap: () {
+                      STM().redirect2page(
+                          ctx,
+                          DrName(
+                            doctorDetails: widget.details,
+                            reshedule: 'yes',
+                          ));
+                    },
+                    child: Container(
+                      height: Dim().d52,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(Dim().d12),
+                          border: Border.all(color: Color(0xff80C342))),
+                      child: Center(
+                        child: Text('Appointment Reschedule',
+                            style: Sty()
+                                .mediumBoldText
+                                .copyWith(color: Clr().primaryColor)),
+                      ),
+                    ),
+                  ),
           ],
         ),
       ),
@@ -438,35 +410,38 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
     return now.isAfter(startTime!)
         ? Container()
         : Center(
-      child: SizedBox(
-        height: 50,
-        width: 300,
-        child: ElevatedButton(
-            onPressed: () {
-              _CancelDialog();
-            },
-            style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: Clr().primaryColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
-            child: Text(
-              'Cancel Appointment',
-              style: Sty().mediumText.copyWith(
-                color: Clr().white,
-                fontWeight: FontWeight.w600,
-              ),
-            )),
-      ),
-    );
+            child: SizedBox(
+              height: 50,
+              width: 300,
+              child: ElevatedButton(
+                  onPressed: () {
+                    _CancelDialog();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Clr().primaryColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                  child: Text(
+                    'Cancel Appointment',
+                    style: Sty().mediumText.copyWith(
+                          color: Clr().white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  )),
+            ),
+          );
   }
 
-  _CancelDialog(){
-    return showDialog(context: context, builder: (index){
-      return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setstate) {
+  _CancelDialog() {
+    return showDialog(
+        context: context,
+        builder: (index) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setstate) {
             return AlertDialog(
-              content: Column(mainAxisSize: MainAxisSize.min,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     decoration: BoxDecoration(
@@ -474,13 +449,14 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                       border: Border.all(color: Clr().black),
                     ),
                     child: Padding(
-                      padding:  EdgeInsets.symmetric(horizontal: Dim().d8),
+                      padding: EdgeInsets.symmetric(horizontal: Dim().d8),
                       child: DropdownButton(
                         value: stypeValue,
                         isExpanded: true,
                         hint: Text('Select Type',
-                            style: Sty().mediumText.copyWith(
-                                color: Clr().shimmerColor)),
+                            style: Sty()
+                                .mediumText
+                                .copyWith(color: Clr().shimmerColor)),
                         icon: Icon(
                           Icons.keyboard_arrow_down,
                           size: 28,
@@ -494,8 +470,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                             child: Text(
                               string['name'],
                               style: const TextStyle(
-                                  color: Color(0xff787882),
-                                  fontSize: 14),
+                                  color: Color(0xff787882), fontSize: 14),
                             ),
                           );
                         }).toList(),
@@ -508,36 +483,160 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                     ),
                   ),
                   SizedBox(height: Dim().d12),
-                  stypeValue == 'Other' ? TextFormField(
-                    decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
-                        hintText: 'Enter The Reason',
-                        hintStyle: Sty().mediumText.copyWith(color: Clr().hintColor)
-                    ),
-                    style: Sty().mediumText,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    controller: canCtrl,
-                  ) :Container(),
+                  stypeValue == 'Other'
+                      ? TextFormField(
+                          decoration: Sty()
+                              .TextFormFieldOutlineDarkStyle
+                              .copyWith(
+                                  hintText: 'Enter The Reason',
+                                  hintStyle: Sty()
+                                      .mediumText
+                                      .copyWith(color: Clr().hintColor)),
+                          style: Sty().mediumText,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          controller: canCtrl,
+                        )
+                      : Container(),
                 ],
               ),
               actions: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d44),
-                  child: ElevatedButton(style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Clr().primaryColor)),onPressed: (){
-                    AppointmentCancel(v['id']);
-                  }, child: Center(child: Text('Submit'))),
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Clr().primaryColor)),
+                      onPressed: () {
+                        AppointmentCancel(v['id']);
+                      },
+                      child: Center(child: Text('Submit'))),
                 )
               ],
             );
-          }
-      );
-    });
+          });
+        });
   }
 
+  // reshedule and first time booking
+  Widget resheduleAndFirstBooking() {
+    return v['is_reschedule'] == 1
+        ? Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            color: Clr().primaryColor,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: Dim().d16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BOOKING TIME',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        'BOOKING DATE',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                  Container(
+                    height: 50,
+                    width: 1.5,
+                    decoration: BoxDecoration(color: Color(0xffECFFDB)),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        v['reschedule_slot']['slot'],
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        v['reschedule_date'],
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )
+        : Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            color: Clr().primaryColor,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: Dim().d16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BOOKING TIME',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        'BOOKING DATE',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                  Container(
+                    height: 50,
+                    width: 1.5,
+                    decoration: BoxDecoration(color: Color(0xffECFFDB)),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        v['slot']['slot'],
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        v['booking_date'],
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+  }
 
   void getReason() async {
-    var result = await STM().getWithoutDialogToken(ctx, 'get_reason',usertoken,'customer');
+    var result = await STM()
+        .getWithoutDialogToken(ctx, 'get_reason', usertoken, 'customer');
     setState(() {
       arrayList = result['reasons'];
     });
@@ -550,12 +649,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
       'appointment_id': id,
       'reason': canCtrl.text.isEmpty ? stypeValue : canCtrl.text,
     });
-    var result = await STM().postWithToken(ctx, Str().processing, 'cancel_appointment', data, usertoken, 'customer');
+    var result = await STM().postWithToken(ctx, Str().processing,
+        'cancel_appointment', data, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       STM().successDialogWithReplace(ctx, message, Home());
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
   }

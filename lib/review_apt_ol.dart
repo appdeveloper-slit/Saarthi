@@ -444,7 +444,7 @@ class _OnlineConsultationState extends State<OnlineConsultation> {
                         width: 100,
                         child: ElevatedButton(
                             onPressed: () {
-                              addAppoinment();
+                              widget.onlineDetails[0]['appointment_id'].toString().isNotEmpty ? resheduleAppoitnment() :  addAppoinment();
                               // STM().redirect2page(ctx, TeleCallConsultation());
                             },
                             style: ElevatedButton.styleFrom( elevation: 0,
@@ -496,4 +496,23 @@ void addAppoinment()async {
       STM().errorDialog(ctx, message);
     }
 }
+
+
+  // reshedule appointment
+
+  void resheduleAppoitnment() async {
+    FormData body = FormData.fromMap({
+      'appointment_id': widget.onlineDetails[0]['appointment_id'],
+      'reschedule_slot_id': widget.onlineDetails[0]['slotid'],
+      'reschedule_date': DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.onlineDetails[0]['bookingdate'].toString()))
+    });
+    var result = await STM().postWithToken(ctx, Str().uploading, 'reschedule', body, usertoken,'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
+  }
 }

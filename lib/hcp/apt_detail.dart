@@ -176,61 +176,26 @@ class AptDetailState extends State<AptDetail> {
             SizedBox(
               height: 8,
             ),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              color: Clr().primaryColor,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: Dim().d16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BOOKING TIME',
-                          style: Sty().mediumText.copyWith(
-                              fontWeight: FontWeight.w600, color: Clr().white),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          'BOOKING DATE',
-                          style: Sty().mediumText.copyWith(
-                              fontWeight: FontWeight.w600, color: Clr().white),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      height: 50,
-                      width: 1,
-                      decoration: BoxDecoration(color: Clr().white),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${v['slot']['slot']}',
-                          style: Sty().mediumText.copyWith(
-                              fontWeight: FontWeight.w600, color: Clr().white),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          '${v['booking_date']}',
-                          style: Sty().mediumText.copyWith(
-                              fontWeight: FontWeight.w600, color: Clr().white),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            v['is_reschedule'] == 1
+                ? Align(alignment: Alignment.centerLeft,child: Text('Appointment Date and Time', style: Sty().mediumText))
+                : Container(),
+            v['is_reschedule'] == 1
+                ? Align(alignment: Alignment.centerLeft,
+                  child: Text('${v['booking_date']} ${v['slot']['slot']}',
+                  style: Sty().mediumText.copyWith(
+                      fontSize: Dim().d12,
+                      decoration: TextDecoration.lineThrough,
+                      color: Color(0xffB7B7B7))),
+                )
+                : Container(),
+            SizedBox(height: Dim().d12),
+            v['is_reschedule'] == 1
+                ? Align(alignment: Alignment.centerLeft,
+                  child: Text('Rescheduled Date and Time',
+                  style: Sty().largeText.copyWith(color: Clr().primaryColor)),
+                )
+                : Container(),
+            resheduleAndFirstBooking(),
             if (v['appointment_type'].toString() == "3")
               SizedBox(
                 height: Dim().d12,
@@ -353,33 +318,36 @@ class AptDetailState extends State<AptDetail> {
             // if (v['status'].toString() == "2" &&
             //         v['appointment_type'].toString() == "1" &&
             //         v['is_prescription'] == true)
-            v['status'].toString() == "1" && v['is_prescription']
-                ? Align(
+             v['is_prescription']
+                ? Padding(
+                  padding:  EdgeInsets.only(top: Dim().d20),
+                  child: Align(
               alignment: Alignment.center,
               child: SizedBox(
-                width: Dim().d300,
-                child: ElevatedButton(
-                  style: Sty().primaryButton,
-                  onPressed: () async {
-                    v['prescription'][0]['type'] == "2" ? STM().openWeb(v['prescription'][0]['pdf_path']) : await launchUrl(
-                      Uri.parse(v['prescription'][0]['pdf_path']),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
-                  child: Text(
-                    'View Prescription',
-                    style: Sty().largeText.copyWith(
-                      color: Clr().white,
+                  width: Dim().d300,
+                  child: ElevatedButton(
+                    style: Sty().primaryButton,
+                    onPressed: () async {
+                      v['prescription'][0]['type'] == "2" ? STM().openWeb(v['prescription'][0]['pdf_path']) : await launchUrl(
+                        Uri.parse(v['prescription'][0]['pdf_path']),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    child: Text(
+                      'View Prescription',
+                      style: Sty().largeText.copyWith(
+                        color: Clr().white,
+                      ),
                     ),
                   ),
-                ),
               ),
-            ) : Container(),
+            ),
+                ) : Container(),
             //When apt is complete , apt type is online & prescription not added
             // if (v['status'].toString() == "2" &&
             //         v['appointment_type'].toString() == "1" &&
             //         v['prescription'] == [])
-              v['status'].toString() == "1" &&  v['is_prescription'] == false ? Padding(
+          v['cancel_reason'] == null &&  v['status'] == '1' && v['is_prescription'] == false ? Padding(
                 padding:  EdgeInsets.only(top: Dim().d20),
                 child: Align(
                   alignment: Alignment.center,
@@ -785,6 +753,120 @@ class AptDetailState extends State<AptDetail> {
         });
   }
 
+  // reshedule and first time booking
+  Widget resheduleAndFirstBooking() {
+    return v['is_reschedule'] == 1
+        ? Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Clr().primaryColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: Dim().d16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'BOOKING TIME',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  'BOOKING DATE',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+            Container(
+              height: 50,
+              width: 1.5,
+              decoration: BoxDecoration(color: Color(0xffECFFDB)),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  v['reschedule_slot']['slot'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  v['reschedule_date'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    )
+        : Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Clr().primaryColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: Dim().d16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'BOOKING TIME',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  'BOOKING DATE',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+            Container(
+              height: 50,
+              width: 1.5,
+              decoration: BoxDecoration(color: Color(0xffECFFDB)),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  v['slot']['slot'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  v['booking_date'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   _getFromCamera() async {
     PickedFile? pickedFile = await ImagePicker().getImage(

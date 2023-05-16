@@ -534,7 +534,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                               onPressed: () {
                                 // STM().redirect2page(ctx, MyAppointments());
                                 if(formKey.currentState!.validate()){
-                                  addAppoinment();
+                                  widget.homedetails[0]['appointment_id'].toString().isNotEmpty ? resheduleAppoitnment() : addAppoinment();
                                 }
                               },
                               style: ElevatedButton.styleFrom( elevation: 0,
@@ -577,6 +577,24 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
       'total_amount': widget.homedetails[0]['total'],
     });
     var result = await STM().postWithToken(ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if(success){
+      STM().successDialogWithReplace(ctx, message, Home());
+    }else{
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  // reshedule appointment
+
+  void resheduleAppoitnment() async {
+    FormData body = FormData.fromMap({
+      'appointment_id': widget.homedetails[0]['appointment_id'],
+      'reschedule_slot_id': widget.homedetails[0]['slotid'],
+      'reschedule_date': DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.homedetails[0]['bookingdate'].toString()))
+    });
+    var result = await STM().postWithToken(ctx, Str().uploading, 'reschedule', body, usertoken,'customer');
     var success = result['success'];
     var message = result['message'];
     if(success){

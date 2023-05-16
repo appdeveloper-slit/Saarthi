@@ -18,12 +18,12 @@ import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/styles.dart';
 
-
 class DrName extends StatefulWidget {
   final dynamic doctorDetails;
   final int? id;
   final String? reshedule;
-  const DrName({super.key, this.doctorDetails, this.id,this.reshedule});
+
+  const DrName({super.key, this.doctorDetails, this.id, this.reshedule});
 
   @override
   State<StatefulWidget> createState() {
@@ -34,7 +34,7 @@ class DrName extends StatefulWidget {
 class DrNamepage extends State<DrName> {
   late BuildContext ctx;
   static StreamController<String?> controller1 =
-  StreamController<String?>.broadcast();
+      StreamController<String?>.broadcast();
   int? selected;
   String? slottime;
   bool isChecked = false;
@@ -57,25 +57,48 @@ class DrNamepage extends State<DrName> {
   ];
 
   String t = "0";
-  DateTime dayno = DateTime.now();
+  DateTime? dayno;
   List<dynamic> dateList = [];
   String? usertoken;
   List<dynamic> patientlist = [];
   List<dynamic> slotlist = [];
   int? total, charges, gst;
 
+  // for all datA FROM reshedule
+  reshedulelist() {
+    if (widget.reshedule == 'yes') {
+      setState(() {
+        dayno = DateTime.parse(
+            '${widget.doctorDetails['booking_date']} ${widget.doctorDetails['slot']['slot']}');
+        int position = dayList.indexWhere(
+            (e) => e['name'].toString() == DateFormat.EEEE().format(dayno!));
+        if (dayList.contains(DateFormat.EEEE().format(dayno!))) {
+          dayList[position]['id'];
+        }
+        AppointmentValue = widget.doctorDetails['appointment_type'] == "1"
+            ? 'Online Appointment'
+            : widget.doctorDetails['appointment_type'] == "2"
+                ? 'Opd'
+                : 'Home Visit';
+        patientDetailsList.add({
+          'id': widget.doctorDetails['patient']['id'],
+          'name': widget.doctorDetails['patient']['full_name'],
+          'age': widget.doctorDetails['patient']['age'],
+        });
+        getSlots(id: dayList[position]['id']);
+      });
+    } else {
+      setState(() {
+        dayno = DateTime.now();
+      });
+    }
+  }
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
-      widget.reshedule == 'yes' ? dayno = DateTime.parse(widget.doctorDetails['booking_date']) : dayno = DateTime.now();
-      print(dayno);
-      widget.reshedule == 'yes' ? AppointmentValue = widget.doctorDetails['appointment_type'] == "1" ? 'Online Appointment' : widget.doctorDetails['appointment_type'] == "2" ? 'Opd' : 'Home Visit' : null;
-      widget.reshedule == 'yes'? patientDetailsList.add({
-        'id': widget.doctorDetails['patient']['id'],
-        'name': widget.doctorDetails['patient']['full_name'],
-        'age': widget.doctorDetails['patient']['age'],
-      }): null;
+      reshedulelist();
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -89,7 +112,7 @@ class DrNamepage extends State<DrName> {
   @override
   void initState() {
     controller1.stream.listen(
-          (event) {
+      (event) {
         setState(() {
           getPatient();
         });
@@ -104,7 +127,9 @@ class DrNamepage extends State<DrName> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-      widget.reshedule =='yes'? STM().back2Previous(ctx) : STM().finishAffinity(ctx, Home());
+        widget.reshedule == 'yes'
+            ? STM().back2Previous(ctx)
+            : STM().finishAffinity(ctx, Home());
         return false;
       },
       child: Scaffold(
@@ -115,7 +140,9 @@ class DrNamepage extends State<DrName> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              widget.reshedule =='yes'? STM().back2Previous(ctx) : STM().finishAffinity(ctx, Home());
+              widget.reshedule == 'yes'
+                  ? STM().back2Previous(ctx)
+                  : STM().finishAffinity(ctx, Home());
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -124,7 +151,9 @@ class DrNamepage extends State<DrName> {
           ),
           centerTitle: true,
           title: Text(
-           widget.reshedule == 'yes' ?  'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}' : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+            widget.reshedule == 'yes'
+                ? 'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}'
+                : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
             style: Sty().largeText.copyWith(
                 color: Clr().appbarTextColor,
                 fontSize: 20,
@@ -140,15 +169,17 @@ class DrNamepage extends State<DrName> {
                 padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                 child: Row(
                   children: [
-                 widget.reshedule == 'yes' ? STM().imageDisplay(
-                     list: widget.doctorDetails['hcp']['profile_pic'],
-                     url: widget.doctorDetails['hcp']['profile_pic'],
-                     h: Dim().d160,
-                     w: Dim().d120) : STM().imageDisplay(
-                        list: widget.doctorDetails['profile_pic'],
-                        url: widget.doctorDetails['profile_pic'],
-                        h: Dim().d160,
-                        w: Dim().d120),
+                    widget.reshedule == 'yes'
+                        ? STM().imageDisplay(
+                            list: widget.doctorDetails['hcp']['profile_pic'],
+                            url: widget.doctorDetails['hcp']['profile_pic'],
+                            h: Dim().d160,
+                            w: Dim().d120)
+                        : STM().imageDisplay(
+                            list: widget.doctorDetails['profile_pic'],
+                            url: widget.doctorDetails['profile_pic'],
+                            h: Dim().d160,
+                            w: Dim().d120),
                     SizedBox(
                       width: Dim().d20,
                     ),
@@ -158,7 +189,9 @@ class DrNamepage extends State<DrName> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                        widget.reshedule == 'yes' ? 'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}' : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                            widget.reshedule == 'yes'
+                                ? 'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}'
+                                : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
                             style: Sty()
                                 .mediumText
                                 .copyWith(fontWeight: FontWeight.w600),
@@ -167,7 +200,9 @@ class DrNamepage extends State<DrName> {
                             height: Dim().d8,
                           ),
                           Text(
-                           widget.reshedule == 'yes' ? '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}' :'${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
+                            widget.reshedule == 'yes'
+                                ? '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}'
+                                : '${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -176,7 +211,9 @@ class DrNamepage extends State<DrName> {
                             height: Dim().d8,
                           ),
                           Text(
-                            widget.reshedule == 'yes' ? '${widget.doctorDetails['hcp']['city']['name']}' : '${widget.doctorDetails['city']['name']}',
+                            widget.reshedule == 'yes'
+                                ? '${widget.doctorDetails['hcp']['city']['name']}'
+                                : '${widget.doctorDetails['city']['name']}',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -185,7 +222,9 @@ class DrNamepage extends State<DrName> {
                             height: Dim().d8,
                           ),
                           Text(
-                            widget.reshedule == 'yes' ? 'Experience : ${widget.doctorDetails['hcp']['professional']['experience']} Years' :  'Experience : ${widget.doctorDetails['professional']['experience']} Years',
+                            widget.reshedule == 'yes'
+                                ? 'Experience : ${widget.doctorDetails['hcp']['professional']['experience']} Years'
+                                : 'Experience : ${widget.doctorDetails['professional']['experience']} Years',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -205,7 +244,9 @@ class DrNamepage extends State<DrName> {
               ),
               CalenderPicker(
                 DateTime.now(),
-                initialSelectedDate: widget.reshedule =='yes' ? dayno : DateTime.now(),
+                initialSelectedDate: widget.reshedule == 'yes'
+                    ? DateTime.parse(dayno.toString())
+                    : DateTime.now(),
                 selectionColor: Clr().primaryColor,
                 selectedTextColor: Colors.white,
                 height: Dim().d100,
@@ -296,44 +337,46 @@ class DrNamepage extends State<DrName> {
               ),
               patientlist.isEmpty
                   ? Container()
-                  : Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Select Patient',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w600),
+                  : widget.reshedule == 'yes'
+                      ? Container()
+                      : Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Select Patient',
+                                style: Sty()
+                                    .mediumText
+                                    .copyWith(fontWeight: FontWeight.w600),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  STM().redirect2page(
+                                      ctx,
+                                      AddNewPatient(
+                                        doctorDetails: widget.doctorDetails,
+                                        stype: 'edit',
+                                      ));
+                                },
+                                child: Wrap(
+                                  children: [
+                                    SvgPicture.asset('assets/add.svg'),
+                                    SizedBox(
+                                      width: 4,
+                                    ),
+                                    Text(
+                                      'Add New',
+                                      style: Sty()
+                                          .smallText
+                                          .copyWith(color: Clr().primaryColor),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
                           ),
-                          InkWell(
-                            onTap: () {
-                              STM().redirect2page(
-                                  ctx,
-                                  AddNewPatient(
-                                    doctorDetails: widget.doctorDetails,
-                                    stype: 'edit',
-                                  ));
-                            },
-                            child: Wrap(
-                              children: [
-                                SvgPicture.asset('assets/add.svg'),
-                                SizedBox(
-                                  width: 4,
-                                ),
-                                Text(
-                                  'Add New',
-                                  style: Sty()
-                                      .smallText
-                                      .copyWith(color: Clr().primaryColor),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
+                        ),
               SizedBox(height: Dim().d12),
               patientlist.isEmpty
                   ? Padding(
@@ -360,65 +403,115 @@ class DrNamepage extends State<DrName> {
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      itemCount: patientlist.length,
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return patientDetails(ctx, index, patientlist);
-                      }),
-              SizedBox(
-                height: Dim().d32,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisExtent: 50,
-                  ),
-                  itemCount: slotlist.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: slotlist[index]['id'] == selected
-                                ? Clr().primaryColor
-                                : Clr().transparent,
-                            borderRadius: BorderRadius.circular(Dim().d8),
-                            border: Border.all(color: Clr().primaryColor)),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              selected = slotlist[index]['id'];
-                              slottime = slotlist[index]['slot'];
-                            });
-                            // STM().redirect2page(ctx, Electronics(categoryList[index]['id'].toString()));
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                  : widget.reshedule == 'yes'
+                      ? Padding(
+                          padding: EdgeInsets.only(left: Dim().d20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                slotlist[index]['slot'],
-                                style: Sty().smallText.copyWith(
-                                    color: slotlist[index]['id'] == selected
-                                        ? Clr().white
-                                        : Clr().primaryColor,
-                                    fontWeight: FontWeight.w600),
-                                // categoryList[index]['name'].toString(),
-                                // overflow: TextOverflow.ellipsis,
+                              Container(
+                                height: Dim().d20,
+                                width: Dim().d20,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Clr().primaryColor,
+                                    border: Border.all(color: Clr().hintColor)),
+                              ),
+                              SizedBox(
+                                width: Dim().d8,
+                              ),
+                              SizedBox(
+                                width: Dim().d16,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${widget.doctorDetails['patient']['full_name']}',
+                                    style: Sty()
+                                        .mediumText
+                                        .copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  SizedBox(
+                                    height: Dim().d4,
+                                  ),
+                                  Text(
+                                    '${widget.doctorDetails['patient']['gender']}, ${widget.doctorDetails['patient']['age']} years',
+                                    style: Sty().mediumText.copyWith(
+                                        fontWeight: FontWeight.w400,
+                                        color: Clr().grey),
+                                  ),
+                                ],
                               )
                             ],
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                        )
+                      : ListView.builder(
+                          itemCount: patientlist.length,
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return patientDetails(ctx, index, patientlist);
+                          }),
+              SizedBox(
+                height: Dim().d32,
               ),
+              slotlist.isEmpty
+                  ? Center(
+                      child: Text('No Slots', style: Sty().mediumBoldText),
+                    )
+                  : Padding(
+                      padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisExtent: 50,
+                        ),
+                        itemCount: slotlist.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: slotlist[index]['id'] == selected
+                                      ? Clr().primaryColor
+                                      : Clr().transparent,
+                                  borderRadius: BorderRadius.circular(Dim().d8),
+                                  border:
+                                      Border.all(color: Clr().primaryColor)),
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    selected = slotlist[index]['id'];
+                                    slottime = slotlist[index]['slot'];
+                                  });
+                                  // STM().redirect2page(ctx, Electronics(categoryList[index]['id'].toString()));
+                                },
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      slotlist[index]['slot'],
+                                      style: Sty().smallText.copyWith(
+                                          color:
+                                              slotlist[index]['id'] == selected
+                                                  ? Clr().white
+                                                  : Clr().primaryColor,
+                                          fontWeight: FontWeight.w600),
+                                      // categoryList[index]['name'].toString(),
+                                      // overflow: TextOverflow.ellipsis,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
               SizedBox(
                 height: Dim().d20,
               ),
@@ -452,20 +545,7 @@ class DrNamepage extends State<DrName> {
                         width: 100,
                         child: ElevatedButton(
                             onPressed: () {
-                              patientDetailsList.isEmpty
-                                  ? STM().displayToast('Patient is required')
-                                  : AppointmentValue == null
-                                      ? STM().displayToast(
-                                          'Appointment type is required')
-                                      : selected == null
-                                          ? STM().displayToast(
-                                              'Slot time is required')
-                                          : Routes(AppointmentValue ==
-                                                  'Online Appointment'
-                                              ? 1
-                                              : AppointmentValue == 'Opd'
-                                                  ? 2
-                                                  : 3);
+                              Data();
                             },
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
@@ -578,89 +658,112 @@ class DrNamepage extends State<DrName> {
   }
 
   // route to book appointment
-  Routes(type) {
-    type == 1
-        ? STM().redirect2page(
-            ctx,
-            OnlineConsultation(
-              onlineDetails: [
-                {
-                  'hcpuserid': widget.doctorDetails['id'],
-                  'hcpprofilepic':
-                      widget.doctorDetails['profile_pic'].toString(),
-                  'hcpname':
-                      '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
-                  'speciality': widget.doctorDetails['professional']
-                      ['speciality_name'][0]['name'],
-                  'bookingtime': slottime,
-                  'bookingdate': dayno,
-                  'patientname': patientDetailsList[0]['name'],
-                  'patientage': patientDetailsList[0]['age'],
-                  'patientid': patientDetailsList[0]['id'],
-                  'slotid': selected,
-                  'charges': charges,
-                  'gst': gst,
-                  'total': total,
-                }
-              ],
-            ))
-        : type == 2
-            ? STM().redirect2page(
-                ctx,
-                TeleCallConsultation(
-                  aptdetails: [
-                    {
-                      'hcpuserid': widget.doctorDetails['id'],
-                      'hcpprofilepic':
-                          widget.doctorDetails['profile_pic'].toString(),
-                      'hcpname':
-                          '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
-                      'speciality': widget.doctorDetails['professional']
-                          ['speciality_name'][0]['name'],
-                      'bookingtime': slottime,
-                      'bookingdate': dayno,
-                      'patientname': patientDetailsList[0]['name'],
-                      'patientage': patientDetailsList[0]['age'],
-                      'patientid': patientDetailsList[0]['id'],
-                      'slotid': selected,
-                      'charges': charges,
-                      'gst': gst,
-                      'total': total,
-                    }
-                  ],
-                ))
-            : STM().redirect2page(
-                ctx,
-                HomeVisitConsultation(
-                  homedetails: [
-                    {
-                      'hcpuserid': widget.doctorDetails['id'],
-                      'hcpprofilepic': widget.doctorDetails['profile_pic'].toString(),
-                      'hcpname': '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
-                      'speciality': widget.doctorDetails['professional']['speciality_name'][0]['name'],
-                      'bookingtime': slottime,
-                      'bookingdate': dayno,
-                      'patientname': patientDetailsList[0]['name'],
-                      'patientage': patientDetailsList[0]['age'],
-                      'patientid': patientDetailsList[0]['id'],
-                      'slotid': selected,
-                      'charges': charges,
-                      'gst': gst,
-                      'total': total,
-                    }
-                  ],
-                ));
+  Routes(type, nextList) {
+    if (widget.reshedule == 'yes') {
+      type == 1
+          ? STM().redirect2page(
+              ctx,
+              OnlineConsultation(
+                onlineDetails: [nextList],
+              ))
+          : type == 2
+              ? STM().redirect2page(
+                  ctx,
+                  TeleCallConsultation(
+                    aptdetails: [nextList],
+                  ))
+              : STM().redirect2page(
+                  ctx,
+                  HomeVisitConsultation(
+                    homedetails: [nextList],
+                  ));
+    } else {
+      type == 1
+          ? STM().redirect2page(
+              ctx,
+              OnlineConsultation(
+                onlineDetails: [nextList],
+              ))
+          : type == 2
+              ? STM().redirect2page(
+                  ctx,
+                  TeleCallConsultation(
+                    aptdetails: [nextList],
+                  ))
+              : STM().redirect2page(
+                  ctx,
+                  HomeVisitConsultation(
+                    homedetails: [nextList],
+                  ));
+    }
+  }
+
+  // data for next page (review page) and route function
+  Data() {
+    return patientDetailsList.isEmpty
+        ? STM().displayToast('Patient is required')
+        : AppointmentValue == null
+            ? STM().displayToast('Appointment type is required')
+            : selected == null
+                ? STM().displayToast('Slot time is required')
+                : Routes(
+                    AppointmentValue == 'Online Appointment'
+                        ? 1
+                        : AppointmentValue == 'Opd'
+                            ? 2
+                            : 3,
+                    widget.reshedule == 'yes'
+                        ? {
+                            'hcpuserid': widget.doctorDetails['hcp']['id'],
+                            'hcpprofilepic': widget.doctorDetails['hcp']
+                                    ['profile_pic']
+                                .toString(),
+                            'hcpname':
+                                '${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}',
+                            'speciality':
+                                '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}',
+                            'bookingtime': slottime,
+                            'bookingdate': dayno,
+                            'patientname': widget.doctorDetails['patient']
+                                ['full_name'],
+                            'patientage': widget.doctorDetails['patient']
+                                ['age'],
+                            'patientid': widget.doctorDetails['patient']['id'],
+                            'slotid': selected,
+                            'charges': charges,
+                            'gst': gst,
+                            'total': total,
+                            'appointment_id': widget.doctorDetails['id'],
+                          }
+                        : {
+                            'hcpuserid': widget.doctorDetails['id'],
+                            'hcpprofilepic':
+                                widget.doctorDetails['profile_pic'].toString(),
+                            'hcpname':
+                                '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                            'speciality': widget.doctorDetails['professional']
+                                ['speciality_name'][0]['name'],
+                            'bookingtime': slottime,
+                            'bookingdate': dayno,
+                            'patientname': patientDetailsList[0]['name'],
+                            'patientage': patientDetailsList[0]['age'],
+                            'patientid': patientDetailsList[0]['id'],
+                            'slotid': selected,
+                            'charges': charges,
+                            'gst': gst,
+                            'total': total,
+                          });
   }
 
   // getSLots
   void getSlots({id}) async {
     FormData body = FormData.fromMap({
       'hcp_user_id': widget.id ?? widget.doctorDetails['hcp']['id'],
-      'type':  AppointmentValue == 'Opd'
-              ? 2
-              : AppointmentValue == 'Home Visit'
-                  ? 3
-                  : 1,
+      'type': AppointmentValue == 'Opd'
+          ? 2
+          : AppointmentValue == 'Home Visit'
+              ? 3
+              : 1,
       'day_no': id,
     });
     var result = await STM().postWithToken(

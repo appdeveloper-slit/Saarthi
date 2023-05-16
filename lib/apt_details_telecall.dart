@@ -32,13 +32,11 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
-      usertoken = sp.getString('customerId') ?? '';
-      DateTime slotDate = DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
-      DateTime startTime = slotDate.subtract(Duration(minutes: int.parse(widget.time.toString())));
-      DateTime endTime = startTime.add(Duration(minutes: 5));
-    });
-    setState(() {
       v = widget.details;
+      usertoken = sp.getString('customerId') ?? '';
+      slotDate = DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
+      startTime = slotDate!.subtract(Duration(minutes: int.parse(widget.time.toString())));
+      DateTime endTime = startTime!.add(Duration(minutes: 5));
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -143,65 +141,21 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
             SizedBox(
               height: 12,
             ),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              color: Clr().primaryColor,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: Dim().d16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BOOKING TIME',
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          'BOOKING DATE',
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white,
-                              fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    ),
-                    Container(
-                      height: 50,
-                      width: 1.5,
-                      decoration: BoxDecoration(color: Color(0xffECFFDB)),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          v['slot']['slot'],
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          v['booking_date'],
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().white,
-                              fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            v['is_reschedule'] == 1
+                ? Text('Appointment Date and Time', style: Sty().mediumText)
+                : Container(),
+            v['is_reschedule'] == 1
+                ? Text('${v['booking_date']} ${v['slot']['slot']}',
+                style: Sty().mediumText.copyWith(
+                    fontSize: Dim().d12,
+                    decoration: TextDecoration.lineThrough,
+                    color: Color(0xffB7B7B7)))
+                : Container(),
+            v['is_reschedule'] == 1
+                ? Text('Rescheduled Date and Time',
+                style: Sty().largeText.copyWith(color: Clr().primaryColor))
+                : Container(),
+            resheduleAndFirstBooking(),
             SizedBox(
               height: 16,
             ),
@@ -348,7 +302,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               ),
             ),
             SizedBox(height: 20,),
-            InkWell(onTap: (){
+         now.isAfter(startTime!) ? Container() : InkWell(onTap: (){
               STM().redirect2page(ctx, DrName(doctorDetails: widget.details,reshedule: 'yes',));
             },
               child: Container(
@@ -476,7 +430,120 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
     });
   }
 
-
+  // reshedule and first time booking
+  Widget resheduleAndFirstBooking() {
+    return v['is_reschedule'] == 1
+        ? Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Clr().primaryColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: Dim().d16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'BOOKING TIME',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  'BOOKING DATE',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+            Container(
+              height: 50,
+              width: 1.5,
+              decoration: BoxDecoration(color: Color(0xffECFFDB)),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  v['reschedule_slot']['slot'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  v['reschedule_date'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    )
+        : Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Clr().primaryColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: Dim().d16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'BOOKING TIME',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  'BOOKING DATE',
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+            Container(
+              height: 50,
+              width: 1.5,
+              decoration: BoxDecoration(color: Color(0xffECFFDB)),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  v['slot']['slot'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  v['booking_date'],
+                  style: Sty().mediumText.copyWith(
+                      color: Clr().white, fontWeight: FontWeight.w600),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   void getReason() async {
     var result = await STM().getWithoutDialogToken(ctx, 'get_reason',usertoken,'customer');
     setState(() {
