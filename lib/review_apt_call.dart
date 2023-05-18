@@ -477,7 +477,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                       child: ElevatedButton(
                           onPressed: () {
                             // STM().redirect2page(ctx, HomeVisitConsultation());
-                            widget.aptdetails[0]['appointment_id'].toString().isNotEmpty ? resheduleAppoitnment() : addAppoinment();
+                            widget.aptdetails[0]['appointment_id'] != null ? resheduleAppoitnment() : addAppoinment();
                           },
                           style: ElevatedButton.styleFrom( elevation: 0,
                             backgroundColor: Clr().white,

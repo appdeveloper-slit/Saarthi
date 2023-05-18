@@ -702,6 +702,40 @@ class STM {
     }
     return result;
   }
+  Future<dynamic> postWithTokenWithoutDailog(ctx, name, body, token, Url) async {
+    //Dialog
+    // AwesomeDialog dialog = STM().loadingDialog(ctx, title);
+    // dialog.show();
+    Dio dio = Dio(
+      BaseOptions(
+        headers: {
+          "Content-Type": "application/json",
+          "responseType": "ResponseType.plain",
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+    String url = Url == 'hcp' ? AppUrl.hcpUrl + name : AppUrl.mainUrl + name;
+    if (kDebugMode) {
+      print("Url = $url\nBody = ${body.fields}");
+    }
+    dynamic result;
+    try {
+      Response response = await dio.post(url, data: body);
+      if (kDebugMode) {
+        print("Response = $response");
+      }
+      if (response.statusCode == 200) {
+        // dialog.dismiss();
+        result = response.data;
+        // result = json.decode(response.data.toString());
+      }
+    } on DioError catch (e) {
+      // dialog.dismiss();
+      // STM().errorDialog(ctx, e.message);
+    }
+    return result;
+  }
 
   Future<dynamic> postWithoutDialog(ctx, name, body) async {
     //Dialog

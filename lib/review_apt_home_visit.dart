@@ -30,6 +30,8 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      widget.homedetails[0]['appointment_id'] != null ? homeAddressCtrl = TextEditingController(text: widget.homedetails[0]['details']['address'])  : null;
+      widget.homedetails[0]['appointment_id'] != null ? mobileCtrl = TextEditingController(text: widget.homedetails[0]['details']['contact_number'])  : null;
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -203,6 +205,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                   child: TextFormField(
                     controller: homeAddressCtrl,
+                    readOnly: widget.homedetails[0]['appointment_id'] != null ? true : false,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
                     validator: (value){
@@ -248,6 +251,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                   child: TextFormField(
                     controller: mobileCtrl,
+                    readOnly: widget.homedetails[0]['appointment_id'] != null ? true : false,
                     keyboardType: TextInputType.number,
                     maxLength: 10,
                     validator: (value){
@@ -534,7 +538,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                               onPressed: () {
                                 // STM().redirect2page(ctx, MyAppointments());
                                 if(formKey.currentState!.validate()){
-                                  widget.homedetails[0]['appointment_id'].toString().isNotEmpty ? resheduleAppoitnment() : addAppoinment();
+                                  widget.homedetails[0]['appointment_id'] != null ? resheduleAppoitnment() : addAppoinment();
                                 }
                               },
                               style: ElevatedButton.styleFrom( elevation: 0,

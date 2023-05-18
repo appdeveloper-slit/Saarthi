@@ -19,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/styles.dart';
+import 'imageView.dart';
 
 class AptDetail extends StatefulWidget {
   final Map<String, dynamic> data;
@@ -328,7 +329,7 @@ class AptDetailState extends State<AptDetail> {
                   child: ElevatedButton(
                     style: Sty().primaryButton,
                     onPressed: () async {
-                      v['prescription'][0]['type'] == "2" ? STM().openWeb(v['prescription'][0]['pdf_path']) : await launchUrl(
+                      v['prescription'][0]['type'] == "2" ? STM().redirect2page(ctx,ImagView(image: v['prescription'][0]['pdf_path'],)) : await launchUrl(
                         Uri.parse(v['prescription'][0]['pdf_path']),
                         mode: LaunchMode.externalApplication,
                       );
@@ -356,7 +357,7 @@ class AptDetailState extends State<AptDetail> {
                     child: ElevatedButton(
                       style: Sty().primaryButton,
                       onPressed: () {
-                        STM().redirect2page(
+                        v['cancel_reason'] == null &&  v['status'] == '1' && v['is_prescription'] == false ? _addPrescriptionDialog() : STM().redirect2page(
                             ctx,
                             AddPrescription(
                               {
@@ -707,8 +708,9 @@ class AptDetailState extends State<AptDetail> {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setstate) {
                 return AlertDialog(
+                  insetPadding: EdgeInsets.symmetric(horizontal: Dim().d12),
                   title: Text('Select Prescription Type:-',style: Sty().mediumBoldText,),
-                  content: Row(
+                  content: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(child: InkWell(
                         onTap: (){
@@ -720,13 +722,11 @@ class AptDetailState extends State<AptDetail> {
                           borderRadius: BorderRadius.circular(Dim().d12),
                           border: Border.all(color: Clr().black),
                         ),child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                           child: Text('Upload Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
-                          ),
+                          padding:  EdgeInsets.all(Dim().d8),
+                          child: Text('Upload Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
                         )),
                       )),
-                      SizedBox(width: Dim().d12,),
+                      SizedBox(width: Dim().d4),
                       Expanded(child: InkWell(onTap: (){
                         STM().redirect2page(ctx, AddPrescription(
                           {
@@ -739,9 +739,10 @@ class AptDetailState extends State<AptDetail> {
                           color: Clr().primaryColor,
                           borderRadius: BorderRadius.circular(Dim().d12),
                           border: Border.all(color: Clr().black),
-                        ),child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
+                        ),child: Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: EdgeInsets.all(Dim().d8),
                             child: Text('Create Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
                           ),
                         )),

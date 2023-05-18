@@ -202,23 +202,22 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                           categoryerror = null;
                           specialList.clear();
                           addspecialityList.clear();
-                          int position = categoryList.indexWhere((element) =>
-                              element['name'].toString() == categoryValue.toString());
+                          int position = categoryList.indexWhere((element) => element['name'].toString() == categoryValue.toString());
                           specialList = categoryList[position]['specaility'];
                         });
                       },
                     ),
                   ),
                 ),
-                categoryerror == null
+                  categoryerror == null
                     ? SizedBox.shrink()
                     : Text(categoryerror ?? '',
                         style: Sty().mediumText.copyWith(
                             color: Clr().errorRed, fontSize: Dim().d16)),
                 SizedBox(
-                  height: 20,
+                  height: Dim().d20,
                 ),
-                RichText(
+                categoryValue == 'hcp'?  RichText(
                   text: TextSpan(
                       text: 'Specialities',
                       style: Sty()
@@ -227,11 +226,11 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                       children: [
                         TextSpan(text: ' *', style: TextStyle(color: Clr().red))
                       ]),
-                ),
-                SizedBox(
+                ) : Container(),
+                categoryValue == 'hcp'?  SizedBox(
                   height: Dim().d12,
-                ),
-                InkWell(
+                ) : Container(),
+                categoryValue == 'hcp'?  InkWell(
                   onTap: () {
                     categoryValue == null
                         ? STM().displayToast('Please select category first')
@@ -257,7 +256,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                                 onConfirm: (results) {
                                   setState(() {
                                     addspecialityList = results;
-                                    specialitieserror = null;
+                                    categoryValue == 'hcp'? specialitieserror = null : specialitieserror != null;
                                   });
                                 },
                               );
@@ -300,7 +299,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                       ),
                     ),
                   ),
-                ),
+                ) : Container(),
                 specialitieserror == null
                     ? SizedBox.shrink()
                     : Text(specialitieserror ?? '',

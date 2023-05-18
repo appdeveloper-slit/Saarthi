@@ -4,9 +4,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'bottom_navigation/bottom_navigation.dart';
 import 'dr_name.dart';
+import 'hcp/imageView.dart';
 import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/dimens.dart';
@@ -42,7 +44,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
       startTime = slotDate!
           .subtract(Duration(minutes: int.parse(widget.time.toString())));
       DateTime endTime = startTime!.add(Duration(minutes: 5));
-      mobileCtrl = TextEditingController(text: v['contact_number']);
+      mobileCtrl = TextEditingController(text: v['hcp']['mobile']);
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -310,42 +312,94 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             SizedBox(
               height: 20,
             ),
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    color: Clr().borderColor,
-                  )),
-              elevation: 0,
-              color: Clr().formfieldbg,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Dim().d16, vertical: Dim().d16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Wrap(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/invoice.svg',
-                          width: 20,
-                        ),
-                        SizedBox(
-                          width: 12,
-                        ),
-                        Text(
-                          'Invoice download',
-                          style: Sty()
-                              .mediumText
-                              .copyWith(fontWeight: FontWeight.w400),
-                        ),
-                      ],
-                    ),
-                    SvgPicture.asset('assets/arrow_black.svg'),
-                  ],
+            InkWell(onTap: ()async{
+              await launchUrl(
+              Uri.parse(v['invoice_path'].toString()),
+              mode: LaunchMode.externalApplication,
+              );
+            },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(
+                      color: Clr().borderColor,
+                    )),
+                elevation: 0,
+                color: Clr().formfieldbg,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Dim().d16, vertical: Dim().d16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Wrap(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/invoice.svg',
+                            width: 20,
+                          ),
+                          SizedBox(
+                            width: 12,
+                          ),
+                          Text(
+                            'Invoice download',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                      SvgPicture.asset('assets/arrow_black.svg'),
+                    ],
+                  ),
                 ),
               ),
             ),
+            SizedBox(height: Dim().d20),
+            v['status'] == '1' ? InkWell(
+              onTap: () async {
+                v['prescription'][0]['pdf_path'].toString().contains('jpg') ? STM().redirect2page(ctx,ImagView(image: v['prescription'][0]['pdf_path'],)) : await launchUrl(
+                  Uri.parse(v['prescription'][0]['pdf_path'].toString()),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(
+                      color: Clr().borderColor,
+                    )),
+                elevation: 0,
+                color: Clr().formfieldbg,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Dim().d16, vertical: Dim().d16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Wrap(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/invoice.svg',
+                            width: 20,
+                          ),
+                          SizedBox(
+                            width: Dim().d12,
+                          ),
+                          Text(
+                            'View Prescription',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                      // SvgPicture.asset('assets/arrow_black.svg'),
+                    ],
+                  ),
+                ),
+              ),
+            ) : Container(),
             SizedBox(
               height: 30,
             ),
@@ -377,7 +431,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             ),
             now.isAfter(startTime!)
                 ? Container()
-                : InkWell(
+                :v['status'] == '0' ? InkWell(
                     onTap: () {
                       STM().redirect2page(
                           ctx,
@@ -398,7 +452,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                                 .copyWith(color: Clr().primaryColor)),
                       ),
                     ),
-                  ),
+                  ) : Container(),
           ],
         ),
       ),

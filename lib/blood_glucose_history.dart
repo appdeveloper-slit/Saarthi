@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/values/dimens.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'hba1c_history.dart';
 import 'manage/static_method.dart';
@@ -21,7 +23,27 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController dobCtrl = TextEditingController();
   TextEditingController dobCtrl1 = TextEditingController();
+  String? usertoken,date,value;
+  bool loading = false;
+  TextEditingController fbsrCtrl = TextEditingController();
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getBloodSugar();
+        print(usertoken);
+      }
+    });
+  }
 
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
   Future datePicker() async {
     DateTime? picked = await showDatePicker(
       context: ctx,
@@ -43,7 +65,7 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
     );
     if (picked != null) {
       setState(() {
-        String s = STM().dateFormat('dd-MM-yyyy', picked);
+        String s = STM().dateFormat('yyyy-MM-dd', picked);
         dobCtrl = TextEditingController(text: s);
       });
     }
@@ -69,7 +91,7 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
     );
     if (picked != null) {
       setState(() {
-        String s = STM().dateFormat('dd-MM-yyyy', picked);
+        String s = STM().dateFormat('yyyy-MM-dd', picked);
         dobCtrl1 = TextEditingController(text: s);
       });
     }
@@ -78,7 +100,6 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
@@ -104,7 +125,7 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(Dim().d16),
-        child: Column(
+        child: loading ? Column(
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d24),
@@ -257,6 +278,31 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
                 ),
               ],
             ),
+            SizedBox(height: Dim().d20,),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                height: 40,
+                width: 120,
+                child: ElevatedButton(
+                    onPressed: () {
+                      getBloodSugar(
+                          fromdate: dobCtrl.text, todate: dobCtrl1.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Clr().primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3))),
+                    child: Text(
+                      'Submit',
+                      style: Sty().mediumText.copyWith(
+                        color: Clr().white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )),
+              ),
+            ),
             SizedBox(height: 30,),
             Text('History',style: Sty().largeText.copyWith(
               fontSize: 20,
@@ -266,7 +312,7 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
             ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: 8,
+                itemCount: historyList.length,
                 // padding: EdgeInsets.only(top: 2,bottom: 12),
                 itemBuilder: (ctx, index) {
                   return Padding(
@@ -278,7 +324,7 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
 
 
           ],
-        ),
+        ) : Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -291,13 +337,13 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '14-12-2022',
+              '${DateFormat('dd-MM-yyy').format(DateTime.parse(List[index]['updated_at']))}',
               style: Sty()
                   .mediumText
                   .copyWith(fontWeight: FontWeight.w400),
             ),
             Text(
-              '50%mg/dl',
+              '${List[index]['blood_glucose']}%mg/dl',
               style: Sty()
                   .smallText
                   .copyWith(fontWeight: FontWeight.w400,
@@ -308,5 +354,23 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
       ],
     );
 
+  }
+  // get bmi
+  void getBloodSugar({fromdate, todate}) async {
+    FormData body = FormData.fromMap({
+      'from_date': fromdate,
+      'to_date': todate,
+    });
+    var result = await STM().postWithTokenWithoutDailog(ctx, 'get_blood_glucose_history', body, usertoken, 'customer');
+    if (result['data'].isNotEmpty) {
+      setState(() {
+        // value = result['data'][0]['blood_glucose'];
+        // date = result['data'][0]['updated_at'];
+        historyList = result['data'];
+        loading = true;
+      });
+    } else {
+      STM().displayToast('No Fasting Blood Sugar Reading');
+    }
   }
 }

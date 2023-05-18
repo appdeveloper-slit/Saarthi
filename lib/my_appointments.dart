@@ -35,6 +35,7 @@ class _MyAppointmentsState extends State<MyAppointments>
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getPatient();
+        getBooking('');
         print(usertoken);
       }
     });
@@ -191,12 +192,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    patientvalue == null
-                        ? Center(
-                            child: Text('Select Patient Name',
-                                style: Sty().mediumBoldText),
-                          )
-                        : upcominglabList.isEmpty
+                     upcominglabList.isEmpty
                             ? Center(
                                 child: Text('No Bookings',
                                     style: Sty().mediumBoldText),
@@ -305,10 +301,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                             Wrap(
                                                               children: [
                                                                 Text(
-                                                                    DateFormat(
-                                                                            'dd-MM-yyyy')
-                                                                        .format(DateTime.parse(upcominglabList[index]['booking_date']
-                                                                            .toString())),
+                                        upcominglabList[index]['is_reschedule'] == 1 ?  DateFormat('dd-MM-yyyy').format(DateTime.parse(upcominglabList[index]['reschedule_date'].toString())) : DateFormat('dd-MM-yyyy').format(DateTime.parse(upcominglabList[index]['booking_date'].toString())),
                                                                     style: TextStyle(
                                                                         fontSize:
                                                                             Dim().d14)),
@@ -316,7 +309,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                                     width: Dim()
                                                                         .d8),
                                                                 Text(
-                                                                    upcominglabList[index]['slot']
+                                                                    upcominglabList[index]['is_reschedule'] == 1 ? upcominglabList[index]['reschedule_slot']['slot'] : upcominglabList[index]['slot']
                                                                             [
                                                                             'slot']
                                                                         .toString(),
@@ -357,12 +350,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                 ],
                               ),
                     // second tab bar view widget
-                    patientvalue == null
-                        ? Center(
-                            child: Text('Select Patient Name',
-                                style: Sty().mediumBoldText),
-                          )
-                        : completedlabList.isEmpty
+                     completedlabList.isEmpty
                             ? Center(
                                 child: Text('No Bookings',
                                     style: Sty().mediumBoldText),
@@ -393,7 +381,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                           TeleCallAppointmentDetails(
                                                               details:
                                                                   completedlabList[
-                                                                      index]))
+                                                                      index],time: time,))
                                                       : completedlabList[index][
                                                                   'appointment_type'] ==
                                                               "1"
@@ -402,13 +390,13 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                               AppointmentolDetails(
                                                                   details:
                                                                       completedlabList[
-                                                                          index]))
+                                                                          index],time: time,))
                                                           : STM().redirect2page(
                                                               ctx,
                                                               HomeVisitAptDetails(
                                                                   details:
                                                                       completedlabList[
-                                                                          index]));
+                                                                          index],time: time,));
                                                 },
                                                 child: Card(
                                                   color: Clr().background,
@@ -473,7 +461,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                             Wrap(
                                                               children: [
                                                                 Text(
-                                                                    DateFormat(
+                                                                    completedlabList[index]['is_reschedule'] == 1 ?  DateFormat('dd-MM-yyyy').format(DateTime.parse(completedlabList[index]['reschedule_date'].toString())) :   DateFormat(
                                                                             'dd-MM-yyyy')
                                                                         .format(DateTime.parse(completedlabList[index]['booking_date']
                                                                             .toString())),
@@ -484,7 +472,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                                     width: Dim()
                                                                         .d8),
                                                                 Text(
-                                                                    completedlabList[index]['slot']
+                                                                    completedlabList[index]['is_reschedule'] == 1 ? completedlabList[index]['reschedule_slot']['slot'] : completedlabList[index]['slot']
                                                                             [
                                                                             'slot']
                                                                         .toString(),

@@ -107,6 +107,14 @@ class _HomeState extends State<Home> {
     {
       'image': 'assets/Nurse.svg',
       'name': 'Nurse',
+    },
+    {
+      'image': 'assets/Physiotherapist.svg',
+      'name': 'Physiotherapist',
+    },
+    {
+      'image': 'assets/nutritionist.svg',
+      'name': 'nutritionist',
     }
   ];
   List<dynamic> doctorsList = [];
@@ -119,7 +127,7 @@ class _HomeState extends State<Home> {
   String t = "0";
   String? sValue = 'Home';
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey<ScaffoldState>();
-  String? usertoken,sUUID;
+  String? usertoken, sUUID;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -361,21 +369,20 @@ class _HomeState extends State<Home> {
         ),
         Padding(
           padding: EdgeInsets.only(left: 6),
-          child: SizedBox(
-            height: 110,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
+          child: GridView.builder(
               itemCount: servicesList.length,
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,mainAxisSpacing:12,crossAxisSpacing: 6,childAspectRatio: 22/13,mainAxisExtent: 100.0),
               itemBuilder: (context, index) {
                 return servicesLayout(ctx, index, servicesList);
-              },
-            ),
-          ),
+              }),
         ),
         SizedBox(
           height: Dim().d8,
         ),
-        Row(
+        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SizedBox(
               height: 60,
@@ -387,8 +394,7 @@ class _HomeState extends State<Home> {
                 child: Card(
                   elevation: 0.6,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Clr().borderColor)),
+                      borderRadius: BorderRadius.circular(10)),
                   child: Padding(
                     padding: EdgeInsets.all(Dim().d16),
                     child: Row(
@@ -419,8 +425,7 @@ class _HomeState extends State<Home> {
                 child: Card(
                   elevation: 0.6,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Clr().borderColor)),
+                      borderRadius: BorderRadius.circular(10)),
                   child: Padding(
                     padding: EdgeInsets.all(Dim().d16),
                     child: Row(
@@ -695,7 +700,8 @@ class _HomeState extends State<Home> {
                         shrinkWrap: true,
                         itemCount: medicationList.length,
                         itemBuilder: (context, index) {
-                          List<dynamic> dayidList = medicationList[index]['day_id'] ?? [];
+                          List<dynamic> dayidList =
+                              medicationList[index]['day_id'] ?? [];
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -703,13 +709,18 @@ class _HomeState extends State<Home> {
                                 '${medicationList[index]['medicine']}',
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
-                                style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+                                style: Sty()
+                                    .mediumText
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                               SizedBox(
                                 height: Dim().d4,
                               ),
                               GridView.builder(
-                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6,childAspectRatio: 12/7),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 6,
+                                          childAspectRatio: 12 / 7),
                                   physics: const NeverScrollableScrollPhysics(),
                                   shrinkWrap: true,
                                   itemCount: dayidList.length,
@@ -717,10 +728,8 @@ class _HomeState extends State<Home> {
                                     return Text(
                                       dayidList.isEmpty
                                           ? ''
-                                          : dayList[int.parse(
-                                                      dayidList[index2]
-                                                          .toString())]
-                                                  ['name']
+                                          : dayList[int.parse(dayidList[index2]
+                                                  .toString())]['name']
                                               .toString()
                                               .substring(0, 3),
                                       style: Sty().mediumText,
@@ -744,7 +753,10 @@ class _HomeState extends State<Home> {
                               //       );
                               //     }),
                               Text(
-                                medicationList[index]['time'].toString().replaceAll('[', '').replaceAll(']', ''),
+                                medicationList[index]['time']
+                                    .toString()
+                                    .replaceAll('[', '')
+                                    .replaceAll(']', ''),
                                 style: Sty()
                                     .smallText
                                     .copyWith(color: Clr().primaryColor),
@@ -768,7 +780,10 @@ class _HomeState extends State<Home> {
           padding: EdgeInsets.only(right: Dim().d12),
           child: Container(
             decoration: BoxDecoration(
-                border: Border.all(color: Clr().hintColor),
+                color: Clr().white,
+                boxShadow: [
+                  BoxShadow(color: Colors.brown.shade50,offset: Offset(1, 1),spreadRadius: 1,blurRadius: 15)
+                ],
                 borderRadius: BorderRadius.circular(Dim().d12)),
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -776,7 +791,7 @@ class _HomeState extends State<Home> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SvgPicture.asset(list[index]['image'], height: Dim().d60),
+                  SvgPicture.asset(list[index]['image'], height: Dim().d60,width: index == 3 ? Dim().d120 : 0,),
                   Text(
                     list[index]['name'],
                     style: Sty().smallText.copyWith(),
@@ -931,8 +946,11 @@ class _HomeState extends State<Home> {
     List specialityList = [];
     typelist = list[index]['appoitment_types'];
 
-    for (int a = 0; a < list[index]['professional']['speciality_name'].length; a++) {
-      specialityList.add(list[index]['professional']['speciality_name'][a]['name']);
+    for (int a = 0;
+        a < list[index]['professional']['speciality_name'].length;
+        a++) {
+      specialityList
+          .add(list[index]['professional']['speciality_name'][a]['name']);
     }
     return Card(
       elevation: 0.6,
@@ -995,11 +1013,17 @@ class _HomeState extends State<Home> {
                           : GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: specialityList.length > 1 ? 2 : specialityList.length,
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,mainAxisExtent: 20.0),
+                              itemCount: specialityList.length > 1
+                                  ? 2
+                                  : specialityList.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3, mainAxisExtent: 20.0),
                               itemBuilder: (context, index2) {
                                 return Text(specialityList[index2],
-                                    style: Sty().smallText.copyWith(fontWeight: FontWeight.w400));
+                                    style: Sty()
+                                        .smallText
+                                        .copyWith(fontWeight: FontWeight.w400));
                               }),
                       SizedBox(
                         height: Dim().d4,

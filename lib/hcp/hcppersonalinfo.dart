@@ -780,12 +780,15 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                 onTap: () {
                   getImage(ImageSource.gallery, 'profile');
                 },
-                child: Container(
+                child: SizedBox(
                   height: Dim().d160,
                   width: Dim().d160,
-                  child: Image.asset(
-                    'assets/hcp_userpng.png',
-                    fit: BoxFit.cover,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Image.asset(
+                      'assets/hcp_userpng.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ))

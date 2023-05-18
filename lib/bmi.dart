@@ -1,7 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/values/dimens.dart';
-
+import 'package:saarathi/values/strings.dart';
+import 'package:saarathi/weight.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'blood_glucose_history.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
@@ -15,6 +19,28 @@ class BMI extends StatefulWidget {
 
 class _BMIState extends State<BMI> {
   late BuildContext ctx;
+  var date;
+  double? value;
+  String? usertoken;
+  bool loading = false;
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getBmi();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +72,7 @@ class _BMIState extends State<BMI> {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(Dim().d16),
         physics: BouncingScrollPhysics(),
-        child: Column(
+        child: loading ? Column(
           children: [
             Container(
               decoration: BoxDecoration(
@@ -107,7 +133,7 @@ class _BMIState extends State<BMI> {
                                 height: 4,
                               ),
                               Text(
-                                '04 December, 2022 ',
+                                '${DateFormat('d MMMM, y').format(DateTime.parse(date))}',
                                 style: Sty().smallText.copyWith(
                                     color: Clr().grey,
                                     fontWeight: FontWeight.w400),
@@ -117,7 +143,7 @@ class _BMIState extends State<BMI> {
                         ],
                       ),
                       SizedBox(
-                        height: 4,
+                        height: Dim().d12,
                       ),
                       Row(
                         children: [
@@ -143,7 +169,7 @@ class _BMIState extends State<BMI> {
                           ),
                           Expanded(
                             child: Text(
-                              '26.8',
+                              '${value!.toStringAsFixed(2)}',
                               textAlign: TextAlign.end,
                               style: Sty().mediumText.copyWith(
                                   color: Clr().black,
@@ -157,13 +183,40 @@ class _BMIState extends State<BMI> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 100,
+            SizedBox(height: Dim().d20),
+            GestureDetector(
+              onTap: (){
+                STM().redirect2page(ctx, Weight());
+              },
+              child: Center(
+                child: Text(
+                  'View Weight History',
+                  style: Sty()
+                      .smallText
+                      .copyWith(color: Clr().primaryColor, fontWeight: FontWeight.w400),
+                ),
+              ),
             ),
-            Image.asset('assets/bmi_chart.png')
+            SizedBox(
+              height: Dim().d100,
+            ),
+            Image.asset('assets/bmi.jpg')
           ],
+        ) : Center(
+          child: CircularProgressIndicator(),
         ),
       ),
     );
+  }
+
+  // get bmi
+  void getBmi() async {
+    FormData body = FormData.fromMap({});
+    var result = await STM().postWithTokenWithoutDailog(ctx, 'get_bmi', body, usertoken, 'customer');
+    setState(() {
+      value = result['bmi'];
+      date = result['date']['updated_at'];
+      loading = true;
+    });
   }
 }

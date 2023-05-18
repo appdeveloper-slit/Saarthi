@@ -444,7 +444,7 @@ class _OnlineConsultationState extends State<OnlineConsultation> {
                         width: 100,
                         child: ElevatedButton(
                             onPressed: () {
-                              widget.onlineDetails[0]['appointment_id'].toString().isNotEmpty ? resheduleAppoitnment() :  addAppoinment();
+                              widget.onlineDetails[0]['appointment_id'] != null ? resheduleAppoitnment() :  addAppoinment();
                               // STM().redirect2page(ctx, TeleCallConsultation());
                             },
                             style: ElevatedButton.styleFrom( elevation: 0,

@@ -297,7 +297,7 @@ class _VerificationState extends State<Verification> {
       'page_type': widget.stypeValue,
       'mobile': widget.smobileCtrl,
       'otp': otpCtrl.text,
-      'user_type': widget.signuptype == 'HCP' ? 1 : 2,
+      'user_type': widget.signuptype == 'HCP' ? 1 : widget.signuptype == 'Customer' ? 2 : 3,
     });
     //Output
     var result = await STM().postOpen(ctx, Str().verifying, "verify_otp", body);
@@ -308,11 +308,13 @@ class _VerificationState extends State<Verification> {
         widget.signuptype == 'HCP' ? STM().finishAffinity(ctx, HomeVisit()) : STM().finishAffinity(ctx, Home());
         widget.signuptype == 'HCP' ? sp.setBool('hcplogin', true) : sp.setBool('login', true);
         widget.signuptype == 'HCP' ? sp.setString('hcptoken', result['hcp_token'].toString()) : sp.setString('customerId', result['customer_token']);
+        widget.signuptype == 'Retailer' ? STM().finishAffinity(ctx, Home()) : null;
       }else{
         widget.signuptype == 'HCP' ? STM().redirect2page(ctx, createAccount(smobile: widget.smobileCtrl,)) : STM().redirect2page(
           ctx,
           PersonalDetails(smobileCtrl: widget.smobileCtrl),
         );
+        widget.signuptype == 'Retailer' ? STM().finishAffinity(ctx, Home()) : null;
       }
       otpCtrl.clear();
       STM().displayToast(message);

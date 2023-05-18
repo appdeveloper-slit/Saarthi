@@ -84,21 +84,17 @@ class _SetTimeState extends State<SetTime> {
               height: Dim().d52,
             ),
             // buildDatePicker(),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceAround,children: [
-              Text('Hours',style: Sty().mediumText.copyWith(fontSize: Dim().d20)),
-              Text('Minutes',style: Sty().mediumText.copyWith(fontSize: Dim().d20)),
-              Text('Seconds',style: Sty().mediumText.copyWith(fontSize: Dim().d20)),
-            ],),
+
             TimePickerSpinner(
-              is24HourMode: true,
-              isShowSeconds: true,
               spacing: Dim().d80,
+              is24HourMode: false,
+              isShowSeconds: false,
               normalTextStyle: TextStyle(fontSize: Dim().d32),
               highlightedTextStyle: TextStyle(color: Clr().primaryColor,fontSize: Dim().d32,),
               onTimeChange: (value){
                 setState(() {
-                  time = DateFormat.Hm().format(value);
-                  print(DateFormat.Hm().format(value));
+                  time = DateFormat.jm().format(value);
+                  print(DateFormat.jm().format(value));
                 });
               },
             ),

@@ -17,7 +17,7 @@ class _SignUpState extends State<SignUp> {
   late BuildContext ctx;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController mobileCtrl = TextEditingController();
-  List<String> arrayList = ['HCP', 'Customer'];
+  List<String> arrayList = ['HCP', 'Customer','Retailer'];
   String t = "0";
   String? stypeValue;
 
@@ -278,7 +278,7 @@ class _SignUpState extends State<SignUp> {
     FormData body = FormData.fromMap({
       'page_type': "register",
       'mobile': mobileCtrl.text,
-      'user_type': stypeValue == 'HCP' ? 1 : 2,
+      'user_type': stypeValue == 'HCP' ? 1 : stypeValue == 'Customer' ? 2 : 3,
     });
     //Output
     var result = await STM().postOpen(ctx, Str().sendingOtp, "send_otp", body);

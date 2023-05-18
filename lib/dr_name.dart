@@ -313,21 +313,23 @@ class DrNamepage extends State<DrName> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (t) {
-                        setState(() {
-                          AppointmentValue = t!;
-                        });
-                        setState(() {
-                          int position = dayList.indexWhere((e) =>
-                              e['name'].toString() ==
-                              DateFormat.EEEE().format(dayno!));
-                          if (dayList
-                              .contains(DateFormat.EEEE().format(dayno!))) {
-                            dayList[position]['id'];
-                          }
-                          getSlots(id: dayList[position]['id']);
-                        });
-                      },
+                      onChanged: widget.reshedule == 'yes'
+                          ? null
+                          : (t) {
+                              setState(() {
+                                AppointmentValue = t!;
+                              });
+                              setState(() {
+                                int position = dayList.indexWhere((e) =>
+                                    e['name'].toString() ==
+                                    DateFormat.EEEE().format(dayno!));
+                                if (dayList.contains(
+                                    DateFormat.EEEE().format(dayno!))) {
+                                  dayList[position]['id'];
+                                }
+                                getSlots(id: dayList[position]['id']);
+                              });
+                            },
                     ),
                   ),
                 ),
@@ -718,6 +720,7 @@ class DrNamepage extends State<DrName> {
                             'hcpprofilepic': widget.doctorDetails['hcp']
                                     ['profile_pic']
                                 .toString(),
+                            'details': widget.doctorDetails,
                             'hcpname':
                                 '${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}',
                             'speciality':

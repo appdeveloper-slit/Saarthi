@@ -4,9 +4,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'apt_details_home_visit.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'dr_name.dart';
+import 'hcp/imageView.dart';
 import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/dimens.dart';
@@ -250,39 +252,92 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               ],
             ),
             SizedBox(height: 20,),
-            Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    color: Clr().borderColor,
+            InkWell(onTap: ()async{
+              await launchUrl(
+              Uri.parse(v['invoice_path'].toString()),
+              mode: LaunchMode.externalApplication,
+              );
+            },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(
+                      color: Clr().borderColor,
 
-                  )
-              ),
-              elevation: 0,
-              color: Clr().formfieldbg,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: Dim().d16,vertical: Dim().d16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Wrap(
-                      children: [
-                        SvgPicture.asset('assets/invoice.svg',width: 20,),
-                        SizedBox(width: 12,),
-                        Text(
-                          'Invoice download',
-                          style:
-                          Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                        ),
-                      ],
-                    ),
-                    SvgPicture.asset('assets/arrow_black.svg'),
-                  ],
+                    )
                 ),
-              ),),
+                elevation: 0,
+                color: Clr().formfieldbg,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d16,vertical: Dim().d16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Wrap(
+                        children: [
+                          SvgPicture.asset('assets/invoice.svg',width: 20,),
+                          SizedBox(width: 12,),
+                          Text(
+                            'Invoice download',
+                            style:
+                            Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                      SvgPicture.asset('assets/arrow_black.svg'),
+                    ],
+                  ),
+                ),),
+            ),
+            SizedBox(height: Dim().d20),
+            v['status'] == '1' ? InkWell(
+              onTap: () async {
+                v['prescription'][0]['pdf_path'].toString().contains('jpg') ? STM().redirect2page(ctx,ImagView(image: v['prescription'][0]['pdf_path'],)) : await launchUrl(
+                  Uri.parse(v['prescription'][0]['pdf_path'].toString()),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(
+                      color: Clr().borderColor,
+                    )),
+                elevation: 0,
+                color: Clr().formfieldbg,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Dim().d16, vertical: Dim().d16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Wrap(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/invoice.svg',
+                            width: 20,
+                          ),
+                          SizedBox(
+                            width: Dim().d12,
+                          ),
+                          Text(
+                            'View Prescription',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                      // SvgPicture.asset('assets/arrow_black.svg'),
+                    ],
+                  ),
+                ),
+              ),
+            ) : Container(),
             SizedBox(
               height: 30,
             ),
+
             v['status'] == '1' ? Container() : v['status'] == '2' ? Container() : CancelButton(),
             SizedBox(height: 20,),
             Text(
@@ -302,7 +357,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               ),
             ),
             SizedBox(height: 20,),
-         now.isAfter(startTime!) ? Container() : InkWell(onTap: (){
+         now.isAfter(startTime!) ? Container() : v['status'] == '0' ?InkWell(onTap: (){
               STM().redirect2page(ctx, DrName(doctorDetails: widget.details,reshedule: 'yes',));
             },
               child: Container(
@@ -317,7 +372,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                           .copyWith(color: Clr().primaryColor)),
                 ),
               ),
-            ),
+            ) : Container(),
           ],
         ),
       ),

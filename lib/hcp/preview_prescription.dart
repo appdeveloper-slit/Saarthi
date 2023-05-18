@@ -40,7 +40,11 @@ class PreviewPage extends State<Preview> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              if (Navigator.of(ctx).canPop()) {
+                Navigator.of(ctx).pop();
+              } else {
+                STM().finishAffinity(ctx, HomeVisit());
+              }
             },
             child: Icon(
               Icons.arrow_back,

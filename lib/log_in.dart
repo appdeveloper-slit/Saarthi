@@ -17,7 +17,7 @@ class _SignInState extends State<SignIn> {
   late BuildContext ctx;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController mobileCtrl = TextEditingController();
-  List<String> arrayList = ['HCP', 'Customer'];
+  List<String> arrayList = ['HCP', 'Customer','Retailer'];
   String? stypeValue;
 
   @override
@@ -274,7 +274,7 @@ class _SignInState extends State<SignIn> {
     FormData body = FormData.fromMap({
       'page_type': "login",
       'mobile': mobileCtrl.text,
-      'user_type': stypeValue == 'HCP' ? 1 : 2,
+      'user_type': stypeValue == 'HCP' ? 1 : stypeValue == 'Customer' ? 2 : 3,
     });
     //Output
     var result = await STM().postOpen(ctx, Str().sendingOtp, "send_otp", body);
