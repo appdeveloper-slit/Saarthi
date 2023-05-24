@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -166,7 +167,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             v['is_reschedule'] == 1
                 ? Text('${v['booking_date']} ${v['slot']['slot']}',
                     style: Sty().mediumText.copyWith(
-                      fontSize: Dim().d12,
+                        fontSize: Dim().d12,
                         decoration: TextDecoration.lineThrough,
                         color: Color(0xffB7B7B7)))
                 : Container(),
@@ -174,7 +175,7 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                 ? Text('Rescheduled Date and Time',
                     style: Sty().largeText.copyWith(color: Clr().primaryColor))
                 : Container(),
-            resheduleAndFirstBooking(),
+            resheduleAndFirstBooking(), // Booking time and booking date
             SizedBox(
               height: 16,
             ),
@@ -312,12 +313,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             SizedBox(
               height: 20,
             ),
-            InkWell(onTap: ()async{
-              await launchUrl(
-              Uri.parse(v['invoice_path'].toString()),
-              mode: LaunchMode.externalApplication,
-              );
-            },
+            InkWell(
+              onTap: () async {
+                await launchUrl(
+                  Uri.parse(v['invoice_path'].toString()),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
               child: Card(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -356,50 +358,61 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
               ),
             ),
             SizedBox(height: Dim().d20),
-            v['status'] == '1' ? InkWell(
-              onTap: () async {
-                v['prescription'][0]['pdf_path'].toString().contains('jpg') ? STM().redirect2page(ctx,ImagView(image: v['prescription'][0]['pdf_path'],)) : await launchUrl(
-                  Uri.parse(v['prescription'][0]['pdf_path'].toString()),
-                  mode: LaunchMode.externalApplication,
-                );
-              },
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(
-                      color: Clr().borderColor,
-                    )),
-                elevation: 0,
-                color: Clr().formfieldbg,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: Dim().d16, vertical: Dim().d16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Wrap(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/invoice.svg',
-                            width: 20,
-                          ),
-                          SizedBox(
-                            width: Dim().d12,
-                          ),
-                          Text(
-                            'View Prescription',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w400),
-                          ),
-                        ],
+            v['status'] == '1'
+                ? InkWell(
+                    onTap: () async {
+                      v['prescription'][0]['pdf_path']
+                              .toString()
+                              .contains('jpg')
+                          ? STM().redirect2page(
+                              ctx,
+                              ImagView(
+                                image: v['prescription'][0]['pdf_path'],
+                              ))
+                          : await launchUrl(
+                              Uri.parse(
+                                  v['prescription'][0]['pdf_path'].toString()),
+                              mode: LaunchMode.externalApplication,
+                            );
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(
+                            color: Clr().borderColor,
+                          )),
+                      elevation: 0,
+                      color: Clr().formfieldbg,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: Dim().d16, vertical: Dim().d16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Wrap(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/invoice.svg',
+                                  width: 20,
+                                ),
+                                SizedBox(
+                                  width: Dim().d12,
+                                ),
+                                Text(
+                                  'View Prescription',
+                                  style: Sty()
+                                      .mediumText
+                                      .copyWith(fontWeight: FontWeight.w400),
+                                ),
+                              ],
+                            ),
+                            // SvgPicture.asset('assets/arrow_black.svg'),
+                          ],
+                        ),
                       ),
-                      // SvgPicture.asset('assets/arrow_black.svg'),
-                    ],
-                  ),
-                ),
-              ),
-            ) : Container(),
+                    ),
+                  )
+                : Container(),
             SizedBox(
               height: 30,
             ),
@@ -431,28 +444,30 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
             ),
             now.isAfter(startTime!)
                 ? Container()
-                :v['status'] == '0' ? InkWell(
-                    onTap: () {
-                      STM().redirect2page(
-                          ctx,
-                          DrName(
-                            doctorDetails: widget.details,
-                            reshedule: 'yes',
-                          ));
-                    },
-                    child: Container(
-                      height: Dim().d52,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(Dim().d12),
-                          border: Border.all(color: Color(0xff80C342))),
-                      child: Center(
-                        child: Text('Appointment Reschedule',
-                            style: Sty()
-                                .mediumBoldText
-                                .copyWith(color: Clr().primaryColor)),
-                      ),
-                    ),
-                  ) : Container(),
+                : v['status'] == '0'
+                    ? InkWell(
+                        onTap: () {
+                          STM().redirect2page(
+                              ctx,
+                              DrName(
+                                doctorDetails: widget.details,
+                                reshedule: 'yes',
+                              ));
+                        },
+                        child: Container(
+                          height: Dim().d52,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(Dim().d12),
+                              border: Border.all(color: Color(0xff80C342))),
+                          child: Center(
+                            child: Text('Appointment Reschedule',
+                                style: Sty()
+                                    .mediumBoldText
+                                    .copyWith(color: Clr().primaryColor)),
+                          ),
+                        ),
+                      )
+                    : Container(),
           ],
         ),
       ),
@@ -613,7 +628,8 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        v['reschedule_slot']['slot'],
+                        DateFormat.jm().format(DateTime.parse(
+                            '${v['reschedule_date'].toString()} ${v['reschedule_slot']['slot']}')),
                         style: Sty().mediumText.copyWith(
                             color: Clr().white, fontWeight: FontWeight.w600),
                       ),
@@ -668,12 +684,13 @@ class _HomeVisitAptDetailsState extends State<HomeVisitAptDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        v['slot']['slot'],
+                        DateFormat.jm().format(DateTime.parse(
+                            '${v['booking_date'].toString()} ${v['slot']['slot']}')),
                         style: Sty().mediumText.copyWith(
                             color: Clr().white, fontWeight: FontWeight.w600),
                       ),
                       SizedBox(
-                        height: 8,
+                        height: Dim().d8,
                       ),
                       Text(
                         v['booking_date'],

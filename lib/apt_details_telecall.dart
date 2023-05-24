@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -525,7 +526,8 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  v['reschedule_slot']['slot'],
+                  DateFormat.jm().format(DateTime.parse(
+                      '${v['reschedule_date'].toString()} ${v['reschedule_slot']['slot']}')),
                   style: Sty().mediumText.copyWith(
                       color: Clr().white, fontWeight: FontWeight.w600),
                 ),
@@ -580,12 +582,13 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  v['slot']['slot'],
+                  DateFormat.jm().format(DateTime.parse(
+                      '${v['booking_date'].toString()} ${v['slot']['slot']}')),
                   style: Sty().mediumText.copyWith(
                       color: Clr().white, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(
-                  height: 8,
+                  height: Dim().d8,
                 ),
                 Text(
                   v['booking_date'],

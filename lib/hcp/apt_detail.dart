@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saarathi/hcp/add_prescription.dart';
 import 'package:saarathi/hcp/callpage.dart';
@@ -41,6 +42,7 @@ class AptDetailState extends State<AptDetail> {
   Map<String, dynamic> v = {};
   File? imageFile;
   String? profile;
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
@@ -178,23 +180,30 @@ class AptDetailState extends State<AptDetail> {
               height: 8,
             ),
             v['is_reschedule'] == 1
-                ? Align(alignment: Alignment.centerLeft,child: Text('Appointment Date and Time', style: Sty().mediumText))
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Appointment Date and Time',
+                        style: Sty().mediumText))
                 : Container(),
             v['is_reschedule'] == 1
-                ? Align(alignment: Alignment.centerLeft,
-                  child: Text('${v['booking_date']} ${v['slot']['slot']}',
-                  style: Sty().mediumText.copyWith(
-                      fontSize: Dim().d12,
-                      decoration: TextDecoration.lineThrough,
-                      color: Color(0xffB7B7B7))),
-                )
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('${v['booking_date']} ${v['slot']['slot']}',
+                        style: Sty().mediumText.copyWith(
+                            fontSize: Dim().d12,
+                            decoration: TextDecoration.lineThrough,
+                            color: Color(0xffB7B7B7))),
+                  )
                 : Container(),
             SizedBox(height: Dim().d12),
             v['is_reschedule'] == 1
-                ? Align(alignment: Alignment.centerLeft,
-                  child: Text('Rescheduled Date and Time',
-                  style: Sty().largeText.copyWith(color: Clr().primaryColor)),
-                )
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Rescheduled Date and Time',
+                        style: Sty()
+                            .largeText
+                            .copyWith(color: Clr().primaryColor)),
+                  )
                 : Container(),
             resheduleAndFirstBooking(),
             if (v['appointment_type'].toString() == "3")
@@ -311,71 +320,90 @@ class AptDetailState extends State<AptDetail> {
                           ),
                     )),
               ),
-            v['status'].toString() == "2" ? Container() : v['status'].toString() == "1" ? Container() : Padding(
-              padding: EdgeInsets.only(top: Dim().d20),
-              child: CancelButton(),
-            ),
+            v['status'].toString() == "2"
+                ? Container()
+                : v['status'].toString() == "1"
+                    ? Container()
+                    : Padding(
+                        padding: EdgeInsets.only(top: Dim().d20),
+                        child: CancelButton(),
+                      ),
             //When apt is complete , apt type is online & prescription not added
             // if (v['status'].toString() == "2" &&
             //         v['appointment_type'].toString() == "1" &&
             //         v['is_prescription'] == true)
-             v['is_prescription']
+            v['is_prescription']
                 ? Padding(
-                  padding:  EdgeInsets.only(top: Dim().d20),
-                  child: Align(
-              alignment: Alignment.center,
-              child: SizedBox(
-                  width: Dim().d300,
-                  child: ElevatedButton(
-                    style: Sty().primaryButton,
-                    onPressed: () async {
-                      v['prescription'][0]['type'] == "2" ? STM().redirect2page(ctx,ImagView(image: v['prescription'][0]['pdf_path'],)) : await launchUrl(
-                        Uri.parse(v['prescription'][0]['pdf_path']),
-                        mode: LaunchMode.externalApplication,
-                      );
-                    },
-                    child: Text(
-                      'View Prescription',
-                      style: Sty().largeText.copyWith(
-                        color: Clr().white,
+                    padding: EdgeInsets.only(top: Dim().d20),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: Dim().d300,
+                        child: ElevatedButton(
+                          style: Sty().primaryButton,
+                          onPressed: () async {
+                            v['prescription'][0]['type'] == "2"
+                                ? STM().redirect2page(
+                                    ctx,
+                                    ImagView(
+                                      image: v['prescription'][0]['pdf_path'],
+                                    ))
+                                : await launchUrl(
+                                    Uri.parse(v['prescription'][0]['pdf_path']),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                          },
+                          child: Text(
+                            'View Prescription',
+                            style: Sty().largeText.copyWith(
+                                  color: Clr().white,
+                                ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-              ),
-            ),
-                ) : Container(),
+                  )
+                : Container(),
             //When apt is complete , apt type is online & prescription not added
             // if (v['status'].toString() == "2" &&
             //         v['appointment_type'].toString() == "1" &&
             //         v['prescription'] == [])
-          v['cancel_reason'] == null &&  v['status'] == '1' && v['is_prescription'] == false ? Padding(
-                padding:  EdgeInsets.only(top: Dim().d20),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: Dim().d300,
-                    child: ElevatedButton(
-                      style: Sty().primaryButton,
-                      onPressed: () {
-                        v['cancel_reason'] == null &&  v['status'] == '1' && v['is_prescription'] == false ? _addPrescriptionDialog() : STM().redirect2page(
-                            ctx,
-                            AddPrescription(
-                              {
-                                'id': v['id'],
-                                'apt_id': v['appointment_type'],
-                              },
-                            ));
-                      },
-                      child: Text(
-                        'Add Prescription',
-                        style: Sty().largeText.copyWith(
-                              color: Clr().white,
-                            ),
+            v['cancel_reason'] == null &&
+                    v['status'] == '1' &&
+                    v['is_prescription'] == false
+                ? Padding(
+                    padding: EdgeInsets.only(top: Dim().d20),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: Dim().d300,
+                        child: ElevatedButton(
+                          style: Sty().primaryButton,
+                          onPressed: () {
+                            v['cancel_reason'] == null &&
+                                    v['status'] == '1' &&
+                                    v['is_prescription'] == false
+                                ? _addPrescriptionDialog()
+                                : STM().redirect2page(
+                                    ctx,
+                                    AddPrescription(
+                                      {
+                                        'id': v['id'],
+                                        'apt_id': v['appointment_type'],
+                                      },
+                                    ));
+                          },
+                          child: Text(
+                            'Add Prescription',
+                            style: Sty().largeText.copyWith(
+                                  color: Clr().white,
+                                ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ) : Container(),
+                  )
+                : Container(),
             if (v['status'].toString() == "0")
               const SizedBox(
                 height: 30,
@@ -480,7 +508,8 @@ class AptDetailState extends State<AptDetail> {
       'appointment_id': v['id'],
     });
     //Output
-    var result = await STM().postWithToken(ctx, Str().loading, "change_appointment_status", body, sToken, 'hcp');
+    var result = await STM().postWithToken(
+        ctx, Str().loading, "change_appointment_status", body, sToken, 'hcp');
     if (!mounted) return;
     var success = result['success'];
     var message = result['message'];
@@ -512,7 +541,7 @@ class AptDetailState extends State<AptDetail> {
       // }
       STM().back2Previous(ctx);
       _addPrescriptionDialog();
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
   }
@@ -523,7 +552,8 @@ class AptDetailState extends State<AptDetail> {
 
   // get reasons
   void getReason() async {
-    var result = await STM().getWithoutDialogToken(ctx, 'get_reason', sToken,'hcp');
+    var result =
+        await STM().getWithoutDialogToken(ctx, 'get_reason', sToken, 'hcp');
     setState(() {
       arrayList = result['reasons'];
     });
@@ -700,57 +730,80 @@ class AptDetailState extends State<AptDetail> {
         });
   }
 
-
   _addPrescriptionDialog() {
     return showDialog(
         context: context,
         builder: (index) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setstate) {
-                return AlertDialog(
-                  insetPadding: EdgeInsets.symmetric(horizontal: Dim().d12),
-                  title: Text('Select Prescription Type:-',style: Sty().mediumBoldText,),
-                  content: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: InkWell(
-                        onTap: (){
-                          _getFromCamera();
-                          STM().back2Previous(ctx);
-                        },
-                        child: Container(height: Dim().d60,decoration: BoxDecoration(
+            return AlertDialog(
+              insetPadding: EdgeInsets.symmetric(horizontal: Dim().d12),
+              title: Text(
+                'Select Prescription Type:-',
+                style: Sty().mediumBoldText,
+              ),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                      child: InkWell(
+                    onTap: () {
+                      _getFromCamera();
+                      STM().back2Previous(ctx);
+                    },
+                    child: Container(
+                        height: Dim().d60,
+                        decoration: BoxDecoration(
                           color: Clr().primaryColor,
                           borderRadius: BorderRadius.circular(Dim().d12),
                           border: Border.all(color: Clr().black),
-                        ),child: Padding(
-                          padding:  EdgeInsets.all(Dim().d8),
-                          child: Text('Upload Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(Dim().d8),
+                          child: Text(
+                            'Upload Prescription',
+                            style:
+                                Sty().mediumText.copyWith(color: Clr().white),
+                          ),
                         )),
-                      )),
-                      SizedBox(width: Dim().d4),
-                      Expanded(child: InkWell(onTap: (){
-                        STM().redirect2page(ctx, AddPrescription(
+                  )),
+                  SizedBox(width: Dim().d4),
+                  Expanded(
+                      child: InkWell(
+                    onTap: () {
+                      STM().redirect2page(
+                        ctx,
+                        AddPrescription(
                           {
                             'id': v['id'],
                             'apt_id': v['appointment_type'],
                           },
-                        ),);
-                      },
-                        child: Container(height: Dim().d60,decoration: BoxDecoration(
+                        ),
+                      );
+                    },
+                    child: Container(
+                        height: Dim().d60,
+                        decoration: BoxDecoration(
                           color: Clr().primaryColor,
                           borderRadius: BorderRadius.circular(Dim().d12),
                           border: Border.all(color: Clr().black),
-                        ),child: Align(
+                        ),
+                        child: Align(
                           alignment: Alignment.center,
                           child: Padding(
                             padding: EdgeInsets.all(Dim().d8),
-                            child: Text('Create Prescription',style: Sty().mediumText.copyWith(color: Clr().white),),
+                            child: Text(
+                              'Create Prescription',
+                              style:
+                                  Sty().mediumText.copyWith(color: Clr().white),
+                            ),
                           ),
                         )),
-                      )),
-                    ],
-                  ),
-                );
-              });
+                  )),
+                ],
+              ),
+            );
+          });
         });
   }
 
@@ -758,115 +811,115 @@ class AptDetailState extends State<AptDetail> {
   Widget resheduleAndFirstBooking() {
     return v['is_reschedule'] == 1
         ? Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      color: Clr().primaryColor,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: Dim().d16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'BOOKING TIME',
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  'BOOKING DATE',
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                )
-              ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            Container(
-              height: 50,
-              width: 1.5,
-              decoration: BoxDecoration(color: Color(0xffECFFDB)),
+            color: Clr().primaryColor,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: Dim().d16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BOOKING TIME',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        'BOOKING DATE',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                  Container(
+                    height: 50,
+                    width: 1.5,
+                    decoration: BoxDecoration(color: Color(0xffECFFDB)),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${DateFormat.jm().format(DateTime.parse('${v['reschedule_date'].toString()} ${v['reschedule_slot']['slot']}'))}',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: Dim().d8,
+                      ),
+                      Text(
+                        v['reschedule_date'],
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  v['reschedule_slot']['slot'],
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  v['reschedule_date'],
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    )
+          )
         : Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      color: Clr().primaryColor,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: Dim().d16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'BOOKING TIME',
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  'BOOKING DATE',
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                )
-              ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            Container(
-              height: 50,
-              width: 1.5,
-              decoration: BoxDecoration(color: Color(0xffECFFDB)),
+            color: Clr().primaryColor,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: Dim().d16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BOOKING TIME',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        'BOOKING DATE',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                  Container(
+                    height: 50,
+                    width: 1.5,
+                    decoration: BoxDecoration(color: Color(0xffECFFDB)),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${DateFormat.jm().format(DateTime.parse('${v['booking_date'].toString()} ${ v['slot']['slot']}'))}',
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        v['booking_date'],
+                        style: Sty().mediumText.copyWith(
+                            color: Clr().white, fontWeight: FontWeight.w600),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  v['slot']['slot'],
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Text(
-                  v['booking_date'],
-                  style: Sty().mediumText.copyWith(
-                      color: Clr().white, fontWeight: FontWeight.w600),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+          );
   }
 
   _getFromCamera() async {
@@ -884,13 +937,14 @@ class AptDetailState extends State<AptDetail> {
       });
     }
   }
+
   //Api method
   void addData() async {
     //Input
     FormData body = FormData.fromMap({
       'appointment_id': v['id'],
-      'type':2,
-      'image':profile,
+      'type': 2,
+      'image': profile,
     });
     //Output
     var result = await STM().postWithToken(

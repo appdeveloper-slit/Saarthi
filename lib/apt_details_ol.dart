@@ -582,7 +582,8 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  v['reschedule_slot']['slot'],
+                  DateFormat.jm().format(DateTime.parse(
+                      '${v['reschedule_date'].toString()} ${v['reschedule_slot']['slot']}')),
                   style: Sty().mediumText.copyWith(
                       color: Clr().white, fontWeight: FontWeight.w600),
                 ),
@@ -637,7 +638,8 @@ class _AppointmentolDetailsState extends State<AppointmentolDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  v['slot']['slot'],
+                  DateFormat.jm().format(DateTime.parse(
+                      '${v['booking_date'].toString()} ${v['slot']['slot']}')),
                   style: Sty().mediumText.copyWith(
                       color: Clr().white, fontWeight: FontWeight.w600),
                 ),

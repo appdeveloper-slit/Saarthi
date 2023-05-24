@@ -63,6 +63,7 @@ class DrNamepage extends State<DrName> {
   List<dynamic> patientlist = [];
   List<dynamic> slotlist = [];
   int? total, charges, gst;
+  var day;
 
   // for all datA FROM reshedule
   reshedulelist() {
@@ -70,6 +71,7 @@ class DrNamepage extends State<DrName> {
       setState(() {
         dayno = DateTime.parse(
             '${widget.doctorDetails['booking_date']} ${widget.doctorDetails['slot']['slot']}');
+        day = widget.doctorDetails['booking_date'];
         int position = dayList.indexWhere(
             (e) => e['name'].toString() == DateFormat.EEEE().format(dayno!));
         if (dayList.contains(DateFormat.EEEE().format(dayno!))) {
@@ -254,6 +256,7 @@ class DrNamepage extends State<DrName> {
                 onDateChange: (date) {
                   setState(() {
                     dayno = date;
+                    day = DateFormat('yyyy-MM-dd').format(date);
                     int position = dayList.indexWhere((e) =>
                         e['name'].toString() == DateFormat.EEEE().format(date));
                     if (dayList.contains(DateFormat.EEEE().format(date))) {
@@ -496,7 +499,7 @@ class DrNamepage extends State<DrName> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      slotlist[index]['slot'],
+                                      '${DateFormat.jm().format(DateTime.parse('${day} ${slotlist[index]['slot'].toString()}'))}',
                                       style: Sty().smallText.copyWith(
                                           color:
                                               slotlist[index]['id'] == selected
@@ -667,17 +670,20 @@ class DrNamepage extends State<DrName> {
               ctx,
               OnlineConsultation(
                 onlineDetails: [nextList],
+                reshedule: 'yes',
               ))
           : type == 2
               ? STM().redirect2page(
                   ctx,
                   TeleCallConsultation(
                     aptdetails: [nextList],
+                    reshedule: 'yes',
                   ))
               : STM().redirect2page(
                   ctx,
                   HomeVisitConsultation(
                     homedetails: [nextList],
+                    reshedule: 'yes',
                   ));
     } else {
       type == 1
@@ -770,7 +776,7 @@ class DrNamepage extends State<DrName> {
       'day_no': id,
     });
     var result = await STM().postWithToken(
-        ctx, Str().processing, 'get_hcp_details', body, usertoken, 'customer');
+        ctx, 'Loading Slots', 'get_hcp_details', body, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
     if (success) {

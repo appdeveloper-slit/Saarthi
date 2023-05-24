@@ -229,7 +229,7 @@ class AddPrescriptionPage extends State<AddPrescription> {
                         color: const Color(0xFFFBFBFB),
                       ),
                   child: Text(
-                    'Name : ${medicineList[index]['name']}\nDosage : ${medicineList[index]['dosage']}',
+                    'Name : ${medicineList[index]['name']}\nDosage : ${medicineList[index]['dosage']}\nDose : ${medicineList[index]['dose']}',
                     style: Sty().mediumText,
                   ),
                 );
@@ -545,6 +545,7 @@ class AddPrescriptionPage extends State<AddPrescription> {
   Widget medicineDialog() {
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     TextEditingController nameCtrl = TextEditingController();
+    TextEditingController doseCtrl = TextEditingController();
     TextEditingController dosageCtrl = TextEditingController();
     return StatefulBuilder(builder: (context, setState2) {
       return Padding(
@@ -630,6 +631,39 @@ class AddPrescriptionPage extends State<AddPrescription> {
                 },
               ),
               SizedBox(
+                height: Dim().d12,
+              ),
+              Text(
+                'Dose',
+                style: Sty().mediumText,
+              ),
+              SizedBox(
+                height: Dim().d4,
+              ),
+              TextFormField(
+                controller: doseCtrl,
+                cursorColor: Clr().primaryColor,
+                style: Sty().mediumText,
+                maxLines: 4,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.done,
+                decoration: Sty().textFieldWhiteStyle.copyWith(
+                  filled: true,
+                  fillColor: const Color(0xFFFBFBFB),
+                  hintStyle: Sty().mediumText.copyWith(
+                    color: Clr().lightGrey,
+                  ),
+                  hintText: "Enter Dose",
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return Str().invalidEmpty;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              SizedBox(
                 height: Dim().d32,
               ),
               Center(
@@ -642,7 +676,8 @@ class AddPrescriptionPage extends State<AddPrescription> {
                         setState(() {
                           medicineList.add({
                             'name': nameCtrl.text.trim(),
-                            'dosage': dosageCtrl.text.trim()
+                            'dosage': dosageCtrl.text.trim(),
+                            'dose': doseCtrl.text.trim(),
                           });
                           STM().back2Previous(context);
                         });

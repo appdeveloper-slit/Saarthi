@@ -267,7 +267,7 @@ class _AppointmentState extends State<Appointment>
                       width: Dim().d12,
                     ),
                     Text(
-                      '${v['slot']['slot']}',
+                      '${DateFormat.jm().format(DateTime.parse('${v['booking_date']} ${v['slot']['slot']}'))}',
                       style: Sty().mediumText,
                     ),
                   ],

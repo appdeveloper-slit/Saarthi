@@ -27,6 +27,7 @@ class _MyAppointmentsState extends State<MyAppointments>
   List<dynamic> upcominglabList = [];
   List<dynamic> completedlabList = [];
   var time;
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
@@ -94,7 +95,10 @@ class _MyAppointmentsState extends State<MyAppointments>
                 alignment: Alignment.centerLeft,
                 child: Container(
                   height: Dim().d40,
-                  width: MediaQuery.of(context).size.width * 0.70,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width * 0.70,
                   decoration: BoxDecoration(
                     color: Colors.green[100],
                     borderRadius: BorderRadius.circular(
@@ -178,7 +182,8 @@ class _MyAppointmentsState extends State<MyAppointments>
                       );
                     }).toList(),
                     onChanged: (t) {
-                      int position = patientlist.indexWhere((element) => element['full_name'].toString() == t.toString());
+                      int position = patientlist.indexWhere((element) =>
+                      element['full_name'].toString() == t.toString());
                       setState(() {
                         patientvalue = t as String;
                         getBooking(patientlist[position]['id']);
@@ -192,334 +197,395 @@ class _MyAppointmentsState extends State<MyAppointments>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                     upcominglabList.isEmpty
-                            ? Center(
-                                child: Text('No Bookings',
-                                    style: Sty().mediumBoldText),
-                              )
-                            : Column(
+                    upcominglabList.isEmpty
+                        ? Center(
+                      child: Text('No Bookings',
+                          style: Sty().mediumBoldText),
+                    )
+                        : Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: upcominglabList.length,
+                            physics: BouncingScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return Column(
                                 children: [
-                                  Expanded(
-                                    child: ListView.builder(
-                                      itemCount: upcominglabList.length,
-                                      physics: BouncingScrollPhysics(),
-                                      scrollDirection: Axis.vertical,
-                                      shrinkWrap: true,
-                                      itemBuilder: (context, index) {
-                                        return Column(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 3),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  upcominglabList[index]['appointment_type'] == "2"
-                                                      ? STM().redirect2page(
-                                                      ctx,
-                                                      TeleCallAppointmentDetails(
-                                                          details: upcominglabList[index],time: time,))
-                                                      : upcominglabList[index][
-                                                  'appointment_type'] ==
-                                                      "1"
-                                                      ? STM().redirect2page(
-                                                      ctx,
-                                                      AppointmentolDetails(
-                                                          details:
-                                                          upcominglabList[
-                                                          index],time: time,))
-                                                      : STM().redirect2page(
-                                                      ctx,
-                                                      HomeVisitAptDetails(
-                                                          details: upcominglabList[index],time: time,));
-                                                },
-                                                child: Card(
-                                                  color: Clr().background,
-                                                  margin: EdgeInsets.only(
-                                                      top: Dim().d12),
-                                                  elevation: 3,
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              Dim().d12)),
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(
-                                                        Dim().d8),
-                                                    child: Row(
-                                                      children: [
-                                                        Container(
-                                                          height: Dim().d140,
-                                                          width: Dim().d100,
-                                                          decoration: BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          Dim()
-                                                                              .d12),
-                                                              border: Border.all(
-                                                                  color: Clr()
-                                                                      .hintColor),
-                                                              image: DecorationImage(
-                                                                  image: NetworkImage(
-                                                                      upcominglabList[index]['hcp']['profile_pic']
-                                                                          .toString()),
-                                                                  fit: BoxFit
-                                                                      .cover)),
-                                                        ),
-                                                        SizedBox(
-                                                          width: Dim().d8,
-                                                        ),
-                                                        Expanded(
-                                                            child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                    '${upcominglabList[index]['hcp']['first_name']} ${upcominglabList[index]['hcp']['last_name']}',
-                                                                    style: Sty()
-                                                                        .mediumText
-                                                                        .copyWith(
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            color: Color(0xff2D2D2D))),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: Dim().d4,
-                                                            ),
-                                                            Text(upcominglabList[index]['hcp']['professional']['speciality_name'][0]['name'],
-                                                                style: TextStyle(
-                                                                    fontSize: Dim()
-                                                                        .d14)),
-                                                            SizedBox(
-                                                              height: Dim().d8,
-                                                            ),
-                                                            Wrap(
-                                                              children: [
-                                                                Text(
-                                        upcominglabList[index]['is_reschedule'] == 1 ?  DateFormat('dd-MM-yyyy').format(DateTime.parse(upcominglabList[index]['reschedule_date'].toString())) : DateFormat('dd-MM-yyyy').format(DateTime.parse(upcominglabList[index]['booking_date'].toString())),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            Dim().d14)),
-                                                                SizedBox(
-                                                                    width: Dim()
-                                                                        .d8),
-                                                                Text(
-                                                                    upcominglabList[index]['is_reschedule'] == 1 ? upcominglabList[index]['reschedule_slot']['slot'] : upcominglabList[index]['slot']
-                                                                            [
-                                                                            'slot']
-                                                                        .toString(),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            Dim().d14)),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: Dim().d8,
-                                                            ),
-                                                            Text('Pending',
-                                                                style: Sty().mediumText.copyWith(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
-                                                                    fontSize:
-                                                                        Dim()
-                                                                            .d14,
-                                                                    color: Color(
-                                                                        0xffFFC107))),
-                                                            SizedBox(
-                                                              height: Dim().d8,
-                                                            ),
-                                                          ],
-                                                        ))
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
+                                  Padding(
+                                    padding:
+                                    const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3),
+                                    child: InkWell(
+                                      onTap: () {
+                                        upcominglabList[index]['appointment_type'] ==
+                                            "2"
+                                            ? STM().redirect2page(
+                                            ctx,
+                                            TeleCallAppointmentDetails(
+                                              details: upcominglabList[index],
+                                              time: time,))
+                                            : upcominglabList[index][
+                                        'appointment_type'] ==
+                                            "1"
+                                            ? STM().redirect2page(
+                                            ctx,
+                                            AppointmentolDetails(
+                                              details:
+                                              upcominglabList[
+                                              index], time: time,))
+                                            : STM().redirect2page(
+                                            ctx,
+                                            HomeVisitAptDetails(
+                                              details: upcominglabList[index],
+                                              time: time,));
                                       },
+                                      child: Card(
+                                        color: Clr().background,
+                                        margin: EdgeInsets.only(
+                                            top: Dim().d12),
+                                        elevation: 3,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                                Dim().d12)),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(
+                                              Dim().d8),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                height: Dim().d140,
+                                                width: Dim().d100,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                    BorderRadius
+                                                        .circular(
+                                                        Dim()
+                                                            .d12),
+                                                    border: Border.all(
+                                                        color: Clr()
+                                                            .hintColor),
+                                                    image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            upcominglabList[index]['hcp']['profile_pic']
+                                                                .toString()),
+                                                        fit: BoxFit
+                                                            .cover)),
+                                              ),
+                                              SizedBox(
+                                                width: Dim().d8,
+                                              ),
+                                              Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment
+                                                        .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                              '${upcominglabList[index]['hcp']['first_name']} ${upcominglabList[index]['hcp']['last_name']}',
+                                                              style: Sty()
+                                                                  .mediumText
+                                                                  .copyWith(
+                                                                  fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                                  color: Color(
+                                                                      0xff2D2D2D))),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: Dim().d4,
+                                                      ),
+                                                      Text(
+                                                          upcominglabList[index]['hcp']['professional']['speciality_name'][0]['name'],
+                                                          style: TextStyle(
+                                                              fontSize: Dim()
+                                                                  .d14)),
+                                                      SizedBox(
+                                                        height: Dim().d8,
+                                                      ),
+                                                      Wrap(
+                                                        children: [
+                                                          Text(
+                                                              upcominglabList[index]['is_reschedule'] ==
+                                                                  1
+                                                                  ? DateFormat(
+                                                                  'dd-MM-yyyy')
+                                                                  .format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      upcominglabList[index]['reschedule_date']
+                                                                          .toString()))
+                                                                  : DateFormat(
+                                                                  'dd-MM-yyyy')
+                                                                  .format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      upcominglabList[index]['booking_date']
+                                                                          .toString())),
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                  Dim().d14)),
+                                                          SizedBox(
+                                                              width: Dim().d8),
+                                                          Text(
+                                                              upcominglabList[index]['is_reschedule'] ==
+                                                                  1
+                                                                  ? DateFormat
+                                                                  .jm().format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      '${upcominglabList[index]['reschedule_date']
+                                                                          .toString()} ${upcominglabList[index]['reschedule_slot']['slot']}'))
+                                                                  : DateFormat
+                                                                  .jm().format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      '${upcominglabList[index]['booking_date']
+                                                                          .toString()} ${upcominglabList[index]['slot']['slot']}')),
+                                                              style: TextStyle(
+                                                                  fontSize: Dim()
+                                                                      .d14)),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: Dim().d8,
+                                                      ),
+                                                      Text('Pending',
+                                                          style: Sty()
+                                                              .mediumText
+                                                              .copyWith(
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .w600,
+                                                              fontSize:
+                                                              Dim().d14,
+                                                              color: Color(
+                                                                  0xffFFC107))),
+                                                      SizedBox(
+                                                        height: Dim().d8,
+                                                      ),
+                                                    ],
+                                                  ))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
-                              ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                     // second tab bar view widget
-                     completedlabList.isEmpty
-                            ? Center(
-                                child: Text('No Bookings',
-                                    style: Sty().mediumBoldText),
-                              )
-                            : Column(
+                    completedlabList.isEmpty
+                        ? Center(
+                      child: Text('No Bookings',
+                          style: Sty().mediumBoldText),
+                    )
+                        : Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: completedlabList.length,
+                            physics: BouncingScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return Column(
                                 children: [
-                                  Expanded(
-                                    child: ListView.builder(
-                                      itemCount: completedlabList.length,
-                                      physics: BouncingScrollPhysics(),
-                                      scrollDirection: Axis.vertical,
-                                      shrinkWrap: true,
-                                      itemBuilder: (context, index) {
-                                        return Column(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10,
-                                                      vertical: 3),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  completedlabList[index][
-                                                              'appointment_type'] ==
-                                                          "2"
-                                                      ? STM().redirect2page(
-                                                          ctx,
-                                                          TeleCallAppointmentDetails(
-                                                              details:
-                                                                  completedlabList[
-                                                                      index],time: time,))
-                                                      : completedlabList[index][
-                                                                  'appointment_type'] ==
-                                                              "1"
-                                                          ? STM().redirect2page(
-                                                              ctx,
-                                                              AppointmentolDetails(
-                                                                  details:
-                                                                      completedlabList[
-                                                                          index],time: time,))
-                                                          : STM().redirect2page(
-                                                              ctx,
-                                                              HomeVisitAptDetails(
-                                                                  details:
-                                                                      completedlabList[
-                                                                          index],time: time,));
-                                                },
-                                                child: Card(
-                                                  color: Clr().background,
-                                                  margin: EdgeInsets.only(
-                                                      top: Dim().d12),
-                                                  elevation: 3,
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              Dim().d12)),
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(
-                                                        Dim().d8),
-                                                    child: Row(
-                                                      children: [
-                                                        Container(
-                                                          height: Dim().d140,
-                                                          width: Dim().d100,
-                                                          decoration: BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          Dim()
-                                                                              .d12),
-                                                              border: Border.all(
-                                                                  color: Clr()
-                                                                      .hintColor),
-                                                              image: DecorationImage(
-                                                                  image: NetworkImage(
-                                                                      completedlabList[index]['hcp']['profile_pic']
-                                                                          .toString()),
-                                                                  fit: BoxFit
-                                                                      .cover)),
-                                                        ),
-                                                        SizedBox(
-                                                          width: Dim().d8,
-                                                        ),
-                                                        Expanded(
-                                                            child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                    '${completedlabList[index]['hcp']['first_name']} ${completedlabList[index]['hcp']['last_name']}',
-                                                                    style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600, color: Color(0xff2D2D2D))),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: Dim().d4,
-                                                            ),
-                                                            Text(
-                                                                completedlabList[index]['hcp']['professional']['speciality_name'][0]['name'],
-                                                                style: TextStyle(
-                                                                    fontSize: Dim()
-                                                                        .d14)),
-                                                            SizedBox(
-                                                              height: Dim().d8,
-                                                            ),
-                                                            Wrap(
-                                                              children: [
-                                                                Text(
-                                                                    completedlabList[index]['is_reschedule'] == 1 ?  DateFormat('dd-MM-yyyy').format(DateTime.parse(completedlabList[index]['reschedule_date'].toString())) :   DateFormat(
-                                                                            'dd-MM-yyyy')
-                                                                        .format(DateTime.parse(completedlabList[index]['booking_date']
-                                                                            .toString())),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            Dim().d14)),
-                                                                SizedBox(
-                                                                    width: Dim()
-                                                                        .d8),
-                                                                Text(
-                                                                    completedlabList[index]['is_reschedule'] == 1 ? completedlabList[index]['reschedule_slot']['slot'] : completedlabList[index]['slot']
-                                                                            [
-                                                                            'slot']
-                                                                        .toString(),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            Dim().d14)),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: Dim().d8,
-                                                            ),
-                                                            Text(
-                                                                completedlabList[index][
-                                                                            'status'] ==
-                                                                        "1"
-                                                                    ? 'Completed'
-                                                                    : 'Cancelled',
-                                                                style: Sty().mediumText.copyWith(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
-                                                                    fontSize:
-                                                                        16,
-                                                                    color: completedlabList[index]['status'] ==
-                                                                            "1"
-                                                                        ? Clr()
-                                                                            .green
-                                                                        : Clr()
-                                                                            .red)),
-                                                            SizedBox(
-                                                              height: Dim().d8,
-                                                            ),
-                                                          ],
-                                                        ))
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
+                                  Padding(
+                                    padding:
+                                    const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3),
+                                    child: InkWell(
+                                      onTap: () {
+                                        completedlabList[index][
+                                        'appointment_type'] ==
+                                            "2"
+                                            ? STM().redirect2page(
+                                            ctx,
+                                            TeleCallAppointmentDetails(
+                                              details:
+                                              completedlabList[index],
+                                              time: time,))
+                                            : completedlabList[index][
+                                        'appointment_type'] ==
+                                            "1"
+                                            ? STM().redirect2page(
+                                            ctx,
+                                            AppointmentolDetails(
+                                              details:
+                                              completedlabList[index],
+                                              time: time,))
+                                            : STM().redirect2page(
+                                            ctx,
+                                            HomeVisitAptDetails(
+                                              details:
+                                              completedlabList[index],
+                                              time: time,));
                                       },
+                                      child: Card(
+                                        color: Clr().background,
+                                        margin: EdgeInsets.only(
+                                            top: Dim().d12),
+                                        elevation: 3,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                                Dim().d12)),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(
+                                              Dim().d8),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                height: Dim().d140,
+                                                width: Dim().d100,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                    BorderRadius
+                                                        .circular(
+                                                        Dim()
+                                                            .d12),
+                                                    border: Border.all(
+                                                        color: Clr()
+                                                            .hintColor),
+                                                    image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            completedlabList[index]['hcp']['profile_pic']
+                                                                .toString()),
+                                                        fit: BoxFit
+                                                            .cover)),
+                                              ),
+                                              SizedBox(
+                                                width: Dim().d8,
+                                              ),
+                                              Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment
+                                                        .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Text(
+                                                              '${completedlabList[index]['hcp']['first_name']} ${completedlabList[index]['hcp']['last_name']}',
+                                                              style: Sty()
+                                                                  .mediumText
+                                                                  .copyWith(
+                                                                  fontWeight: FontWeight
+                                                                      .w600,
+                                                                  color: Color(
+                                                                      0xff2D2D2D))),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: Dim().d4,
+                                                      ),
+                                                      Text(
+                                                          completedlabList[index]['hcp']['professional']['speciality_name'][0]['name'],
+                                                          style: TextStyle(
+                                                              fontSize: Dim()
+                                                                  .d14)),
+                                                      SizedBox(
+                                                        height: Dim().d8,
+                                                      ),
+                                                      Wrap(
+                                                        children: [
+                                                          Text(
+                                                              completedlabList[index]['is_reschedule'] ==
+                                                                  1
+                                                                  ? DateFormat(
+                                                                  'dd-MM-yyyy')
+                                                                  .format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      completedlabList[index]['reschedule_date']
+                                                                          .toString()))
+                                                                  : DateFormat(
+                                                                  'dd-MM-yyyy')
+                                                                  .format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      completedlabList[index]['booking_date']
+                                                                          .toString())),
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                  Dim().d14)),
+                                                          SizedBox(
+                                                              width: Dim()
+                                                                  .d8),
+                                                          Text(
+                                                              completedlabList[index]['is_reschedule'] ==
+                                                                  1
+                                                                  ? DateFormat
+                                                                  .jm().format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      '${completedlabList[index]['reschedule_date']
+                                                                          .toString()} ${completedlabList[index]['reschedule_slot']['slot']}'))
+                                                                  : DateFormat
+                                                                  .jm().format(
+                                                                  DateTime
+                                                                      .parse(
+                                                                      '${completedlabList[index]['booking_date']
+                                                                          .toString()} ${completedlabList[index]['slot']['slot']}')),
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                  Dim().d14)),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: Dim().d8,
+                                                      ),
+                                                      Text(
+                                                          completedlabList[index][
+                                                          'status'] ==
+                                                              "1"
+                                                              ? 'Completed'
+                                                              : 'Cancelled',
+                                                          style: Sty()
+                                                              .mediumText
+                                                              .copyWith(
+                                                              fontWeight:
+                                                              FontWeight
+                                                                  .w600,
+                                                              fontSize:
+                                                              16,
+                                                              color: completedlabList[index]['status'] ==
+                                                                  "1"
+                                                                  ? Clr()
+                                                                  .green
+                                                                  : Clr()
+                                                                  .red)),
+                                                      SizedBox(
+                                                        height: Dim().d8,
+                                                      ),
+                                                    ],
+                                                  ))
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
-                              ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -534,7 +600,8 @@ class _MyAppointmentsState extends State<MyAppointments>
     FormData body = FormData.fromMap({
       'patient_id': id,
     });
-    var result = await STM().postWithToken(ctx, Str().loading, 'appointment_history', body, usertoken, 'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().loading, 'appointment_history', body, usertoken, 'customer');
     var success = result['success'];
     if (success) {
       setState(() {

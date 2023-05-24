@@ -13,7 +13,10 @@ import 'values/styles.dart';
 
 class TeleCallConsultation extends StatefulWidget {
   final dynamic aptdetails;
-  const TeleCallConsultation({super.key, this.aptdetails});
+  final String? reshedule;
+
+  const TeleCallConsultation({super.key, this.aptdetails, this.reshedule});
+
   @override
   State<TeleCallConsultation> createState() => _TeleCallConsultationState();
 }
@@ -34,6 +37,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
       }
     });
   }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -48,7 +52,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
       appBar: AppBar(
-          elevation: 2,
+        elevation: 2,
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -79,7 +83,8 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                 children: [
                   CircleAvatar(
                     radius: Dim().d56,
-                    backgroundImage: NetworkImage(widget.aptdetails[0]['hcpprofilepic'].toString()),
+                    backgroundImage: NetworkImage(
+                        widget.aptdetails[0]['hcpprofilepic'].toString()),
                   ),
                   SizedBox(
                     width: Dim().d20,
@@ -155,7 +160,8 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.aptdetails[0]['bookingtime'].toString(),
+                            DateFormat.jm().format(DateTime.parse(
+                                '${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString()))} ${widget.aptdetails[0]['bookingtime'].toString()}')),
                             style: Sty().mediumText.copyWith(
                                 color: Clr().white,
                                 fontWeight: FontWeight.w600),
@@ -164,7 +170,9 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                             height: Dim().d8,
                           ),
                           Text(
-                            DateFormat('d MMM y').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString())),
+                            DateFormat('d MMM y').format(DateTime.parse(widget
+                                .aptdetails[0]['bookingdate']
+                                .toString())),
                             style: Sty().mediumText.copyWith(
                                 color: Clr().white,
                                 fontWeight: FontWeight.w600),
@@ -287,11 +295,11 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                             borderSide: BorderSide(color: Clr().transparent)),
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Clr().primaryColor, width: 1.0),
+                              BorderSide(color: Clr().primaryColor, width: 1.0),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         contentPadding:
-                        EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         // label: Text('Enter Your Number'),
                         hintText: "Enter coupon code",
                         hintStyle: Sty()
@@ -311,7 +319,8 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
                         onPressed: () {
                           // STM().redirect2page(ctx, AddNewPatient());
                         },
-                        style: ElevatedButton.styleFrom( elevation: 0,
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
                           backgroundColor: Clr().primaryColor,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5)),
@@ -343,171 +352,221 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
             SizedBox(
               height: 20,
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: Text(
-                'Payment Details',
-                style: Sty().largeText.copyWith(
-                    fontWeight: FontWeight.w600, color: Clr().primaryColor),
-              ),
-            ),
-            SizedBox(
-              height: 4,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Consultation Fee',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                  ),
-                  Text(
-                    '₹ ${widget.aptdetails[0]['charges'].toString()}',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 4,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'GST',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                  ),
-                  Text(
-                    '₹ ${widget.aptdetails[0]['gst'].toString()}',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                  ),
-                ],
-              ),
-            ),
-            // SizedBox(
-            //   height: 4,
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //     children: [
-            //       Text(
-            //         'Discount',
-            //         style:
-            //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-            //       ),
-            //       Text(
-            //         '₹90',
-            //         style:
-            //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            const Divider(),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total Amount Payable',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    '₹ ${widget.aptdetails[0]['total'].toString()}',
-                    style:
-                    Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Clr().grey.withOpacity(0.5),
-                      spreadRadius: 1,
-                      blurRadius: 12,
-                      offset: Offset(12, 0.5), // changes position of shadow
-                    ),
-                  ],
-                  color: Clr().primaryColor,
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(15),
-                      topLeft: Radius.circular(15))),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Dim().d24, vertical: Dim().d8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '₹ ${widget.aptdetails[0]['total'].toString()}',
-                          style: Sty().mediumText.copyWith(
-                              fontWeight: FontWeight.w600, color: Clr().white),
+            widget.reshedule == 'yes'
+                ? Container()
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                        child: Text(
+                          'Payment Details',
+                          style: Sty().largeText.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Clr().primaryColor),
                         ),
-                        Text(
-                          'Total Payable',
-                          style: Sty().smallText.copyWith(
-                              fontWeight: FontWeight.w400, color: Clr().white),
+                      ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Consultation Fee',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w400),
+                            ),
+                            Text(
+                              '₹ ${widget.aptdetails[0]['charges'].toString()}',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w400),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 30,
-                      width: 100,
-                      child: ElevatedButton(
-                          onPressed: () {
-                            // STM().redirect2page(ctx, HomeVisitConsultation());
-                            widget.aptdetails[0]['appointment_id'] != null ? resheduleAppoitnment() : addAppoinment();
-                          },
-                          style: ElevatedButton.styleFrom( elevation: 0,
-                            backgroundColor: Clr().white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5)),
-                          ),
-                          child: Text(
-                            'Confirm',
-                            style: Sty().smallText.copyWith(
-                                color: Clr().primaryColor,
-                                fontWeight: FontWeight.w600),
-                          )),
-                    )
-                  ],
+                      ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'GST',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w400),
+                            ),
+                            Text(
+                              '₹ ${widget.aptdetails[0]['gst'].toString()}',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w400),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // SizedBox(
+                      //   height: 4,
+                      // ),
+                      // Padding(
+                      //   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //     children: [
+                      //       Text(
+                      //         'Discount',
+                      //         style:
+                      //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                      //       ),
+                      //       Text(
+                      //         '₹90',
+                      //         style:
+                      //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      const Divider(),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total Amount Payable',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '₹ ${widget.aptdetails[0]['total'].toString()}',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+            SizedBox(
+              height: Dim().d32,
+            ),
+            widget.reshedule == 'yes'
+                ? Padding(
+              padding:  EdgeInsets.only(bottom: Dim().d12),
+              child: Center(
+                child: SizedBox(
+                  height: 30,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        // STM().redirect2page(ctx, HomeVisitConsultation());
+                        resheduleAppoitnment();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Clr().primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5)),
+                      ),
+                      child: Text(
+                        'Reschedule Appointment',
+                        style: Sty().smallText.copyWith(
+                            color: Clr().white,
+                            fontWeight: FontWeight.w600),
+                      )),
                 ),
               ),
             )
+                : Container(
+                    decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Clr().grey.withOpacity(0.5),
+                            spreadRadius: 1,
+                            blurRadius: 12,
+                            offset:
+                                Offset(12, 0.5), // changes position of shadow
+                          ),
+                        ],
+                        color: Clr().primaryColor,
+                        borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(15),
+                            topLeft: Radius.circular(15))),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: Dim().d24, vertical: Dim().d8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '₹ ${widget.aptdetails[0]['total'].toString()}',
+                                style: Sty().mediumText.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Clr().white),
+                              ),
+                              Text(
+                                widget.reshedule == 'yes'
+                                    ? 'paid'
+                                    : 'Total Payable',
+                                style: Sty().smallText.copyWith(
+                                    fontWeight: widget.reshedule == 'yes'
+                                        ? FontWeight.w900
+                                        : FontWeight.w400,
+                                    color: Clr().white),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 30,
+                            width: 100,
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  // STM().redirect2page(ctx, HomeVisitConsultation());
+                                  widget.aptdetails[0]['appointment_id'] != null
+                                      ? resheduleAppoitnment()
+                                      : addAppoinment();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Clr().white,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)),
+                                ),
+                                child: Text(
+                                  'Confirm',
+                                  style: Sty().smallText.copyWith(
+                                      color: Clr().primaryColor,
+                                      fontWeight: FontWeight.w600),
+                                )),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
           ],
         ),
       ),
     );
   }
 
-
   // add appoinment
   void addAppoinment() async {
     FormData body = FormData.fromMap({
       'hcp_user_id': widget.aptdetails[0]['hcpuserid'],
       'slot_id': widget.aptdetails[0]['slotid'],
-      'booking_date': DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString())),
+      'booking_date': DateFormat('yyyy-MM-dd').format(
+          DateTime.parse(widget.aptdetails[0]['bookingdate'].toString())),
       'address': '',
       'contact_number': '',
       'appointment_type': 2,
@@ -517,32 +576,34 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
       'discount': '',
       'total_amount': widget.aptdetails[0]['total'],
     });
-    var result = await STM().postWithToken(ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       STM().successDialogWithReplace(ctx, message, Home());
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
   }
 
   // reshedule appointment
 
- void resheduleAppoitnment() async {
+  void resheduleAppoitnment() async {
     FormData body = FormData.fromMap({
-    'appointment_id': widget.aptdetails[0]['appointment_id'],
-    'reschedule_slot_id': widget.aptdetails[0]['slotid'],
-    'reschedule_date': DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.aptdetails[0]['bookingdate'].toString()))
+      'appointment_id': widget.aptdetails[0]['appointment_id'],
+      'reschedule_slot_id': widget.aptdetails[0]['slotid'],
+      'reschedule_date': DateFormat('yyyy-MM-dd').format(
+          DateTime.parse(widget.aptdetails[0]['bookingdate'].toString()))
     });
-    var result = await STM().postWithToken(ctx, Str().uploading, 'reschedule', body, usertoken,'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().uploading, 'reschedule', body, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       STM().successDialogWithReplace(ctx, message, Home());
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
- }
-
+  }
 }

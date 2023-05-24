@@ -10,7 +10,9 @@ import 'values/styles.dart';
 
 class MedicationReminder extends StatefulWidget {
   final dynamic medicationDetails;
+
   const MedicationReminder({super.key, this.medicationDetails});
+
   @override
   State<MedicationReminder> createState() => _MedicationReminderState();
 }
@@ -43,7 +45,8 @@ class _MedicationReminderState extends State<MedicationReminder> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
-      medicineCtrl = TextEditingController(text: widget.medicationDetails['medicine']);
+      medicineCtrl =
+          TextEditingController(text: widget.medicationDetails['medicine']);
       daySelectedList = widget.medicationDetails['day_id'];
     });
     STM().checkInternet(context, widget).then((value) {
@@ -142,6 +145,52 @@ class _MedicationReminderState extends State<MedicationReminder> {
               SizedBox(
                 height: Dim().d20,
               ),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.end,
+                children: [
+                  daySelectedList.length > 0
+                      ? InkWell(
+                          onTap: () {
+                            setState(() {
+                              daySelectedList.clear();
+                            });
+                          },
+                          child: Container(
+                            height: Dim().d20,
+                            width: Dim().d20,
+                            child: Icon(Icons.check_box,
+                                color: Clr().primaryColor),
+                          ),
+                        )
+                      : InkWell(
+                          onTap: () {
+                            for (int a = 0; a < dayList.length; a++) {
+                              setState(() {
+                                daySelectedList.add(dayList[a]['id']);
+                              });
+                            }
+                          },
+                          child: Container(
+                            height: Dim().d20,
+                            width: Dim().d20,
+                            child: Icon(
+                              Icons.check_box_outline_blank,
+                              color: Clr().hintColor,
+                            ),
+                          ),
+                        ),
+                  SizedBox(width: Dim().d8),
+                  Text(
+                    'Select all days',
+                    style: TextStyle(
+                    fontSize: Dim().d16, fontWeight: FontWeight.w400),
+                    overflow: TextOverflow.fade,
+                  )
+                ],
+              ),
+              SizedBox(
+                height: Dim().d20,
+              ),
               ListView.builder(
                   itemCount: dayList.length,
                   shrinkWrap: true,
@@ -149,7 +198,7 @@ class _MedicationReminderState extends State<MedicationReminder> {
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: EdgeInsets.only(bottom: Dim().d20),
-                      child: Row(
+                      child: Wrap(crossAxisAlignment: WrapCrossAlignment.end,
                         children: [
                           daySelectedList.contains(dayList[index]['id'])
                               ? InkWell(
@@ -159,7 +208,7 @@ class _MedicationReminderState extends State<MedicationReminder> {
                                           .remove(dayList[index]['id']);
                                     });
                                   },
-                                  child: Container(
+                                  child: SizedBox(
                                     height: Dim().d20,
                                     width: Dim().d20,
                                     child: Icon(Icons.check_box,
@@ -172,7 +221,7 @@ class _MedicationReminderState extends State<MedicationReminder> {
                                       daySelectedList.add(dayList[index]['id']);
                                     });
                                   },
-                                  child: Container(
+                                  child: SizedBox(
                                     height: Dim().d20,
                                     width: Dim().d20,
                                     child: Icon(
@@ -184,14 +233,13 @@ class _MedicationReminderState extends State<MedicationReminder> {
                           SizedBox(
                             width: Dim().d20,
                           ),
-                          Expanded(
-                              child: Text(
+                          Text(
                             dayList[index]['name'],
                             style: TextStyle(
-                                fontSize: Dim().d16,
-                                fontWeight: FontWeight.w400),
+                            fontSize: Dim().d16,
+                            fontWeight: FontWeight.w400),
                             overflow: TextOverflow.fade,
-                          ))
+                          )
                         ],
                       ),
                     );
@@ -214,8 +262,13 @@ class _MedicationReminderState extends State<MedicationReminder> {
                                   SetTime(
                                     days: daySelectedList,
                                     medicine: medicineCtrl.text,
-                                    timelist: widget.medicationDetails == null ? [] : widget.medicationDetails['time'],
-                                    id: widget.medicationDetails == null ? null : widget.medicationDetails['id'].toString(),
+                                    timelist: widget.medicationDetails == null
+                                        ? []
+                                        : widget.medicationDetails['time'],
+                                    id: widget.medicationDetails == null
+                                        ? null
+                                        : widget.medicationDetails['id']
+                                            .toString(),
                                   ));
                         }
                       },
