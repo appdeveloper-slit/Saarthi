@@ -543,6 +543,7 @@ class _OnlineConsultationState extends State<OnlineConsultation> {
       'gst': widget.onlineDetails[0]['gst'],
       'discount': '',
       'total_amount': widget.onlineDetails[0]['total'],
+      'complain':widget.onlineDetails[0]['complain'],
     });
     var result = await STM().postWithToken(
         ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');

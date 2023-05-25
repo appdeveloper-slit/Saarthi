@@ -665,6 +665,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
       'gst': widget.homedetails[0]['gst'],
       'discount': '',
       'total_amount': widget.homedetails[0]['total'],
+      'complain':widget.homedetails[0]['complain'],
     });
     var result = await STM().postWithToken(
         ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');

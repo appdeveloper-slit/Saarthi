@@ -40,6 +40,7 @@ class DrNamepage extends State<DrName> {
   bool isChecked = false;
   List idSelectedList = [];
   List<Map<String, dynamic>> patientDetailsList = [];
+  TextEditingController complainCtrl = TextEditingController();
   String AppointmentValue = 'Online Appointment';
   List<String> AppointmentList = [
     'Online Appointment',
@@ -87,6 +88,7 @@ class DrNamepage extends State<DrName> {
           'name': widget.doctorDetails['patient']['full_name'],
           'age': widget.doctorDetails['patient']['age'],
         });
+        complainCtrl = TextEditingController(text: widget.doctorDetails['patient']['complain']);
         getSlots(id: dayList[position]['id']);
       });
     } else {
@@ -334,6 +336,54 @@ class DrNamepage extends State<DrName> {
                               });
                             },
                     ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: Dim().d20,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.reshedule == 'yes'
+                        ? 'Your Complain'
+                        : 'Enter your Complain',
+                    style:
+                        Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: Dim().d12,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                child: TextFormField(
+                  controller: complainCtrl,
+                  readOnly: widget.reshedule == 'yes' ? true : false,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 3,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Clr().formfieldbg,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Clr().transparent)),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Clr().primaryColor, width: 1.0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: Dim().d20, vertical: Dim().d16),
+                    hintText: "Enter Your Complain",
+                    hintStyle: Sty()
+                        .mediumText
+                        .copyWith(color: Clr().shimmerColor, fontSize: 14),
+                    counterText: "",
                   ),
                 ),
               ),
@@ -714,54 +764,60 @@ class DrNamepage extends State<DrName> {
             ? STM().displayToast('Appointment type is required')
             : selected == null
                 ? STM().displayToast('Slot time is required')
-                : Routes(
-                    AppointmentValue == 'Online Appointment'
-                        ? 1
-                        : AppointmentValue == 'Opd'
-                            ? 2
-                            : 3,
-                    widget.reshedule == 'yes'
-                        ? {
-                            'hcpuserid': widget.doctorDetails['hcp']['id'],
-                            'hcpprofilepic': widget.doctorDetails['hcp']
-                                    ['profile_pic']
-                                .toString(),
-                            'details': widget.doctorDetails,
-                            'hcpname':
-                                '${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}',
-                            'speciality':
-                                '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}',
-                            'bookingtime': slottime,
-                            'bookingdate': dayno,
-                            'patientname': widget.doctorDetails['patient']
-                                ['full_name'],
-                            'patientage': widget.doctorDetails['patient']
-                                ['age'],
-                            'patientid': widget.doctorDetails['patient']['id'],
-                            'slotid': selected,
-                            'charges': charges,
-                            'gst': gst,
-                            'total': total,
-                            'appointment_id': widget.doctorDetails['id'],
-                          }
-                        : {
-                            'hcpuserid': widget.doctorDetails['id'],
-                            'hcpprofilepic':
-                                widget.doctorDetails['profile_pic'].toString(),
-                            'hcpname':
-                                '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
-                            'speciality': widget.doctorDetails['professional']
-                                ['speciality_name'][0]['name'],
-                            'bookingtime': slottime,
-                            'bookingdate': dayno,
-                            'patientname': patientDetailsList[0]['name'],
-                            'patientage': patientDetailsList[0]['age'],
-                            'patientid': patientDetailsList[0]['id'],
-                            'slotid': selected,
-                            'charges': charges,
-                            'gst': gst,
-                            'total': total,
-                          });
+                : complainCtrl.text.isEmpty
+                    ? STM().displayToast('Your complain is required')
+                    : Routes(
+                        AppointmentValue == 'Online Appointment'
+                            ? 1
+                            : AppointmentValue == 'Opd'
+                                ? 2
+                                : 3,
+                        widget.reshedule == 'yes'
+                            ? {
+                                'hcpuserid': widget.doctorDetails['hcp']['id'],
+                                'hcpprofilepic': widget.doctorDetails['hcp']
+                                        ['profile_pic']
+                                    .toString(),
+                                'details': widget.doctorDetails,
+                                'hcpname':
+                                    '${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}',
+                                'speciality':
+                                    '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}',
+                                'bookingtime': slottime,
+                                'bookingdate': dayno,
+                                'patientname': widget.doctorDetails['patient']
+                                    ['full_name'],
+                                'patientage': widget.doctorDetails['patient']
+                                    ['age'],
+                                'patientid': widget.doctorDetails['patient']
+                                    ['id'],
+                                'slotid': selected,
+                                'charges': charges,
+                                'gst': gst,
+                                'total': total,
+                                'appointment_id': widget.doctorDetails['id'],
+                              }
+                            : {
+                                'hcpuserid': widget.doctorDetails['id'],
+                                'hcpprofilepic': widget
+                                    .doctorDetails['profile_pic']
+                                    .toString(),
+                                'hcpname':
+                                    '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                                'speciality':
+                                    widget.doctorDetails['professional']
+                                        ['speciality_name'][0]['name'],
+                                'bookingtime': slottime,
+                                'bookingdate': dayno,
+                                'patientname': patientDetailsList[0]['name'],
+                                'patientage': patientDetailsList[0]['age'],
+                                'patientid': patientDetailsList[0]['id'],
+                                'slotid': selected,
+                                'charges': charges,
+                                'gst': gst,
+                                'total': total,
+                                'complain': complainCtrl.text,
+                              });
   }
 
   // getSLots

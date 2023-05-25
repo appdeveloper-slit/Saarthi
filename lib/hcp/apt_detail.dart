@@ -907,7 +907,7 @@ class AptDetailState extends State<AptDetail> {
                             color: Clr().white, fontWeight: FontWeight.w600),
                       ),
                       SizedBox(
-                        height: 8,
+                        height: Dim().d8,
                       ),
                       Text(
                         v['booking_date'],

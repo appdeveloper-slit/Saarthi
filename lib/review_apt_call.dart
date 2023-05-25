@@ -575,6 +575,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
       'gst': widget.aptdetails[0]['gst'],
       'discount': '',
       'total_amount': widget.aptdetails[0]['total'],
+      'complain':widget.aptdetails[0]['complain'],
     });
     var result = await STM().postWithToken(
         ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');
