@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/hcp/hcpappointmentavailability.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -482,7 +483,7 @@ class _OlConsSlotsState extends State<OlConsSlots> {
                                       },
                                       child: Center(
                                         child: Text(
-                                          slotList[index2]['slot'].toString(),
+                                          '${DateFormat.jm().format(DateTime.parse('${DateFormat('yyyy-MM-dd').format(DateTime.now())} ${slotList[index2]['slot']}'))}',
                                           style: Sty().smallText.copyWith(
                                               color: OnlineSelectionList[index]
                                                           ['slots']

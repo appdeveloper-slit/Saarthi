@@ -24,11 +24,13 @@ class TeleCallConsultation extends StatefulWidget {
 class _TeleCallConsultationState extends State<TeleCallConsultation> {
   late BuildContext ctx;
   String? usertoken;
+  TextEditingController complainCtrl = TextEditingController();
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      complainCtrl = TextEditingController(text: widget.aptdetails[0]['complain']);
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -281,6 +283,51 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Your Complain',
+                  style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: Dim().d12,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+              child: TextFormField(
+                controller: complainCtrl,
+                readOnly: true,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                minLines: 3,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Clr().formfieldbg,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Clr().transparent)),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Clr().primaryColor, width: 1.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: Dim().d20, vertical: Dim().d16),
+                  hintText: "Your Complain",
+                  hintStyle: Sty()
+                      .mediumText
+                      .copyWith(color: Clr().shimmerColor, fontSize: 14),
+                  counterText: "",
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: Dim().d16),
               child: Row(
                 children: [
                   Expanded(
@@ -461,30 +508,30 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
             ),
             widget.reshedule == 'yes'
                 ? Padding(
-              padding:  EdgeInsets.only(bottom: Dim().d12),
-              child: Center(
-                child: SizedBox(
-                  height: 30,
-                  child: ElevatedButton(
-                      onPressed: () {
-                        // STM().redirect2page(ctx, HomeVisitConsultation());
-                        resheduleAppoitnment();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: Clr().primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5)),
+                    padding: EdgeInsets.only(bottom: Dim().d12),
+                    child: Center(
+                      child: SizedBox(
+                        height: 30,
+                        child: ElevatedButton(
+                            onPressed: () {
+                              // STM().redirect2page(ctx, HomeVisitConsultation());
+                              resheduleAppoitnment();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: Clr().primaryColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5)),
+                            ),
+                            child: Text(
+                              'Reschedule Appointment',
+                              style: Sty().smallText.copyWith(
+                                  color: Clr().white,
+                                  fontWeight: FontWeight.w600),
+                            )),
                       ),
-                      child: Text(
-                        'Reschedule Appointment',
-                        style: Sty().smallText.copyWith(
-                            color: Clr().white,
-                            fontWeight: FontWeight.w600),
-                      )),
-                ),
-              ),
-            )
+                    ),
+                  )
                 : Container(
                     decoration: BoxDecoration(
                         boxShadow: [
@@ -575,7 +622,7 @@ class _TeleCallConsultationState extends State<TeleCallConsultation> {
       'gst': widget.aptdetails[0]['gst'],
       'discount': '',
       'total_amount': widget.aptdetails[0]['total'],
-      'complain':widget.aptdetails[0]['complain'],
+      'complain': widget.aptdetails[0]['complain'],
     });
     var result = await STM().postWithToken(
         ctx, Str().processing, 'add_appointment', body, usertoken, 'customer');

@@ -26,6 +26,7 @@ class TeleCallAppointmentDetails extends StatefulWidget {
 class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails> {
   late BuildContext ctx;
   TextEditingController canCtrl = TextEditingController();
+  TextEditingController complainCtrl = TextEditingController();
   DateTime now = DateTime.now();
   String? usertoken;
   DateTime? slotDate;
@@ -40,6 +41,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
       slotDate = DateTime.parse('${v['booking_date']} ${v['slot']['slot']}');
       startTime = slotDate!.subtract(Duration(minutes: int.parse(widget.time.toString())));
       DateTime endTime = startTime!.add(Duration(minutes: 5));
+      complainCtrl = TextEditingController(text: v['complain']);
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -148,7 +150,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                 ? Text('Appointment Date and Time', style: Sty().mediumText)
                 : Container(),
             v['is_reschedule'] == 1
-                ? Text('${v['booking_date']} ${v['slot']['slot']}',
+                ? Text('${v['booking_date']} ${DateFormat.jm().format(DateTime.parse('${v['booking_date'].toString()} ${v['slot']['slot']}'))}',
                 style: Sty().mediumText.copyWith(
                     fontSize: Dim().d12,
                     decoration: TextDecoration.lineThrough,
@@ -173,6 +175,46 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
             Text(
               'OPD',
               style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Your Complain',
+                style:
+                Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            SizedBox(
+              height: Dim().d12,
+            ),
+            TextFormField(
+              controller: complainCtrl,
+              readOnly: true,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              minLines: 3,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Clr().formfieldbg,
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Clr().transparent)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                  BorderSide(color: Clr().primaryColor, width: 1.0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: Dim().d20, vertical: Dim().d16),
+                hintText: "Your Complain",
+                hintStyle: Sty()
+                    .mediumText
+                    .copyWith(color: Clr().shimmerColor, fontSize: 14),
+                counterText: "",
+              ),
             ),
             SizedBox(
               height: 20,

@@ -108,67 +108,78 @@ class AptDetailState extends State<AptDetail> {
                 SizedBox(
                   width: Dim().d20,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Appointment ID : ',
-                          style: Sty().smallText,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Appointment ID : ',
+                            style: Sty().smallText,
+                          ),
+                          Text(
+                            '${v['appointment_uid']}',
+                            style: Sty().smallText.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xffFFC107),
+                                ),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        'Mr. ${v['patient']['full_name']}',
+                        style: Sty().smallText,
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            v['patient']['gender'],
+                            style: Sty().smallText.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          SizedBox(
+                            width: Dim().d20,
+                          ),
+                          Text(
+                            'Age : ${v['patient']['age']}',
+                            style: Sty().smallText.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: Dim().d8,
+                      ),
+                      Text(
+                        'Complain : ${v['complain'] ?? ''}',
+                        style: Sty().smallText.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
-                        Text(
-                          '${v['appointment_uid']}',
-                          style: Sty().smallText.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xffFFC107),
-                              ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      'Mr. ${v['patient']['full_name']}',
-                      style: Sty().smallText,
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          v['patient']['gender'],
-                          style: Sty().smallText.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                        SizedBox(
-                          width: Dim().d20,
-                        ),
-                        Text(
-                          'Age : ${v['patient']['age']}',
-                          style: Sty().smallText.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: Dim().d8,
-                    ),
-                    Text(
-                      v['appointment_type'] == "1"
-                          ? 'Online Consultation'
-                          : v['appointment_type'] == "2"
-                              ? 'OPD'
-                              : 'Home Visit',
-                      style: Sty().smallText.copyWith(
-                          color: Clr().primaryColor,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ],
+                      ),
+                      SizedBox(
+                        height: Dim().d8,
+                      ),
+                      Text(
+                        v['appointment_type'] == "1"
+                            ? 'Online Consultation'
+                            : v['appointment_type'] == "2"
+                                ? 'OPD'
+                                : 'Home Visit',
+                        style: Sty().smallText.copyWith(
+                            color: Clr().primaryColor,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),
@@ -188,7 +199,7 @@ class AptDetailState extends State<AptDetail> {
             v['is_reschedule'] == 1
                 ? Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('${v['booking_date']} ${v['slot']['slot']}',
+                    child: Text('${v['booking_date']} ${DateFormat.jm().format(DateTime.parse('${v['booking_date'].toString()} ${v['slot']['slot']}'))}',
                         style: Sty().mediumText.copyWith(
                             fontSize: Dim().d12,
                             decoration: TextDecoration.lineThrough,

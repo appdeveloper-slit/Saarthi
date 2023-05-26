@@ -72,12 +72,6 @@ class DrNamepage extends State<DrName> {
       setState(() {
         dayno = DateTime.parse(
             '${widget.doctorDetails['booking_date']} ${widget.doctorDetails['slot']['slot']}');
-        day = widget.doctorDetails['booking_date'];
-        int position = dayList.indexWhere(
-            (e) => e['name'].toString() == DateFormat.EEEE().format(dayno!));
-        if (dayList.contains(DateFormat.EEEE().format(dayno!))) {
-          dayList[position]['id'];
-        }
         AppointmentValue = widget.doctorDetails['appointment_type'] == "1"
             ? 'Online Appointment'
             : widget.doctorDetails['appointment_type'] == "2"
@@ -88,8 +82,8 @@ class DrNamepage extends State<DrName> {
           'name': widget.doctorDetails['patient']['full_name'],
           'age': widget.doctorDetails['patient']['age'],
         });
-        complainCtrl = TextEditingController(text: widget.doctorDetails['patient']['complain']);
-        getSlots(id: dayList[position]['id']);
+        complainCtrl = TextEditingController(
+            text: widget.doctorDetails['complain']);
       });
     } else {
       setState(() {
@@ -97,6 +91,34 @@ class DrNamepage extends State<DrName> {
       });
     }
   }
+
+  apiCallForSlot() {
+    if (widget.reshedule == 'yes'){
+      setState(() {
+        dayno = DateTime.parse(
+            '${widget.doctorDetails['booking_date']} ${widget.doctorDetails['slot']['slot']}');
+        day = widget.doctorDetails['booking_date'];
+        int position = dayList.indexWhere(
+                (e) => e['name'].toString() == DateFormat.EEEE().format(dayno!));
+        if (dayList.contains(DateFormat.EEEE().format(dayno!))) {
+          dayList[position]['id'];
+        }
+        getSlots(id: dayList[position]['id']);
+      });
+    }else{
+      setState(() {
+        dayno = DateTime.now();
+        day = DateFormat('yyyy-MM-dd').format(dayno!);
+        int position = dayList.indexWhere((e) =>
+        e['name'].toString() == DateFormat.EEEE().format(dayno!));
+        if (dayList.contains(DateFormat.EEEE().format(dayno!))) {
+          dayList[position]['id'];
+        }
+        getSlots(id: dayList[position]['id']);
+      });
+    }
+  }
+
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -108,6 +130,7 @@ class DrNamepage extends State<DrName> {
       if (value) {
         getPatient();
         dayList;
+        apiCallForSlot();
         print(usertoken);
       }
     });
@@ -796,6 +819,7 @@ class DrNamepage extends State<DrName> {
                                 'gst': gst,
                                 'total': total,
                                 'appointment_id': widget.doctorDetails['id'],
+                                'complain': complainCtrl.text,
                               }
                             : {
                                 'hcpuserid': widget.doctorDetails['id'],

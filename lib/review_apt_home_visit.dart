@@ -25,6 +25,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
   late BuildContext ctx;
   String? usertoken;
   TextEditingController homeAddressCtrl = TextEditingController();
+  TextEditingController complainCtrl = TextEditingController();
   TextEditingController mobileCtrl = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -36,6 +37,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
           ? homeAddressCtrl = TextEditingController(
               text: widget.homedetails[0]['details']['address'])
           : null;
+      complainCtrl = TextEditingController(text: widget.homedetails[0]['complain']);
       widget.homedetails[0]['appointment_id'] != null
           ? mobileCtrl = TextEditingController(
               text: widget.homedetails[0]['details']['contact_number'])
@@ -356,6 +358,52 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                 ),
                 SizedBox(
                   height: Dim().d20,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Your Complain',
+                      style:
+                      Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: Dim().d12,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                  child: TextFormField(
+                    controller: complainCtrl,
+                    readOnly: true,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    minLines: 3,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Clr().formfieldbg,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Clr().transparent)),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                        BorderSide(color: Clr().primaryColor, width: 1.0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: Dim().d20, vertical: Dim().d16),
+                      hintText: "Your Complain",
+                      hintStyle: Sty()
+                          .mediumText
+                          .copyWith(color: Clr().shimmerColor, fontSize: 14),
+                      counterText: "",
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
