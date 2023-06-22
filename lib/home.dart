@@ -374,7 +374,7 @@ class _HomeState extends State<Home> {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,mainAxisSpacing:12,crossAxisSpacing: 6,childAspectRatio: 22/13,mainAxisExtent: 100.0),
+                  crossAxisCount: 2,mainAxisSpacing:12,crossAxisSpacing: 6,childAspectRatio: 20/13,),
               itemBuilder: (context, index) {
                 return servicesLayout(ctx, index, servicesList);
               }),
@@ -384,9 +384,7 @@ class _HomeState extends State<Home> {
         ),
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            SizedBox(
-              height: 60,
-              width: 160,
+            Expanded(
               child: InkWell(
                 onTap: () {
                   STM().redirect2page(ctx, Pharmacy());
@@ -405,6 +403,8 @@ class _HomeState extends State<Home> {
                         ),
                         Text(
                           'Pharmacy',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: Sty()
                               .mediumText
                               .copyWith(fontWeight: FontWeight.w600),
@@ -415,9 +415,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 60,
-              width: 160,
+            Expanded(
               child: InkWell(
                 onTap: () {
                   STM().redirect2page(ctx, Labs());
@@ -794,6 +792,8 @@ class _HomeState extends State<Home> {
                   SvgPicture.asset(list[index]['image'], height: Dim().d60,width: index == 3 ? Dim().d120 : 0,),
                   Text(
                     list[index]['name'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Sty().smallText.copyWith(),
                   )
                 ],
@@ -1548,6 +1548,9 @@ class _HomeState extends State<Home> {
         ),
         Text(
           List[index]['name'],
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
           style: Sty().smallText.copyWith(),
         )
       ],

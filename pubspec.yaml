@@ -62,6 +62,7 @@ dependencies:
   flutter_incoming_call: ^0.1.1
   onesignal_flutter: ^3.4.1
   photo_view: ^0.14.0
+  sqflite: ^2.2.8+4
 
 dev_dependencies:
   # rules and activating additional ones.

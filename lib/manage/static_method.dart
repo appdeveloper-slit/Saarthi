@@ -212,7 +212,6 @@ class STM {
           return true;
         },
         child: Container(
-          height: Dim().d160,
           padding: EdgeInsets.all(Dim().d16),
           decoration: BoxDecoration(
             color: Clr().white,

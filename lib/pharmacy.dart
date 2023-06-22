@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'localstore.dart';
 import 'product_page.dart';
 import 'your_cart.dart';
 
@@ -15,14 +17,85 @@ class Pharmacy extends StatefulWidget {
 
 class _PharmacyState extends State<Pharmacy> {
   late BuildContext ctx;
+  List<dynamic> pharmacyList = [
+    {
+      'id': 1,
+      'image':'https://stylesatlife.com/wp-content/uploads/2017/03/Bromhexine.jpg',
+      'name': 'Bohomexijn horide',
+      'price':400,
+      'actualprice':700,
+    },
+    {
+      'id': 2,
+      'image':'https://i0.wp.com/nimedhealth.com.ng/wp-content/uploads/2021/03/images-2021-03-12T174135.264.jpeg?fit=554%2C554&ssl=1',
+      'name': 'Inhaled Corticosteroids',
+      'price': 200,
+      'actualprice':300,
+    },
+    {
+      'id': 3,
+      'image':'https://i0.wp.com/nimedhealth.com.ng/wp-content/uploads/2021/03/images-2021-03-12T174135.264.jpeg?fit=554%2C554&ssl=1',
+      'name': 'Codeine Syrup for Cough Control',
+      'price': 120,
+      'actualprice':500,
+    },
+    {
+      'id': 4,
+      'image':'https://stylesatlife.com/wp-content/uploads/2017/03/Bromhexine.jpg',
+      'name': 'Syrups and Tablets for Cough Dry or Wet',
+      'price': 230,
+      'actualprice': 600,
+    }
+  ];
+
+  bool isLoading = true;
+  List<dynamic> addToCart = [];
+
+  Future<void> _updateItem(idd, name,  image, price, actualPrice, counter) async {
+    await Store.updateItem(idd, name,  image, price, actualPrice, counter);
+  }
+
+  void _refreshData() async {
+    dynamic data = await Store.getItems();
+    setState(() {
+      addToCart = data;
+      print(addToCart);
+      isLoading = false;
+    });
+  }
+
+  Future<void> _addItem(idd, name, image, price, actualPrice, counter) async {
+    await Store.createItem(idd, name, image, price, actualPrice, counter);
+  }
+
+  getSessionData() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    // var status = await OneSignal.shared.getDeviceState();
+    setState(() {
+      // sUserid = sp.getString('user_id');
+      // sUUID = status?.userId;
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        // getHome();
+        _refreshData();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSessionData();
+    super.initState();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
         bottomNavigationBar: bottomBarLayout(ctx, 0),
-        backgroundColor: Color(0xffd0d0d0),
         appBar: AppBar(
           elevation: 2,
           leading: InkWell(
@@ -54,6 +127,7 @@ class _PharmacyState extends State<Pharmacy> {
             InkWell(
               onTap: () {
                 // STM().redirect2page(context, NotificationPage());
+                STM().redirect2page(ctx, MyCart());
               },
               child: Padding(
                   padding: EdgeInsets.only(right: 16),
@@ -81,97 +155,101 @@ class _PharmacyState extends State<Pharmacy> {
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 1,
-                  mainAxisExtent: 210,
+                  childAspectRatio: 3/4,
                   mainAxisSpacing: 1,
                 ),
                 shrinkWrap: true,
-                itemCount: 16,
+                itemCount: pharmacyList.length,
                 itemBuilder: (context, index) => Container(
                   decoration: BoxDecoration(color: Colors.white),
-                  child: Column(
-                    children: [
-                      InkWell(
-                          onTap: (){
-                            STM().redirect2page(ctx, ProductPage());
-                          },
-                          child: Image.asset('assets/myoders.png', height: 90, width: 120)),
-                      SizedBox(
-                        width: Dim().d12,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: Dim().d20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Baidynath Kesari Kalp Royal Prash 500 g',
-                                style: TextStyle(fontSize: 14)),
-                            SizedBox(
-                              height: Dim().d4,
-                            ),
-                            Row(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(right: BorderSide(color: Clr().lightGrey),bottom: BorderSide(color: Clr().lightGrey),top: BorderSide(color: Clr().lightGrey),)
+                    ),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Dim().d12,vertical: Dim().d14),
+                          child: InkWell(
+                              onTap: (){
+                                // STM().redirect2page(ctx, ProductPage());
+                              },
+                              child: Image.network( '${pharmacyList[index]['image'].toString()}', height: 90, width: 120)),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+                            child: Text('${pharmacyList[index]['name'].toString()}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: Dim().d16,fontWeight: FontWeight.w300)),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+                            child: Row(
                               children: [
-                                Text('₹400',
+                                Text('₹${pharmacyList[index]['price']}',
                                     style: Sty().mediumText.copyWith(
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: Dim().d14,
+                                        fontWeight: FontWeight.w400,
                                         color: Color(0xff2D2D2D))),
-                                SizedBox(
-                                  width: Dim().d4,
-                                ),
-                                Text(' ₹ 700',
+                                SizedBox(width: Dim().d12),
+                                Text(' ₹${pharmacyList[index]['actualprice']}',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize:  Dim().d14,
                                       color: Colors.grey,
                                       decoration: TextDecoration.lineThrough,
+                                      fontWeight: FontWeight.w400,
                                       decorationThickness: 2,
                                     )),
                               ],
                             ),
-                            SizedBox(
-                              height: Dim().d8,
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: SizedBox(
-                                height: 40,
-                                width: 120,
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      STM().redirect2page(ctx, MyCart());
-                                    },
-                                    style: ElevatedButton.styleFrom( elevation: 0,
-
-                                        backgroundColor: Colors.white,
-                                        side: BorderSide(
-                                            width: 1,
-                                            color: Clr().primaryColor),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10))),
-                                    child: Text(
-                                      'Add to Cart',
-                                      style: Sty().smallText.copyWith(
-                                          color: Clr().primaryColor,
-                                          fontWeight: FontWeight.w500),
-                                    )),
-                              ),
-                            ),
-                            SizedBox(
-                              height: Dim().d8,
-                            ),
-                          ],
+                          ),
                         ),
-                      )
-                    ],
+                        SizedBox(
+                          height: Dim().d36,
+                          child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _refreshData();
+                                  _addItem(
+                                    pharmacyList[index]['id'],
+                                    pharmacyList[index]['name'].toString(),
+                                    pharmacyList[index]['image'].toString(),
+                                    pharmacyList[index]['price'].toString(),
+                                    pharmacyList[index]['price'].toString(),
+                                    1,
+                                  ).then((value) {
+                                    _refreshData();
+                                  });
+                                });
+                                // STM().redirect2page(ctx, MyCart());
+                              },
+                              style: ElevatedButton.styleFrom( elevation: 0,
+                                  backgroundColor: Colors.white,
+                                  side: BorderSide(
+                                      width: 1,
+                                      color: Clr().primaryColor),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(10))),
+                              child: Text(
+                                'Add to Cart',
+                                style: Sty().smallText.copyWith(
+                                    fontSize: Dim().d14,
+                                    color: Clr().primaryColor,
+                                    fontWeight: FontWeight.w400),
+                              )),
+                        ),
+                        SizedBox(
+                          height: Dim().d12,
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(
-                height: 1,
-              ),
-              SizedBox(
-                height: Dim().d20,
-                child: Container(
-                  color: Colors.white,
                 ),
               ),
             ],
