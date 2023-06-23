@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -18,22 +21,37 @@ class _MyAddressPageState extends State<MyAddressPage> {
 
   // dynamic useraddress ;
   List<dynamic> useraddress = [];
-
-
   String? sUserid;
 
+  String? usertoken, sUUID;
 
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+      // sUUID = status?.userId;
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getapi(apiname: 'get_shipping_address',type: 'get');
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
-
       // bottomNavigationBar: bottomBarLayout(ctx, 0),
-      appBar:AppBar(
+      appBar: AppBar(
         leading: InkWell(
           onTap: () {
             STM().back2Previous(ctx);
@@ -55,37 +73,46 @@ class _MyAddressPageState extends State<MyAddressPage> {
           padding: EdgeInsets.all(Dim().d20),
           child: Column(
             children: [
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom( elevation: 0,
-
-                      backgroundColor: Color(0xffFBFBFB),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15))),
-                  // Text Color (Foreground color)
-                  onPressed: () {
-                    STM().redirect2page(ctx, AddNewAddress());
-                  },
+              InkWell(
+                onTap: () {
+                  STM().redirect2page(ctx, AddNewAddress());
+                },
+                child: Card(
+                  color: Color(0xffECECEC).withOpacity(0.1),
+                  borderOnForeground: true,
+                  margin: EdgeInsets.only(top: Dim().d16),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Clr().grey, width: 0.2),
+                      borderRadius: BorderRadius.circular(Dim().d12)),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: Dim().d20,),
+                    padding: EdgeInsets.symmetric(
+                        vertical: Dim().d20, horizontal: Dim().d20),
                     child: Row(
                       children: [
                         SvgPicture.asset("assets/plus.svg"),
-                        SizedBox(width: Dim().d12,),
-                        Text(
-                          "Add a new address", style: TextStyle(
-                          color: Color(0xff80C342), fontSize: 16,
+                        SizedBox(
+                          width: Dim().d12,
                         ),
+                        Text(
+                          "Add a new address",
+                          style: TextStyle(
+                            color: Color(0xff80C342),
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
-                  )),
-              SizedBox(height: Dim().d8,),
-
-
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: Dim().d8,
+              ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: 2,
+                itemCount: useraddress.length,
                 // itemCount: useraddress.length,
                 itemBuilder: (context, index) {
                   return Column(
@@ -99,42 +126,41 @@ class _MyAddressPageState extends State<MyAddressPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-
-
                               Row(
-
-                                mainAxisAlignment: MainAxisAlignment
-                                    .spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
                                       SvgPicture.asset('assets/myaddDot.svg'),
-                                      SizedBox(width: Dim().d12,),
+                                      SizedBox(
+                                        width: Dim().d12,
+                                      ),
                                       Text(
                                           // '${useraddress[index]['name']
                                           //     .toString()}',
 
-                                          'Aniket Mahakal',
+                                          '${useraddress[index]['']}',
                                           style: Sty().mediumText.copyWith(
                                               fontWeight: FontWeight.w500,
                                               fontSize: 16,
                                               color: Color(0xff2D2D2D))),
                                     ],
                                   ),
-
-
                                   Row(
                                     children: [
                                       InkWell(
-                                        onTap: () {
-                                          // STM().redirect2page(ctx, AddNewAddress(sType: 'updateAddress',id: useraddress[index]['id'].toString(),));
-                                          // getUpdateAddress(id: useraddress[index]['id'].toString(),city_id:useraddress[index]['city_id'].toString() ,mobile:useraddress[index]['mobile'].toString() ,name:useraddress[index]['name'].toString() ,state_id:useraddress[index]['state_id'].toString() );
-                                        },
-                                          child: SvgPicture.asset('assets/editadd.svg')),
-                                      SizedBox(width: Dim().d20,),
+                                          onTap: () {
+                                            // STM().redirect2page(ctx, AddNewAddress(sType: 'updateAddress',id: useraddress[index]['id'].toString(),));
+                                            // getUpdateAddress(id: useraddress[index]['id'].toString(),city_id:useraddress[index]['city_id'].toString() ,mobile:useraddress[index]['mobile'].toString() ,name:useraddress[index]['name'].toString() ,state_id:useraddress[index]['state_id'].toString() );
+                                          },
+                                          child: SvgPicture.asset(
+                                              'assets/editadd.svg')),
+                                      SizedBox(
+                                        width: Dim().d20,
+                                      ),
                                       InkWell(
                                           onTap: () {
                                             // getDeleteAddress(
@@ -142,17 +168,15 @@ class _MyAddressPageState extends State<MyAddressPage> {
                                             //         .toString());
                                           },
                                           child: Padding(
-                                            padding: EdgeInsets.only(right: Dim().d16),
+                                            padding: EdgeInsets.only(
+                                                right: Dim().d16),
                                             child: SvgPicture.asset(
                                                 'assets/deleteadd.svg'),
                                           )),
                                     ],
                                   ),
-
                                 ],
                               ),
-
-
                               SizedBox(
                                 height: 6,
                               ),
@@ -161,7 +185,6 @@ class _MyAddressPageState extends State<MyAddressPage> {
                                 child: Column(
                                   children: [
                                     Align(
-
                                       alignment: Alignment.centerLeft,
                                       child: Text(
                                         // '+91 ${useraddress[index]['mobile']
@@ -184,14 +207,12 @@ class _MyAddressPageState extends State<MyAddressPage> {
                                             height: 1.5,
                                             fontWeight: FontWeight.w400,
                                             fontSize: 12,
-
                                             color: Color(0xff2D2D2D)),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-
                             ],
                           ),
                         ),
@@ -207,6 +228,45 @@ class _MyAddressPageState extends State<MyAddressPage> {
     );
   }
 
+  /// api
+  /// get TimeTableList
+  void getapi({value, type, apiname}) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
 
+    /// required key's of every api using their api name
+    var data = FormData.fromMap({});
+    switch (apiname) {
+      // case "get_timetable":
+      //   data = FormData.fromMap({
+      //     'next_week': value,
+      //   });
+      //   break;
+    }
+
+    /// adding data to the dio body layout..
+    FormData body = data;
+
+    ///  response of get and post api in result using what type of api have...
+    var result = type == 'get'
+        ? await STM()
+            .getWithTokenUrl(ctx, Str().loading, apiname, usertoken, 'customer')
+        : await STM().postWithToken(
+            ctx, Str().loading, apiname, body, usertoken, 'customer');
+    var success = result['success'];
+
+    /// get response in list using apiname (get_timetable , "get_classroom" is api)
+    setState(() {
+      switch (apiname) {
+        case "get_shipping_address":
+          if (success) {
+            setState(() {
+              useraddress = result['address'];
+            });
+          } else {
+            STM().errorDialog(ctx, '${result['message'].toString()}');
+          }
+          break;
+      }
+    });
+  }
 }
-

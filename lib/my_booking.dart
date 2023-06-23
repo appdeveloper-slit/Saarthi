@@ -9,14 +9,16 @@ import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'booking_details .dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'my_appointments.dart';
 
 class MyBooking extends StatefulWidget {
+  final index;
+  const MyBooking({super.key,  this.index});
   @override
   _MyBookingState createState() => _MyBookingState();
 }
 
-class _MyBookingState extends State<MyBooking>
-    with SingleTickerProviderStateMixin {
+class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMixin {
   late BuildContext ctx;
   late TabController _tabController;
   String? usertoken,patientvalue;
@@ -53,9 +55,8 @@ class _MyBookingState extends State<MyBooking>
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return WillPopScope(onWillPop: () async {
-      STM().back2Previous(ctx);
+      STM().directionRoute(widget.index, ctx);
       return false;
     },
       child: Scaffold(
@@ -66,7 +67,7 @@ class _MyBookingState extends State<MyBooking>
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              STM().directionRoute(widget.index, ctx);
             },
             child: Icon(
               Icons.arrow_back_rounded,

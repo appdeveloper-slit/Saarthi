@@ -11,15 +11,18 @@ import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'apt_details_ol.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'home.dart';
 
 class MyAppointments extends StatefulWidget {
+  final index;
+  const MyAppointments({super.key, this.index});
   @override
   _MyAppointmentsState createState() => _MyAppointmentsState();
 }
 
 class _MyAppointmentsState extends State<MyAppointments>
     with SingleTickerProviderStateMixin {
-  late BuildContext ctx;
+   late BuildContext ctx;
 
   late TabController _tabController;
   String? usertoken, patientvalue;
@@ -60,7 +63,7 @@ class _MyAppointmentsState extends State<MyAppointments>
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().back2Previous(ctx);
+        STM().directionRoute(0, ctx);
         return false;
       },
       child: Scaffold(
@@ -71,7 +74,7 @@ class _MyAppointmentsState extends State<MyAppointments>
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              STM().directionRoute(0, ctx);
             },
             child: Icon(
               Icons.arrow_back_rounded,

@@ -475,14 +475,16 @@ class _HomeState extends State<Home> {
           height: Dim().d16,
         ),
         SizedBox(
-          height: 300,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: doctorsList.length,
-            itemBuilder: (context, index) {
-              return doctorsLayout(ctx, index, doctorsList);
-            },
+          height: Dim().d300,
+          child: Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount: doctorsList.length,
+              itemBuilder: (context, index) {
+                return doctorsLayout(ctx, index, doctorsList);
+              },
+            ),
           ),
         ),
         SizedBox(
@@ -1005,9 +1007,6 @@ class _HomeState extends State<Home> {
                           // )
                         ],
                       ),
-                      SizedBox(
-                        height: Dim().d4,
-                      ),
                       list[index]['professional'] == null
                           ? Container()
                           : GridView.builder(
@@ -1063,70 +1062,65 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
-            SizedBox(
-              height: Dim().d8,
-            ),
-            Row(
-              children: [
-                typelist.contains('Online Consultation')
-                    ? Row(
-                        children: [
-                          SvgPicture.asset('assets/online_consultation.svg'),
-                          SizedBox(
-                            width: 6,
-                          ),
-                          Text(
-                            'Online Consultation',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      )
-                    : Container(),
-                SizedBox(
-                  width: 16,
-                ),
-                typelist.contains('OPD')
-                    ? Row(
-                        children: [
-                          SvgPicture.asset('assets/opd.svg'),
-                          SizedBox(
-                            width: 6,
-                          ),
-                          Text(
-                            'OPD',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      )
-                    : Container(),
-              ],
-            ),
-            SizedBox(
-              height: 12,
+            Expanded(
+              child: Row(
+                children: [
+                  typelist.contains('Online Consultation')
+                      ? Row(
+                          children: [
+                            SvgPicture.asset('assets/online_consultation.svg'),
+                            SizedBox(
+                              width: 6,
+                            ),
+                            Text(
+                              'Online Consultation',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                  SizedBox(
+                    width: 16,
+                  ),
+                  typelist.contains('OPD')
+                      ? Row(
+                          children: [
+                            SvgPicture.asset('assets/opd.svg'),
+                            SizedBox(
+                              width: 6,
+                            ),
+                            Text(
+                              'OPD',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                ],
+              ),
             ),
             typelist.contains('Home Visit')
-                ? Row(
-                    children: [
-                      SvgPicture.asset('assets/home_visit.svg'),
-                      SizedBox(
-                        width: 6,
-                      ),
-                      Text(
-                        'Home Visit',
-                        style: Sty()
-                            .mediumText
-                            .copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  )
+                ? Expanded(
+                  child: Row(
+                      children: [
+                        SvgPicture.asset('assets/home_visit.svg'),
+                        SizedBox(
+                          width: 6,
+                        ),
+                        Text(
+                          'Home Visit',
+                          style: Sty()
+                              .mediumText
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                )
                 : Container(),
-            SizedBox(
-              height: 20,
-            ),
             SizedBox(
               height: 50,
               width: 300,
@@ -1151,9 +1145,6 @@ class _HomeState extends State<Home> {
                           fontWeight: FontWeight.w600,
                         ),
                   )),
-            ),
-            SizedBox(
-              height: 12,
             ),
           ],
         ),

@@ -5,6 +5,7 @@ import 'package:saarathi/values/dimens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'log_in.dart';
 import 'manage/static_method.dart';
+import 'my_address.dart';
 import 'my_profile.dart';
 
 Widget navbar(context, key) {
@@ -53,7 +54,7 @@ Widget navbar(context, key) {
                   },
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 0,
               ),
               Container(
@@ -61,7 +62,7 @@ Widget navbar(context, key) {
                 // decoration: BoxDecoration(color: Color(0xffFF6363)),
                 child: ListTile(
                   leading: SvgPicture.asset('assets/My Address.svg'),
-                  title: Text(
+                  title: const Text(
                     'My Address',
                     style: TextStyle(
                         color: Colors.black,
@@ -69,8 +70,8 @@ Widget navbar(context, key) {
                         fontWeight: FontWeight.w400),
                   ),
                   onTap: () {
-                    // STM().redirect2page(context, MyAddressPage());
-                    // close(key);
+                    STM().redirect2page(context, MyAddressPage());
+                    close(key);
                   },
                 ),
               ),

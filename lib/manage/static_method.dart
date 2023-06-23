@@ -11,6 +11,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../home.dart';
+import '../my_appointments.dart';
+import '../my_booking.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
 import '../values/styles.dart';
@@ -37,8 +40,52 @@ class STM {
     Navigator.pop(context);
   }
 
+  // switch(variable_expression) {
+  // case constant_expr1: {
+  // // statements;
+  // }
+  // break;
+  //
+  // case constant_expr2: {
+  // //statements;
+  // }
+  // break;
+  //
+  // default: {
+  // //statements;
+  // }
+  // break;
+  // }
   void displayToast(String string) {
-    Fluttertoast.showToast(msg: string, toastLength: Toast.LENGTH_SHORT);
+    Fluttertoast.showToast(
+      msg: string,
+      toastLength: Toast.LENGTH_SHORT,
+    );
+  }
+
+  directionRoute(index, ctx) {
+    switch (index) {
+      case 0:
+        {
+          STM().finishAffinity(ctx, Home());
+        }
+        break;
+      case 1:
+        {
+          STM().replacePage(ctx, MyAppointments());
+        }
+        break;
+      case 2:
+        {
+          STM().replacePage(ctx, MyBooking());
+        }
+        break;
+      default:
+        {
+          STM().back2Previous(ctx);
+        }
+        break;
+    }
   }
 
   openWeb(String url) async {
@@ -408,13 +455,12 @@ class STM {
               width: double.infinity,
               child: ElevatedButton(
                 style: Sty().primaryButton,
-                onPressed: () {
-                  STM().checkInternet(context, widget).then((value) {
-                    if (value) {
-                      Navigator.pop(context);
-                      STM().replacePage(context, widget);
-                    }
-                  });
+                onPressed: () async{
+                  var connectivityResult = await (Connectivity().checkConnectivity());
+                  if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
+                    Navigator.pop(context);
+                    STM().replacePage(context, widget);
+                  }
                 },
                 child: Text(
                   "Try Again",
@@ -549,7 +595,8 @@ class STM {
     }
     return result;
   }
-  Future<dynamic> getWithoutDialogToken(ctx, name,token,Url) async {
+
+  Future<dynamic> getWithoutDialogToken(ctx, name, token, Url) async {
     Dio dio = Dio(
       BaseOptions(
         headers: {
@@ -701,7 +748,9 @@ class STM {
     }
     return result;
   }
-  Future<dynamic> postWithTokenWithoutDailog(ctx, name, body, token, Url) async {
+
+  Future<dynamic> postWithTokenWithoutDailog(
+      ctx, name, body, token, Url) async {
     //Dialog
     // AwesomeDialog dialog = STM().loadingDialog(ctx, title);
     // dialog.show();

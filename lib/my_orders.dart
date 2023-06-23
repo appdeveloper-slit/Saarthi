@@ -5,9 +5,12 @@ import '../values/colors.dart';
 import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'my_booking.dart';
 import 'order_details.dart';
 
 class MyOrders extends StatefulWidget {
+  final index;
+  const MyOrders({super.key,  this.index});
   @override
   State<MyOrders> createState() => _MyOrdersState();
 }
@@ -20,7 +23,7 @@ class _MyOrdersState extends State<MyOrders> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().back2Previous(ctx);
+        STM().directionRoute(widget.index, ctx);
         return false;
       },
       child: Scaffold(
@@ -30,7 +33,7 @@ class _MyOrdersState extends State<MyOrders> {
           elevation: 2,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              STM().directionRoute(widget.index, ctx);
             },
             child: Icon(
               Icons.arrow_back,

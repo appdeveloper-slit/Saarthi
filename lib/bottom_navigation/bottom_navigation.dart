@@ -27,12 +27,12 @@ Widget bottomBarLayout(ctx, index) {
         case 2:
           index == 2
               ? STM().replacePage(ctx, MyBooking())
-              : STM().redirect2page(ctx, MyBooking());
+              : STM().redirect2page(ctx, MyBooking(index: index == 1 ? 1 : 0));
           break;
         case 3:
           index == 3
               ? STM().replacePage(ctx, MyOrders())
-              : STM().redirect2page(ctx, MyOrders());
+              : STM().redirect2page(ctx, MyOrders(index: index == 2 ? 2 : 0,));
           break;
       }
     },

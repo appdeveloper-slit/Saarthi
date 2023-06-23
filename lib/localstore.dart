@@ -81,6 +81,7 @@ class Store {
     return result[0]['sum'].toString();
   }
 
+
   //get counter id
   static Future<String> getCounterId() async {
     var db = await Store.db();

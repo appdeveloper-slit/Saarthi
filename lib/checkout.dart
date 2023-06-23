@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:saarathi/coupons.dart';
 import 'package:saarathi/values/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'localstore.dart';
 import 'my_address.dart';
 
 class CheckOut extends StatefulWidget {
@@ -16,10 +18,45 @@ class CheckOut extends StatefulWidget {
 class _CheckOutState extends State<CheckOut> {
   late BuildContext ctx;
   bool isChecked = false;
-
   String?  sPayment;
   List<dynamic> paymentList = ["Online Payment",];
 
+  List<dynamic> addToCart = [];
+  bool isLoading = true;
+  String sTotalPrice = "0";
+  String? sUserid;
+  bool click = false;
+
+  void _refreshData() async {
+    var data = await Store.getItems();
+    var price = await Store.getTotalPrice();
+    setState(() {
+      addToCart = data;
+      isLoading = false;
+      sTotalPrice = price;
+    });
+  }
+
+  getSessionData() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    // var status = await OneSignal.shared.getDeviceState();
+    setState(() {
+      // sUserid = sp.getString('user_id');
+      // sUUID = status?.userId;
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        // getHome();
+        _refreshData();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSessionData();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     ctx = context;
@@ -72,78 +109,37 @@ class _CheckOutState extends State<CheckOut> {
                         ),
                       ),
                       SizedBox(
-                        height: 16,
+                        height: Dim().d16,
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                                child: Text('Dolo 650 mg',
+                      ListView.builder(itemCount: addToCart.length,shrinkWrap: true,physics: NeverScrollableScrollPhysics(),itemBuilder: (context,index){
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Dim().d16,vertical: Dim().d12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Expanded(flex:4,
+                                child: Text('${addToCart[index]['name'].toString()}',
                                     style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500))),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              'x1',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Expanded(
-                                child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      '₹ 30',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500),
-                                    ))),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 12,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                                child: Text('Dolo 650 mg',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500))),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              'x1',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Expanded(
-                                child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      '₹ 30',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500),
-                                    ))),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 12,
-                      )
+                                        fontSize: Dim().d14,
+                                        fontWeight: FontWeight.w300)),
+                              ),
+                              Expanded(flex:1,
+                                child: Text(
+                                  'x${addToCart[index]['counter'].toString()}',
+                                  style: TextStyle(
+                                      fontSize: Dim().d12, fontWeight: FontWeight.w400),
+                                ),
+                              ),
+                              Text(
+                                '₹ ${addToCart[index]['price']}',
+                                style: TextStyle(
+                                    fontSize: Dim().d14,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -312,7 +308,7 @@ class _CheckOutState extends State<CheckOut> {
                                       fontSize: 16, fontWeight: FontWeight.w400),
                                 ),
                                 Text(
-                                  '₹ 60',
+                                  '₹ ${sTotalPrice}',
                                   style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500),
@@ -396,7 +392,7 @@ class _CheckOutState extends State<CheckOut> {
                                   ),
                                 ),
                                 Text(
-                                  '₹ 60',
+                                  '₹ ${sTotalPrice}',
                                   style: Sty().largeText.copyWith(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
@@ -408,14 +404,12 @@ class _CheckOutState extends State<CheckOut> {
                         ],
                       ),
                     ),
-
                   ],
                 ),
               ),
               SizedBox(
                 height: 8,
               ),
-
               Card(
                 elevation: 1,
                 color: Color(0xFFFBFBFB),
@@ -445,7 +439,6 @@ class _CheckOutState extends State<CheckOut> {
                       Container(
                         color: Clr().white,
                         child: Column(
-
                           children: [
                             // RadioListTile<dynamic>(
                             //   dense: true,
@@ -477,6 +470,7 @@ class _CheckOutState extends State<CheckOut> {
                               onChanged: (value) {
                                 setState(() {
                                   sPayment = value!;
+                                  click = true;
                                 });
                               },
                               title: Transform.translate(
@@ -498,7 +492,7 @@ class _CheckOutState extends State<CheckOut> {
                 ),
               ),
               SizedBox(height: 24,),
-              SizedBox(
+              click ?  SizedBox(
                 height: 50,
                 width: 300,
                 child: ElevatedButton(
@@ -527,8 +521,7 @@ class _CheckOutState extends State<CheckOut> {
                         color: Clr().white,
                         fontWeight: FontWeight.w600,),
                     )),
-              ),
-
+              ) : Container(),
             ],
           ),
         ),
