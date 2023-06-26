@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:saarathi/checkout.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
@@ -38,7 +39,7 @@ class _ProductPageState extends State<ProductPage> {
     'Online Appointment',
     'Home Visit',
   ];
-
+  var success;
   List<dynamic> addToCart = [];
   bool isLoading = true;
   String sTotalPrice = "0";
@@ -207,46 +208,46 @@ class _ProductPageState extends State<ProductPage> {
                   height: Dim().d8,
                 ),
                 if (v['is_variant'] == 1)
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 25,
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            // STM().redirect2page(ctx, MyCart());
-                          },
-                          child: Text(
-                            'Pack Of 25',
-                            style: TextStyle(
-                                fontSize: 15, color: Color(0xffA6A6A6)),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Colors.white,
-                              side: BorderSide(
-                                  width: 1, color: Color(0xffA6A6A6)),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)))),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      ElevatedButton(
-                          onPressed: () {
-                            // STM().redirect2page(ctx, OTP());
-                          },
-                          style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Clr().primaryColor,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5))),
-                          child: Text(
-                            'Pack Of 50',
-                            style: Sty().mediumText.copyWith(
-                                color: Clr().white,
-                                fontWeight: FontWeight.w400),
-                          )),
-                    ],
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Dim().d20),
+                    child: Center(
+                      child: SizedBox(
+                          height: Dim().d44,
+                          child: ListView.builder(
+                              itemCount: v['medicine_variant'].length,
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                var pack = v['medicine_variant'][index];
+                                return Padding(
+                                  padding: EdgeInsets.only(right: Dim().d12,),
+                                  child: SizedBox(
+                                    width: Dim().d220,
+                                    child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+
+                                          });
+                                        },
+                                        child: Text(
+                                          '${pack['variant_name']}',
+                                          maxLines: 1,
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 15, color: Color(0xffA6A6A6)),
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor: Colors.white,
+                                            side: BorderSide(
+                                                width: 1, color: Color(0xffA6A6A6)),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5)))),
+                                  ),
+                                );
+                              })),
+                    ),
                   ),
                 if (v['is_variant'] == 1)
                   SizedBox(
@@ -347,7 +348,7 @@ class _ProductPageState extends State<ProductPage> {
                                 ],
                               ),
                             )
-                          :  message.toString().contains("Yeah") ?  SizedBox(
+                          : SizedBox(
                               height: Dim().d44,
                               child: ElevatedButton(
                                   onPressed: () {
@@ -381,7 +382,7 @@ class _ProductPageState extends State<ProductPage> {
                                         color: Clr().white,
                                         fontWeight: FontWeight.w400),
                                   )),
-                            ) : Container()
+                            )
                     ],
                   ),
                 ),
@@ -436,7 +437,11 @@ class _ProductPageState extends State<ProductPage> {
                               hintText: "Enter Pincode Here",
                               suffixIcon: InkWell(
                                 onTap: () {
-                                  checkAvailbility();
+                                  pincodeCtrl.text.isEmpty
+                                      ? Fluttertoast.showToast(
+                                          msg: 'Enter the pincode',
+                                          gravity: ToastGravity.CENTER)
+                                      : checkAvailbility();
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.all(16),
@@ -463,7 +468,7 @@ class _ProductPageState extends State<ProductPage> {
                                 '${message}',
                                 style: Sty().smallText.copyWith(
                                     fontSize: 12,
-                                    color: message.toString().contains("Sorry")
+                                    color: success == false
                                         ? Clr().errorRed
                                         : Clr().primaryColor),
                               ),
@@ -476,39 +481,42 @@ class _ProductPageState extends State<ProductPage> {
               ],
             ),
             SizedBox(
-              height: 12,
+              height: Dim().d12,
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: Dim().d8, horizontal: Dim().d16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Description',
-                    style:
-                        Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(
-                    height: Dim().d12,
-                  ),
-                  Text(
-                    '${v['description'].toString()}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      shadows: [
-                        Shadow(offset: Offset(0, 0), color: Colors.black)
+            v['description'] == null
+                ? Container()
+                : Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: Dim().d8, horizontal: Dim().d16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Description',
+                          style: Sty()
+                              .mediumText
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(
+                          height: Dim().d12,
+                        ),
+                        Text(
+                          '${v['description'].toString()}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            shadows: [
+                              Shadow(offset: Offset(0, 0), color: Colors.black)
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
             SizedBox(
               height: Dim().d32,
             ),
             addToCart.map((e) => e['idd']).contains(v['id'])
-                ?  Container(
+                ? Container(
                     decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
@@ -537,29 +545,29 @@ class _ProductPageState extends State<ProductPage> {
                                 color: Clr().white),
                           ),
                           SizedBox(
-                                  height: 30,
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        STM().redirect2page(ctx, MyCart());
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        elevation: 0,
-                                        backgroundColor: Clr().white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5)),
-                                      ),
-                                      child: Text(
-                                        'Continue',
-                                        style: Sty().smallText.copyWith(
-                                            color: Clr().primaryColor,
-                                            fontWeight: FontWeight.w600),
-                                      )),
-                                )
+                            height: 30,
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  STM().redirect2page(ctx, MyCart());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Clr().white,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)),
+                                ),
+                                child: Text(
+                                  'Continue',
+                                  style: Sty().smallText.copyWith(
+                                      color: Clr().primaryColor,
+                                      fontWeight: FontWeight.w600),
+                                )),
+                          )
                         ],
                       ),
                     ),
-                  ) : Container()
+                  )
+                : Container()
           ],
         ),
       ),
@@ -624,7 +632,7 @@ class _ProductPageState extends State<ProductPage> {
     });
     var result = await STM().postWithToken(ctx, Str().processing,
         'check_availability', body, usertoken, 'customer');
-    var success = result['success'];
+    success = result['success'];
     if (success) {
       setState(() {
         message = result['message'];

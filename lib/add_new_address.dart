@@ -9,7 +9,8 @@ import '../values/styles.dart';
 import 'my_address.dart';
 
 class AddNewAddress extends StatefulWidget {
-
+  final details;
+  const AddNewAddress({super.key, this.details});
   @override
   State<AddNewAddress> createState() => _AddNewAddressState();
 }
@@ -18,27 +19,51 @@ class _AddNewAddressState extends State<AddNewAddress> {
   late BuildContext ctx;
   TextEditingController mobileCtrl = TextEditingController();
   TextEditingController firstnameCtrl = TextEditingController();
+  TextEditingController pincodeCtrl = TextEditingController();
+  TextEditingController addressCtrl = TextEditingController();
   dynamic getuserStatus;
   List<dynamic> cityList = [];
-  List<dynamic> statelist = [];
+  List<dynamic> stateList = [];
   List<dynamic> pincodeList = [];
-  String? stateValue;
-  String? cityValue;
-  String? pincode;
+  int? stateValue,cityValue;
+  String? usertoken;
+  String? pincode, _dropdownError, _dropdownError1;
   final formkey = GlobalKey<FormState>();
-   // final _formKey = GlobalKey<FormState>();
+
+  // final _formKey = GlobalKey<FormState>();
   bool again = false;
-
-
   String? sUserid;
 
+  getSessionData() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      firstnameCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['name']);
+      mobileCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['mobile']);
+      addressCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['address']);
+      pincodeCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['pincode']);
+
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getCity();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getSessionData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().back2Previous(ctx);
+        STM().replacePage(ctx,MyAddressPage());
         return false;
       },
       child: Scaffold(
@@ -46,11 +71,10 @@ class _AddNewAddressState extends State<AddNewAddress> {
         // bottomNavigationBar: bottomBarLayout(ctx, 2),
         appBar: AppBar(
           elevation: 2,
-
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().back2Previous(ctx);
+              STM().replacePage(ctx,MyAddressPage());
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -69,12 +93,10 @@ class _AddNewAddressState extends State<AddNewAddress> {
           child: Form(
             key: formkey,
             child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 12),
               children: [
                 SizedBox(
                   height: Dim().d20,
                 ),
-
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d20),
                   child: TextFormField(
@@ -85,12 +107,11 @@ class _AddNewAddressState extends State<AddNewAddress> {
                         return 'This field is required';
                       }
                     },
-                    decoration: Sty().TextFormFieldUnderlineStyle.copyWith(
+                    decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
                         hintText: 'Name',
-                        hintStyle: TextStyle(color: Colors.black)),
+                        hintStyle: TextStyle(color: Clr().hintColor)),
                   ),
                 ),
-
                 SizedBox(
                   height: Dim().d20,
                 ),
@@ -98,7 +119,6 @@ class _AddNewAddressState extends State<AddNewAddress> {
                   padding: EdgeInsets.symmetric(horizontal: Dim().d20),
                   child: TextFormField(
                     controller: mobileCtrl,
-
                     maxLength: 10,
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -111,56 +131,10 @@ class _AddNewAddressState extends State<AddNewAddress> {
                         return null;
                       }
                     },
-                    decoration: Sty().TextFormFieldUnderlineStyle.copyWith(
+                    decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
                         counterText: "",
                         hintText: 'Mobile Number',
-                        hintStyle: TextStyle(color: Clr().black)),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: Dim().d20),
-                  child: Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        DropdownButtonHideUnderline(
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                              horizontal: Dim().d14,
-                            )),
-                            value: stateValue,
-                            isExpanded: true,
-                            hint: Text(
-                              stateValue ?? 'State',
-                              style: Sty().mediumText.copyWith(
-                                    color: Color(0xff2D2D2D),
-                                  ),
-                            ),
-                            icon: Icon(Icons.arrow_drop_down),
-                            style: TextStyle(color: Color(0xff2D2D2D)),
-                            items: statelist.map((string) {
-                              return DropdownMenuItem<String>(
-                                value: string['id'].toString(),
-                                child: Text(string['name'].toString(),
-                                    style: Sty()
-                                        .mediumText
-                                        .copyWith(color: Clr().black)),
-                              );
-                            }).toList(),
-                            onChanged: (v) {
-                              // STM().redirect2page(ctx, Home());
-                              setState(() {
-                                stateValue = v!;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                        hintStyle: TextStyle(color: Clr().hintColor)),
                   ),
                 ),
                 SizedBox(
@@ -168,126 +142,180 @@ class _AddNewAddressState extends State<AddNewAddress> {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d20),
-                  child: Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        DropdownButtonHideUnderline(
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: Dim().d14,
-                                )),
-                            isExpanded: true,
-                            hint: Text(
-                              cityValue ?? 'City',
-                              style: Sty().mediumText.copyWith(
-                                color: Color(0xff2D2D2D),
-                              ),
-                            ),
-                            icon: Icon(Icons.arrow_drop_down),
-                            style: TextStyle(color: Color(0xff2D2D2D)),
-                            items: cityList.map((string) {
-                              return DropdownMenuItem<String>(
-                                value: string['id'].toString(),
-                                child: Text(string['name'].toString(),
-                                    style: Sty()
-                                        .mediumText
-                                        .copyWith(color: Clr().black)),
-                              );
-                            }).toList(),
-                            onChanged: (v) {
-                              // STM().redirect2page(ctx, Home());
-                               setState(() {
-                                cityValue = v!;
-                               });
-                            },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField(
+                          decoration: Sty().TextFormFieldOutlineDarkStyle,
+                          value: stateValue,
+                          isExpanded: true,
+                          hint: Text(
+                            'State',
+                            style: Sty().mediumText.copyWith(
+                                  color: stateValue == null
+                                      ? Clr().hintColor
+                                      : Clr().black,
+                                ),
                           ),
+                          icon: Icon(Icons.arrow_drop_down),
+                          style: TextStyle(color: Color(0xff2D2D2D)),
+                          items: stateList.map((string) {
+                            return DropdownMenuItem(
+                              value: string['id'],
+                              child: Text(string['name'],
+                                  style: Sty()
+                                      .mediumText
+                                      .copyWith(color: Clr().black)),
+                            );
+                          }).toList(),
+                          onChanged: (v) {
+                            // STM().redirect2page(ctx, Home());
+                            setState(() {
+                              stateValue = v as int?;
+                              _dropdownError1 = null;
+                              int position = int.parse(stateValue.toString());
+                              cityList = stateList[position - 1]['city'];
+                              cityValue = null;
+                            });
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+                _dropdownError1 == null
+                    ? Container()
+                    : SizedBox(height: Dim().d12),
+                _dropdownError1 == null
+                    ? SizedBox.shrink()
+                    : Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dim().d32),
+                        child: Text('${_dropdownError1}',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(color: Clr().errorRed)),
+                      ),
                 SizedBox(
-                  height: 20,
+                  height: Dim().d20,
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d20),
-                  child: Container(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        DropdownButtonHideUnderline(
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: Dim().d14,
-                                )),
-                            isExpanded: true,
-                            hint: Text(
-                              pincode ?? 'Pincode',
-                              style: Sty().mediumText.copyWith(
-                                color: Color(0xff2D2D2D),
-                              ),
-                            ),
-                            icon: Icon(Icons.arrow_drop_down),
-                            style: TextStyle(color: Color(0xff2D2D2D)),
-                            items: pincodeList.map((string) {
-                              return DropdownMenuItem<String>(
-                                value: string['pincode'].toString(),
-                                child: Text(string['pincode'].toString(),
-                                    style: Sty()
-                                        .mediumText
-                                        .copyWith(color: Clr().black)),
-                              );
-                            }).toList(),
-                            onChanged: (v) {
-                              pincode = v!;
-                            },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField(
+                          decoration: Sty().TextFormFieldOutlineDarkStyle,
+                          isExpanded: true,
+                          value: cityValue,
+                          hint: Text(
+                             'City',
+                            style: Sty().mediumText.copyWith(
+                                  color: cityValue == null
+                                      ? Clr().hintColor
+                                      : Clr().black,
+                                ),
                           ),
+                          icon: Icon(Icons.arrow_drop_down),
+                          style: TextStyle(color: Color(0xff2D2D2D)),
+                          items: cityList.map((string) {
+                            return DropdownMenuItem(
+                              value: string['id'],
+                              child: Text(string['name'],
+                                  style: Sty()
+                                      .mediumText
+                                      .copyWith(color: Clr().black)),
+                            );
+                          }).toList(),
+                          onChanged: (v) {
+                            // STM().redirect2page(ctx, Home());
+                            setState(() {
+                              cityValue = v as int?;
+                              _dropdownError = null;
+                            });
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                ),
+                _dropdownError == null
+                    ? Container()
+                    : SizedBox(height: Dim().d12),
+                _dropdownError == null
+                    ? SizedBox.shrink()
+                    : Padding(
+                        padding: EdgeInsets.symmetric(horizontal: Dim().d32),
+                        child: Text('${_dropdownError}',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(color: Clr().errorRed)),
+                      ),
+                SizedBox(
+                  height: Dim().d20,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d20),
+                  child: TextFormField(
+                    keyboardType: TextInputType.name,
+                    controller: addressCtrl,
+                    maxLines: 3,
+                    textInputAction: TextInputAction.newline,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Address is required';
+                      }
+                    },
+                    decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
+                        hintText: 'Address',
+                        hintStyle: TextStyle(color: Clr().hintColor)),
                   ),
                 ),
                 SizedBox(
-                  height: Dim().d40,
+                  height: Dim().d20,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: Dim().d16,),
+                  padding: EdgeInsets.symmetric(horizontal: Dim().d20),
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    controller: pincodeCtrl,
+                    maxLength: 6,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Pincode is required';
+                      }
+                    },
+                    decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
+                        hintText: 'Pincode',
+                        counterText: '',
+                        hintStyle: TextStyle(color: Clr().hintColor)),
+                  ),
+                ),
+                SizedBox(
+                  height: Dim().d20,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dim().d16,
+                  ),
                   child: SizedBox(
                     height: 50,
-                    width: 300,
                     child: ElevatedButton(
-
                         onPressed: () {
-                          // STM().redirect2page(ctx, Home());
-                          // if (formKey.currentState!
-                          //     .validate()) {
-                          //   STM()
-                          //       .checkInternet(
-                          //       context, widget)
-                          //       .then((value) {
-                          //     if (value) {
-                          //       sendOtp();
-                          //     }
-                          //   });
-                          // }
-                          if (formkey.currentState!.validate()) {
-                            // updateUser();
-                            // widget.sType == 'addAddress'? getaddAddress():getUpdateAddress();
-                          }
+                          _validateForm(ctx);
                         },
-                        style: ElevatedButton.styleFrom( elevation: 0,
+                        style: ElevatedButton.styleFrom(
+                            elevation: 0,
                             backgroundColor: Clr().primaryColor,
                             shape: RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.circular(10))),
+                                borderRadius: BorderRadius.circular(10))),
                         child: Text(
                           'Save location',
                           style: Sty().mediumText.copyWith(
-                            color: Clr().white,
-                            fontWeight: FontWeight.w600,),
+                                color: Clr().white,
+                                fontWeight: FontWeight.w600,
+                              ),
                         )),
                   ),
                 ),
@@ -297,6 +325,61 @@ class _AddNewAddressState extends State<AddNewAddress> {
         ),
       ),
     );
+  }
+
+  _validateForm(ctx) {
+    bool _isValid = formkey.currentState!.validate();
+
+    if (cityValue == null) {
+      setState(() => _dropdownError = "Please select city");
+      _isValid = false;
+    }
+    if (stateValue == null) {
+      setState(() {
+        _dropdownError1 = "Please select state";
+      });
+      _isValid = false;
+    }
+    if (_isValid) {
+      addAddress();
+    }
+  }
+
+  /// add address
+  void addAddress() async {
+    FormData body = FormData.fromMap({
+      'id': widget.details == null ? '' : widget.details['id'],
+      'state_id': stateValue,
+      'city_id': cityValue,
+      'pincode': pincodeCtrl.text,
+      'address': addressCtrl.text,
+      'name': firstnameCtrl.text,
+      'mobile': mobileCtrl.text,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing,
+       widget.details == null ? 'add_shipping_address' : 'update_shipping_address', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      STM().successDialogWithReplace(ctx, message, MyAddressPage());
+    } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+
+  void getCity() async {
+    var result = await STM().getOpen(ctx, Str().loading, 'get_cities');
+    var success = result['success'];
+    if(success){
+      setState(() {
+        stateList = result['cities'];
+        stateValue = widget.details == null ? null : widget.details['state_id'];
+        int position = int.parse(stateValue.toString());
+        cityList = stateList[position - 1]['city'];
+        cityValue = widget.details == null ? null : widget.details['city_id'];
+      });
+    }
   }
 
 }

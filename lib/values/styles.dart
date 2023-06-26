@@ -158,7 +158,7 @@ class Sty {
     ),
     enabledBorder: OutlineInputBorder(
       borderSide: BorderSide(
-        color: Clr().lightGrey,
+        color: Colors.black38,
       ),
       borderRadius: BorderRadius.circular(
         Dim().d12,
@@ -166,7 +166,7 @@ class Sty {
     ),
     focusedBorder: OutlineInputBorder(
       borderSide: BorderSide(
-        color: Clr().black,
+        color: Colors.black38,
       ),
       borderRadius: BorderRadius.circular(
         Dim().d12,
