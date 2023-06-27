@@ -187,7 +187,8 @@ class _HomeState extends State<Home> {
         SizedBox(
           width: Dim().d12,
         ),
-        Expanded(
+        SizedBox(
+          width: Dim().d100,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: locationValue,
@@ -476,15 +477,13 @@ class _HomeState extends State<Home> {
         ),
         SizedBox(
           height: Dim().d300,
-          child: Expanded(
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: doctorsList.length,
-              itemBuilder: (context, index) {
-                return doctorsLayout(ctx, index, doctorsList);
-              },
-            ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            itemCount: doctorsList.length,
+            itemBuilder: (context, index) {
+              return doctorsLayout(ctx, index, doctorsList);
+            },
           ),
         ),
         SizedBox(
@@ -975,61 +974,64 @@ class _HomeState extends State<Home> {
                 SizedBox(
                   width: Dim().d12,
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'Dr.${list[index]['first_name']} ${list[index]['last_name']}',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          // Wrap(
-                          //   crossAxisAlignment: WrapCrossAlignment.center,
-                          //   children: [
-                          //     SvgPicture.asset('assets/map_pin.svg'),
-                          //     SizedBox(
-                          //       width: 4,
-                          //     ),
-                          //     Text(
-                          //       '1 KM',
-                          //       style: Sty().smallText.copyWith(
-                          //           color: Clr().primaryColor,
-                          //           fontWeight: FontWeight.w600),
-                          //     )
-                          //   ],
-                          // )
-                        ],
-                      ),
-                      list[index]['professional'] == null
-                          ? Container()
-                          : GridView.builder(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Dr.${list[index]['first_name']} ${list[index]['last_name']}',
+                          style: Sty()
+                              .mediumText
+                              .copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        // Wrap(
+                        //   crossAxisAlignment: WrapCrossAlignment.center,
+                        //   children: [
+                        //     SvgPicture.asset('assets/map_pin.svg'),
+                        //     SizedBox(
+                        //       width: 4,
+                        //     ),
+                        //     Text(
+                        //       '1 KM',
+                        //       style: Sty().smallText.copyWith(
+                        //           color: Clr().primaryColor,
+                        //           fontWeight: FontWeight.w600),
+                        //     )
+                        //   ],
+                        // )
+                      ],
+                    ),
+                    list[index]['professional'] == null
+                        ? Container()
+                        : SizedBox(
+                          width: Dim().d200,
+                          child: GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: specialityList.length > 1
                                   ? 2
                                   : specialityList.length,
                               gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3, mainAxisExtent: 20.0),
+                                   SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3, mainAxisExtent: Dim().d24),
                               itemBuilder: (context, index2) {
                                 return Text(specialityList[index2],
                                     style: Sty()
                                         .smallText
                                         .copyWith(fontWeight: FontWeight.w400));
                               }),
-                      SizedBox(
-                        height: Dim().d4,
-                      ),
-                      list[index]['languages'] == null
-                          ? Container()
-                          : Text(
+                        ),
+                    SizedBox(
+                      height: Dim().d4,
+                    ),
+                    list[index]['languages'] == null
+                        ? Container()
+                        : SizedBox(
+                          width: Dim().d200,
+                          child: Text(
                               'Speaks : ${list[index]['languages'].toString().replaceAll('[', '').replaceAll(']', '')}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1037,89 +1039,85 @@ class _HomeState extends State<Home> {
                                   .smallText
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
-                      SizedBox(
-                        height: Dim().d4,
-                      ),
-                      Text(
-                        'Starts at : ₹ ${list[index]['appointment_details'][0]['charges']}',
-                        style: Sty()
-                            .smallText
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                      SizedBox(
-                        height: Dim().d4,
-                      ),
-                      Text(
-                        list[index]['professional'] == null
-                            ? ''
-                            : '${list[index]['professional']['experience']} Years of experience',
-                        style: Sty()
-                            .smallText
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                    ],
-                  ),
+                        ),
+                    SizedBox(
+                      height: Dim().d4,
+                    ),
+                    Text(
+                      'Starts at : ₹ ${list[index]['appointment_details'][0]['charges']}',
+                      style: Sty()
+                          .smallText
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                    SizedBox(
+                      height: Dim().d4,
+                    ),
+                    Text(
+                      list[index]['professional'] == null
+                          ? ''
+                          : '${list[index]['professional']['experience']} Years of experience',
+                      style: Sty()
+                          .smallText
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                  ],
                 ),
               ],
             ),
-            Expanded(
-              child: Row(
-                children: [
-                  typelist.contains('Online Consultation')
-                      ? Row(
-                          children: [
-                            SvgPicture.asset('assets/online_consultation.svg'),
-                            SizedBox(
-                              width: 6,
-                            ),
-                            Text(
-                              'Online Consultation',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        )
-                      : Container(),
-                  SizedBox(
-                    width: 16,
-                  ),
-                  typelist.contains('OPD')
-                      ? Row(
-                          children: [
-                            SvgPicture.asset('assets/opd.svg'),
-                            SizedBox(
-                              width: 6,
-                            ),
-                            Text(
-                              'OPD',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        )
-                      : Container(),
-                ],
-              ),
+            Row(
+              children: [
+                typelist.contains('Online Consultation')
+                    ? Row(
+                        children: [
+                          SvgPicture.asset('assets/online_consultation.svg'),
+                          SizedBox(
+                            width: 6,
+                          ),
+                          Text(
+                            'Online Consultation',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      )
+                    : Container(),
+                SizedBox(
+                  width: 16,
+                ),
+                typelist.contains('OPD')
+                    ? Row(
+                        children: [
+                          SvgPicture.asset('assets/opd.svg'),
+                          SizedBox(
+                            width: 6,
+                          ),
+                          Text(
+                            'OPD',
+                            style: Sty()
+                                .mediumText
+                                .copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      )
+                    : Container(),
+              ],
             ),
             typelist.contains('Home Visit')
-                ? Expanded(
-                  child: Row(
-                      children: [
-                        SvgPicture.asset('assets/home_visit.svg'),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        Text(
-                          'Home Visit',
-                          style: Sty()
-                              .mediumText
-                              .copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                )
+                ? Row(
+                    children: [
+                      SvgPicture.asset('assets/home_visit.svg'),
+                      SizedBox(
+                        width: 6,
+                      ),
+                      Text(
+                        'Home Visit',
+                        style: Sty()
+                            .mediumText
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  )
                 : Container(),
             SizedBox(
               height: 50,
