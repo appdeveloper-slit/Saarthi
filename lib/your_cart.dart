@@ -24,8 +24,8 @@ class _MyCartState extends State<MyCart> {
   String? sUserid;
 
   Future<void> _updateItem(
-      idd, name, image, price, actualPrice, counter) async {
-    await Store.updateItem(idd, name, image, price, actualPrice, counter);
+      medicine_id, varientid,name, image, price,actualPrice, counter) async {
+    await Store.updateItem(medicine_id, varientid,name, image, price, actualPrice, counter);
   }
 
   void _refreshData() async {
@@ -35,6 +35,7 @@ class _MyCartState extends State<MyCart> {
       addToCart = data;
       isLoading = false;
       sTotalPrice = price;
+      print(addToCart);
     });
   }
 
@@ -137,6 +138,7 @@ class _MyCartState extends State<MyCart> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                   Align(
+                                    alignment: Alignment.centerRight,
                                     child: InkWell(
                                       child: SvgPicture.asset(
                                         'assets/delete.svg',
@@ -144,13 +146,13 @@ class _MyCartState extends State<MyCart> {
                                       onTap: () {
                                         setState(() {
                                           Store.deleteItem(
-                                            addToCart[index]['idd'],
+                                            addToCart[index]['medicine_id'],
+                                            addToCart[index]['varientid']
                                           );
                                           _refreshData();
                                         });
                                       },
                                     ),
-                                    alignment: Alignment.centerRight,
                                   ),
                                   Text('${addToCart[index]['name'].toString()}',
                                       overflow: TextOverflow.ellipsis,
@@ -297,7 +299,8 @@ class _MyCartState extends State<MyCart> {
     var newPrice = price - acutal;
     if (counter > 0) {
       _updateItem(
-              addToCart[index]['idd'],
+              addToCart[index]['medicine_id'],
+              addToCart[index]['varientid'] ?? 0,
               addToCart[index]['name'].toString(),
               addToCart[index]['image'].toString(),
               newPrice.toString(),
@@ -319,7 +322,8 @@ class _MyCartState extends State<MyCart> {
     counter++;
     var newPrice = price + acutal;
     _updateItem(
-            addToCart[index]['idd'],
+            addToCart[index]['medicine_id'],
+            addToCart[index]['varientid'] ?? 0,
             addToCart[index]['name'].toString(),
             addToCart[index]['image'].toString(),
             newPrice.toString(),

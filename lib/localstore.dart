@@ -9,7 +9,9 @@ class Store {
   static Future<void> createTables(sql.Database database) async {
     await database.execute(""" 
     CREATE TABLE items(
-    idd INTEGER unique,
+    idd INTEGER AUTO_INCREMENT,
+    medicine_id INTEGER,
+    varientid INTEGER,
     name TEXT,
     image TEXT,
     price TEXT,
@@ -22,10 +24,10 @@ class Store {
 
   // open databse
   static Future<sql.Database> db() async {
-    return sql.openDatabase('cart.db', version: 1,
+    return sql.openDatabase('cart.db', version: 7,
         onCreate: (sql.Database database, int version) async {
-          await createTables(database);
-        });
+      await createTables(database);
+    });
   }
 
   // id exists
@@ -39,37 +41,38 @@ class Store {
   static Future<bool> isProductExist(int id) async {
     var db = await Store.db();
     var result =
-    await db.rawQuery('SELECT EXISTS(SELECT 1 FROM items WHERE idd="$id")');
+        await db.rawQuery('SELECT EXISTS(SELECT 1 FROM items WHERE medicine_id="$id")');
     int? exists = Sqflite.firstIntValue(result);
     return exists == 1;
   }
 
   //insert data into databse
-  static Future<int> createItem(int idd, String name, String image, String price, String actualPrice, int counter) async {
+  static Future<int> createItem(int medicine_id, int varientid, String name,
+      String image, String price, String actualPrice, int counter) async {
     var db = await Store.db();
     var data = {
-      'idd': idd,
+      'medicine_id': medicine_id,
+      'varientid': varientid,
       'name': name,
       'image': image,
       'price': price,
       'actualPrice': actualPrice,
       'counter': counter,
     };
-    var id = await db.insert('items', data,
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    var id = await db.insert('items', data);
     return id;
   }
 
   // get the data
   static Future<List<dynamic>> getItems() async {
     var db = await Store.db();
-    return db.query('items', orderBy: "idd");
+    return db.query('items', orderBy: "medicine_id");
   }
 
   // get the data
   static Future<List<Map<String, Object?>>> getIds() async {
     var db = await Store.db();
-    var result = await db.rawQuery("SELECT idd as data1 FROM items");
+    var result = await db.rawQuery("SELECT medicine_id as data1 FROM items");
     print(result);
     return result;
   }
@@ -81,22 +84,23 @@ class Store {
     return result[0]['sum'].toString();
   }
 
-
   //get counter id
   static Future<String> getCounterId() async {
     var db = await Store.db();
     var result =
-    await db.rawQuery("SELECT * FROM items ORDER BY counter LIMIT 1;");
+        await db.rawQuery("SELECT * FROM items ORDER BY counter LIMIT 1;");
     print(result);
     return result[0]['sum'].toString();
   }
 
   // update item
 
-  static Future<int> updateItem(int idd, String name, String image, String price, String actualPrice, int counter) async {
+  static Future<int> updateItem(int medicine_id, int varientid, String name,
+      String image, String price, String actualPrice, int counter) async {
     var db = await Store.db();
     var data = {
-      'idd': idd,
+      'medicine_id': medicine_id,
+      'varientid': varientid,
       'name': name,
       'image': image,
       'price': price,
@@ -104,14 +108,14 @@ class Store {
       'counter': counter,
     };
     var result =
-    await db.update('items', data, where: "idd = ?", whereArgs: [idd]);
+        await db.update('items', data, where: varientid != 0 ? "varientid = ?" :"medicine_id = ?", whereArgs: [varientid != 0 ? varientid : medicine_id]);
     return result;
   }
 
   // delete items
-  static Future<void> deleteItem(int id) async {
+  static Future<void> deleteItem(int medicine_id,int varientid) async {
     var db = await Store.db();
-    await db.delete("items", where: "idd = ?", whereArgs: [id]);
+    await db.delete("items", where: varientid != 0 ? "varientid = ?" :"medicine_id = ?", whereArgs: [varientid != 0 ? varientid : medicine_id]);
   }
 
   // delete items

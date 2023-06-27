@@ -26,8 +26,8 @@ class _PharmacyState extends State<Pharmacy> {
   List<dynamic> addToCart = [];
 
   Future<void> _updateItem(
-      idd, name, image, price, actualPrice, counter) async {
-    await Store.updateItem(idd, name, image, price, actualPrice, counter);
+      medicine_id, varientid,name, image, price, actualPrice, counter) async {
+    await Store.updateItem(medicine_id, varientid,name, image, price, actualPrice, counter);
   }
 
   void _refreshData() async {
@@ -39,8 +39,8 @@ class _PharmacyState extends State<Pharmacy> {
     });
   }
 
-  Future<void> _addItem(idd, name, image, price, actualPrice, counter) async {
-    await Store.createItem(idd, name, image, price, actualPrice, counter);
+  Future<void> _addItem(medicine_id, varientid,name, image, price, actualPrice, counter) async {
+    await Store.createItem(medicine_id, varientid,name, image, price, actualPrice, counter);
   }
   String? usertoken, sUUID;
 
@@ -206,13 +206,14 @@ class _PharmacyState extends State<Pharmacy> {
                                   onPressed: () {
                                     setState(() {
                                       _refreshData();
-                                      addToCart.map((e) => e['idd']).contains(pharmacyList[index]['id'])
+                                      addToCart.map((e) => e['medicine_id']).contains(pharmacyList[index]['id'])
                                           ? Fluttertoast.showToast(
                                               msg: 'Item is already added in cart',
                                               toastLength: Toast.LENGTH_SHORT,
                                               gravity: ToastGravity.CENTER)
                                           : _addItem(
                                               pharmacyList[index]['id'],
+                                              0,
                                               pharmacyList[index]['name']
                                                   .toString(),
                                               pharmacyList[index]['image']

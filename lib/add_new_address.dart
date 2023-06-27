@@ -374,10 +374,12 @@ class _AddNewAddressState extends State<AddNewAddress> {
     if(success){
       setState(() {
         stateList = result['cities'];
-        stateValue = widget.details == null ? null : widget.details['state_id'];
-        int position = int.parse(stateValue.toString());
-        cityList = stateList[position - 1]['city'];
-        cityValue = widget.details == null ? null : widget.details['city_id'];
+        if(widget.details != null){
+          stateValue = widget.details['state_id'];
+          int position = int.parse(stateValue.toString());
+          cityList = stateList[position - 1]['city'];
+          cityValue = widget.details['city_id'];
+        }
       });
     }
   }

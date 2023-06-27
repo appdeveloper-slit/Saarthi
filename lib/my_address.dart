@@ -80,7 +80,7 @@ class _MyAddressPageState extends State<MyAddressPage> {
               children: [
                 InkWell(
                   onTap: () {
-                    STM().redirect2page(ctx, AddNewAddress());
+                    STM().replacePage(ctx, AddNewAddress());
                   },
                   child: Card(
                     color: Color(0xffECECEC).withOpacity(0.1),
