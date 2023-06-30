@@ -101,41 +101,43 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                 SizedBox(
                   width: Dim().d24,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Appointment ID : #${v['appointment_uid']}',
-                      style: Sty()
-                          .mediumText
-                          .copyWith(
-                          color: Clr().primaryColor,
-                          fontWeight: FontWeight.w400),
-                    ),
-                    SizedBox(height: Dim().d4,),
-                    Text(
-                      '${v['hcp']['first_name']} ${v['hcp']['last_name']}',
-                      style: Sty()
-                          .mediumText
-                          .copyWith(fontWeight: FontWeight.w400),
-                    ),
-                    SizedBox(height: Dim().d4,),
-                    Text(
-                      v['hcp']['professional']['speciality_name'][0]['name'],
-                      style: Sty()
-                          .mediumText
-                          .copyWith(fontWeight: FontWeight.w400),
-                    ),
-                    SizedBox(height: Dim().d4,),
-                    Text(
-                      v['status'] == '0' ? 'Pending' :  v['status'] == '1' ? 'Completed' : 'Cancelled',
-                      style: Sty()
-                          .mediumText
-                          .copyWith(
-                          color: v['status'] == '0' ? Color(0xffFFC107) : v['status'] == '1' ? Clr().green : Clr().red,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Appointment ID : #${v['appointment_uid']}',
+                        style: Sty()
+                            .mediumText
+                            .copyWith(
+                            color: Clr().primaryColor,
+                            fontWeight: FontWeight.w400),
+                      ),
+                      SizedBox(height: Dim().d4,),
+                      Text(
+                        '${v['hcp']['first_name']} ${v['hcp']['last_name']}',
+                        style: Sty()
+                            .mediumText
+                            .copyWith(fontWeight: FontWeight.w400),
+                      ),
+                      SizedBox(height: Dim().d4,),
+                      Text(
+                        v['hcp']['professional']['speciality_name'][0]['name'],
+                        style: Sty()
+                            .mediumText
+                            .copyWith(fontWeight: FontWeight.w400),
+                      ),
+                      SizedBox(height: Dim().d4,),
+                      Text(
+                        v['status'] == '0' ? 'Pending' :  v['status'] == '1' ? 'Completed' : 'Cancelled',
+                        style: Sty()
+                            .mediumText
+                            .copyWith(
+                            color: v['status'] == '0' ? Color(0xffFFC107) : v['status'] == '1' ? Clr().green : Clr().red,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),

@@ -412,7 +412,7 @@ class _ProductPageState extends State<ProductPage> {
                                     _refreshData();
                                     _addItem(
                                       v['id'],
-                                      varientid ?? 0,
+                                      varientid ?? -1,
                                       varientname ?? v['name'].toString(),
                                       v['image'].toString(),
                                       varientsellingprice ??
@@ -426,7 +426,7 @@ class _ProductPageState extends State<ProductPage> {
                                           msg: 'Item added to cart',
                                           toastLength: Toast.LENGTH_SHORT,
                                           gravity: ToastGravity.CENTER);
-                                      print(addToCart.where((e) => e['varientid'] != 0 ? e['varientid'] == varientid : e['medicine_id'] == v['id']));
+                                      print(addToCart[position]['price']);
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -436,7 +436,7 @@ class _ProductPageState extends State<ProductPage> {
                                         borderRadius: BorderRadius.circular(5)),
                                   ),
                                   child: Text(
-                                    'Add to Cart',
+                                     'Add to Cart',
                                     style: Sty().smallText.copyWith(
                                         fontSize: Dim().d14,
                                         color: Clr().white,
@@ -575,59 +575,58 @@ class _ProductPageState extends State<ProductPage> {
             SizedBox(
               height: Dim().d32,
             ),
-            addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id'])
-                ? Container(
-                    decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Clr().grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 12,
-                            offset:
-                                Offset(12, 0.5), // changes position of shadow
-                          ),
-                        ],
-                        color: Clr().primaryColor,
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(15),
-                            topLeft: Radius.circular(15))),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: Dim().d24, vertical: Dim().d16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '₹ ${addToCart.isEmpty ? 00 : addToCart[position]['price']}',
-                            style: Sty().mediumText.copyWith(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Clr().white),
-                          ),
-                          SizedBox(
-                            height: 30,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  STM().redirect2page(ctx, MyCart());
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor: Clr().white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
-                                ),
-                                child: Text(
-                                  'Continue',
-                                  style: Sty().smallText.copyWith(
-                                      color: Clr().primaryColor,
-                                      fontWeight: FontWeight.w600),
-                                )),
-                          )
-                        ],
+            if(addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id']))
+              Container(
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Clr().grey.withOpacity(0.5),
+                        spreadRadius: 1,
+                        blurRadius: 12,
+                        offset:
+                        Offset(12, 0.5), // changes position of shadow
                       ),
-                    ),
-                  )
-                : Container()
+                    ],
+                    color: Clr().primaryColor,
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(15),
+                        topLeft: Radius.circular(15))),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: Dim().d24, vertical: Dim().d16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '₹ ${addToCart.isEmpty ? 0.0 : addToCart[position]['price']}',
+                        style: Sty().mediumText.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Clr().white),
+                      ),
+                      SizedBox(
+                        height: 30,
+                        child: ElevatedButton(
+                            onPressed: () {
+                              STM().redirect2page(ctx, MyCart());
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: Clr().white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5)),
+                            ),
+                            child: Text(
+                              'Continue',
+                              style: Sty().smallText.copyWith(
+                                  color: Clr().primaryColor,
+                                  fontWeight: FontWeight.w600),
+                            )),
+                      )
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

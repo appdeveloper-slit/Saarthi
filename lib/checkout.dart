@@ -630,6 +630,12 @@ class CheckOutpage extends State<CheckOut> {
     var message = result['message'];
     if (success) {
       STM().successDialogWithAffinity(ctx, message, Home());
+      for(int a =0; a < addToCart.length; a++){
+        Store.deleteItem(
+            addToCart[a]['medicine_id'],
+            addToCart[a]['varientid']
+        );
+      }
     } else {
       STM().errorDialog(ctx, message);
     }

@@ -188,7 +188,7 @@ class _HomeState extends State<Home> {
           width: Dim().d12,
         ),
         SizedBox(
-          width: Dim().d100,
+          width: Dim().d80,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: locationValue,

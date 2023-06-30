@@ -101,7 +101,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                   width: MediaQuery
                       .of(context)
                       .size
-                      .width * 0.70,
+                      .width * 0.80,
                   decoration: BoxDecoration(
                     color: Colors.green[100],
                     borderRadius: BorderRadius.circular(
@@ -126,7 +126,6 @@ class _MyAppointmentsState extends State<MyAppointments>
                       Tab(
                         text: 'Upcoming',
                       ),
-
                       // second tab [you can add an icon using the icon property]
                       Tab(
                         text: 'Completed',
