@@ -641,8 +641,18 @@ class _ProductPageState extends State<ProductPage> {
   // remove item
   removeItem(index) {
     int counter = addToCart[index]['counter'];
-    var acutal = int.parse(addToCart[index]['actualPrice'].toString());
-    var price = int.parse(addToCart[index]['price'].toString());
+    var acutal;
+    try{
+      acutal = double.parse(addToCart[index]['actualPrice'].toString());
+    }catch(_) {
+      acutal = int.parse(addToCart[index]['actualPrice'].toString());
+    };
+    var price;
+    try{
+      price = double.parse(addToCart[index]['price'].toString());
+    }catch(_) {
+      price = int.parse(addToCart[index]['price'].toString());
+    };
     counter--;
     var newPrice = price - acutal;
     if (counter > 0) {
@@ -665,8 +675,18 @@ class _ProductPageState extends State<ProductPage> {
   // add item
   addItem(index) {
     int counter = addToCart[index]['counter'];
-    var acutal = int.parse(addToCart[index]['actualPrice'].toString());
-    var price = int.parse(addToCart[index]['price'].toString());
+    var acutal;
+    try{
+       acutal = double.parse(addToCart[index]['actualPrice'].toString());
+    }catch(_) {
+      acutal = int.parse(addToCart[index]['actualPrice'].toString());
+    };
+    var price;
+    try{
+      price = double.parse(addToCart[index]['price'].toString());
+    }catch(_) {
+      price = int.parse(addToCart[index]['price'].toString());
+    };
     counter++;
     var newPrice = price + acutal;
     if (counter > 0) {

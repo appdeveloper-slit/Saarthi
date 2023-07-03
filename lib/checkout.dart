@@ -39,7 +39,7 @@ class CheckOutpage extends State<CheckOut> {
   String sTotalPrice = "0";
   String? sUserid, address, usertoken, total, addressid;
   bool click = false;
-  int? discount;
+  var discount;
 
   void _refreshData() async {
     var data = await Store.getItems();
@@ -208,7 +208,7 @@ class CheckOutpage extends State<CheckOut> {
                   width: 300,
                   child: ElevatedButton(
                       onPressed: () {
-                        STM().redirect2page(ctx, MyAddressPage());
+                        STM().redirect2page(ctx, MyAddressPage(route: 1,));
                         // if (formKey.currentState!
                         //     .validate()) {
                         //   STM()
@@ -606,8 +606,11 @@ class CheckOutpage extends State<CheckOut> {
       setState(() {
         STM().displayToast(message);
         total = result['data'].toString();
-        discount =
-            int.parse(sTotalPrice) - int.parse(result['data'].toString());
+        try{
+          discount = double.parse(sTotalPrice.toString()) - double.parse(result['data'].toString());
+        }catch(_) {
+          discount = int.parse(sTotalPrice) - int.parse(result['data'].toString());
+        };
       });
     } else {
       STM().errorDialog(ctx, message);

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -10,7 +11,9 @@ import 'my_address.dart';
 
 class AddNewAddress extends StatefulWidget {
   final details;
+
   const AddNewAddress({super.key, this.details});
+
   @override
   State<AddNewAddress> createState() => _AddNewAddressState();
 }
@@ -25,8 +28,10 @@ class _AddNewAddressState extends State<AddNewAddress> {
   List<dynamic> cityList = [];
   List<dynamic> stateList = [];
   List<dynamic> pincodeList = [];
-  int? stateValue,cityValue;
+  int? stateValue, cityValue;
   String? usertoken;
+  String message = 'Check delivery availability in your pincode';
+  var success;
   String? pincode, _dropdownError, _dropdownError1;
   final formkey = GlobalKey<FormState>();
 
@@ -37,10 +42,14 @@ class _AddNewAddressState extends State<AddNewAddress> {
   getSessionData() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
-      firstnameCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['name']);
-      mobileCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['mobile']);
-      addressCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['address']);
-      pincodeCtrl = TextEditingController(text: widget.details == null ? '' : widget.details['pincode']);
+      firstnameCtrl = TextEditingController(
+          text: widget.details == null ? '' : widget.details['name']);
+      mobileCtrl = TextEditingController(
+          text: widget.details == null ? '' : widget.details['mobile']);
+      addressCtrl = TextEditingController(
+          text: widget.details == null ? '' : widget.details['address']);
+      pincodeCtrl = TextEditingController(
+          text: widget.details == null ? '' : widget.details['pincode']);
 
       usertoken = sp.getString('customerId') ?? '';
     });
@@ -63,7 +72,7 @@ class _AddNewAddressState extends State<AddNewAddress> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().replacePage(ctx,MyAddressPage());
+        STM().replacePage(ctx, MyAddressPage());
         return false;
       },
       child: Scaffold(
@@ -74,7 +83,7 @@ class _AddNewAddressState extends State<AddNewAddress> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().replacePage(ctx,MyAddressPage());
+              STM().replacePage(ctx, MyAddressPage());
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -104,11 +113,11 @@ class _AddNewAddressState extends State<AddNewAddress> {
                     controller: firstnameCtrl,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'This field is required';
+                        return 'Full name is required';
                       }
                     },
                     decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
-                        hintText: 'Name',
+                        hintText: 'Full Name',
                         hintStyle: TextStyle(color: Clr().hintColor)),
                   ),
                 ),
@@ -123,7 +132,7 @@ class _AddNewAddressState extends State<AddNewAddress> {
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Mobile field required';
+                        return 'Mobile number is required';
                       }
                       if (value.length != 10) {
                         return 'Mobile Number must be of 10 digit';
@@ -210,7 +219,7 @@ class _AddNewAddressState extends State<AddNewAddress> {
                           isExpanded: true,
                           value: cityValue,
                           hint: Text(
-                             'City',
+                            'City',
                             style: Sty().mediumText.copyWith(
                                   color: cityValue == null
                                       ? Clr().hintColor
@@ -285,13 +294,49 @@ class _AddNewAddressState extends State<AddNewAddress> {
                       if (value!.isEmpty) {
                         return 'Pincode is required';
                       }
+                      if (value.length != 6) {
+                        return 'Pincode must be 6 digits';
+                      }
+                      return null;
                     },
                     decoration: Sty().TextFormFieldOutlineDarkStyle.copyWith(
+                        suffixIcon: InkWell(
+                          onTap: () {
+                            pincodeCtrl.text.isEmpty
+                                ? Fluttertoast.showToast(
+                                    msg: 'Enter the pincode',
+                                    gravity: ToastGravity.CENTER)
+                                : checkAvailbility();
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text('Check',
+                                style: TextStyle(
+                                    fontSize: Dim().d14,
+                                    fontWeight: FontWeight.w400)),
+                          ),
+                        ),
                         hintText: 'Pincode',
                         counterText: '',
                         hintStyle: TextStyle(color: Clr().hintColor)),
                   ),
                 ),
+                if (message.isNotEmpty)
+                  SizedBox(
+                    height: Dim().d4,
+                  ),
+                if (message.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(left: Dim().d20),
+                    child: Text(
+                      '${message}',
+                      style: Sty().smallText.copyWith(
+                          fontSize: 12,
+                          color: success == false
+                              ? Clr().errorRed
+                              : Clr().primaryColor),
+                    ),
+                  ),
                 SizedBox(
                   height: Dim().d20,
                 ),
@@ -356,8 +401,15 @@ class _AddNewAddressState extends State<AddNewAddress> {
       'name': firstnameCtrl.text,
       'mobile': mobileCtrl.text,
     });
-    var result = await STM().postWithToken(ctx, Str().processing,
-       widget.details == null ? 'add_shipping_address' : 'update_shipping_address', body, usertoken, 'customer');
+    var result = await STM().postWithToken(
+        ctx,
+        Str().processing,
+        widget.details == null
+            ? 'add_shipping_address'
+            : 'update_shipping_address',
+        body,
+        usertoken,
+        'customer');
     var success = result['success'];
     var message = result['message'];
     if (success) {
@@ -367,14 +419,13 @@ class _AddNewAddressState extends State<AddNewAddress> {
     }
   }
 
-
   void getCity() async {
     var result = await STM().getOpen(ctx, Str().loading, 'get_cities');
     var success = result['success'];
-    if(success){
+    if (success) {
       setState(() {
         stateList = result['cities'];
-        if(widget.details != null){
+        if (widget.details != null) {
           stateValue = widget.details['state_id'];
           int position = int.parse(stateValue.toString());
           cityList = stateList[position - 1]['city'];
@@ -384,4 +435,21 @@ class _AddNewAddressState extends State<AddNewAddress> {
     }
   }
 
+  void checkAvailbility() async {
+    FormData body = FormData.fromMap({
+      'pincode': pincodeCtrl.text,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing,
+        'check_availability', body, usertoken, 'customer');
+    success = result['success'];
+    if (success) {
+      setState(() {
+        message = result['message'];
+      });
+    } else {
+      setState(() {
+        message = result['message'];
+      });
+    }
+  }
 }

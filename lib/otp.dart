@@ -88,7 +88,7 @@ class _VerificationState extends State<Verification> {
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                '4 digit code has been sent to +91 ${widget.smobileCtrl}',
+                                '4 digit code has been sent to ${widget.smobileCtrl}',
                                 style: Sty().mediumText.copyWith(
                                     fontSize: Dim().d12,
                                     fontWeight: FontWeight.w600),

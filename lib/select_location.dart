@@ -459,7 +459,7 @@ class _SelectLocationState extends State<SelectLocation> {
 
   // getLocation
   getLocation() async {
-    dialog = STM().loadingDialog(ctx, 'Fetch location');
+    dialog = STM().loadingDialog(ctx, 'Fetching location');
     dialog!.show();
    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
       setState(() {

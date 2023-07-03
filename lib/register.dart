@@ -196,7 +196,7 @@ class _SignUpState extends State<SignUp> {
                                       return 'Mobile number is required';
                                     }
                                     if (value.length != 10) {
-                                      return 'mobile number must be 10 digits long';
+                                      return 'Mobile number must be 10 digits';
                                     }
                                   },
                                 ),

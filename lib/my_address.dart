@@ -12,6 +12,8 @@ import 'bottom_navigation/bottom_navigation.dart';
 import 'checkout.dart';
 
 class MyAddressPage extends StatefulWidget {
+  final route;
+  const MyAddressPage({super.key, this.route});
   @override
   State<MyAddressPage> createState() => _MyAddressPageState();
 }
@@ -49,7 +51,7 @@ class _MyAddressPageState extends State<MyAddressPage> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().replacePage(ctx, CheckOut());
+      widget.route == 1 ? STM().replacePage(ctx, CheckOut()) : STM().back2Previous(ctx);
         return false;
       },
       child: Scaffold(
@@ -59,7 +61,7 @@ class _MyAddressPageState extends State<MyAddressPage> {
         appBar: AppBar(
           leading: InkWell(
             onTap: () {
-              STM().replacePage(ctx, CheckOut());
+              widget.route == 1 ? STM().replacePage(ctx, CheckOut()) : STM().back2Previous(ctx);
             },
             child: Icon(
               Icons.arrow_back,
