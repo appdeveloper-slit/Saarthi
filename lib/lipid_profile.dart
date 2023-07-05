@@ -139,7 +139,8 @@ class _LipidProfileState extends State<LipidProfile> {
                     SizedBox(
                       height: 20,
                     ),
-                    Row(
+                    if(value != null)
+                      Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
@@ -159,6 +160,7 @@ class _LipidProfileState extends State<LipidProfile> {
                     SizedBox(
                       height: 8,
                     ),
+                    if(value != null)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -179,6 +181,7 @@ class _LipidProfileState extends State<LipidProfile> {
                     SizedBox(
                       height: 8,
                     ),
+                    if(value != null)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -189,7 +192,7 @@ class _LipidProfileState extends State<LipidProfile> {
                               .copyWith(fontWeight: FontWeight.w400),
                         ),
                         Text(
-                          '323 mg/dL',
+                          '${value['hdl_cholesterol'].toString()}',
                           style: Sty()
                               .smallText
                               .copyWith(fontWeight: FontWeight.w400),
@@ -199,6 +202,7 @@ class _LipidProfileState extends State<LipidProfile> {
                     SizedBox(
                       height: 8,
                     ),
+                    if(value != null)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -209,7 +213,7 @@ class _LipidProfileState extends State<LipidProfile> {
                               .copyWith(fontWeight: FontWeight.w400),
                         ),
                         Text(
-                          '1233 mg/dL',
+                          '${value['triglycerides'].toString()}',
                           style: Sty()
                               .smallText
                               .copyWith(fontWeight: FontWeight.w400),

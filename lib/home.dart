@@ -11,10 +11,12 @@ import 'package:saarathi/blood_glucose.dart';
 import 'package:saarathi/heart_rate.dart';
 import 'package:saarathi/lab_details.dart';
 import 'package:saarathi/manage/static_method.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:saarathi/notifications.dart';
 import 'package:saarathi/oxygen.dart';
 import 'package:saarathi/physical_details.dart';
 import 'package:saarathi/programdetails.dart';
+import 'package:saarathi/select_location.dart';
 import 'package:saarathi/sidedrawer.dart';
 import 'package:saarathi/values/colors.dart';
 import 'package:saarathi/values/dimens.dart';
@@ -101,20 +103,24 @@ class _HomeState extends State<Home> {
   List<dynamic> programList = [];
   List<Map<String, dynamic>> servicesList = [
     {
+      'id': 1,
       'image': 'assets/physician.svg',
-      'name': 'Doctor',
+      'name': 'Physicians',
     },
     {
-      'image': 'assets/Nurse.svg',
-      'name': 'Nurse',
+      'id': 2,
+      'image': 'assets/nutritionist.svg',
+      'name': 'Nutrition',
     },
     {
+      'id': 3,
       'image': 'assets/Physiotherapist.svg',
       'name': 'Physiotherapist',
     },
     {
-      'image': 'assets/nutritionist.svg',
-      'name': 'nutritionist',
+      'id': 4,
+      'image': 'assets/Nurse.svg',
+      'name': 'Nurse',
     }
   ];
   List<dynamic> doctorsList = [];
@@ -127,7 +133,19 @@ class _HomeState extends State<Home> {
   String t = "0";
   String? sValue = 'Home';
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey<ScaffoldState>();
-  String? usertoken, sUUID;
+  String? usertoken, sUUID,city;
+
+  getLocation() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    double lat = double.parse(sp.getString('lat').toString());
+    double lng = double.parse(sp.getString('lng').toString());
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+    setState(() {
+      Placemark placeMark = placemarks[0];
+      city = placeMark.subLocality;
+      print(city);
+    });
+  }
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -150,6 +168,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     getSession();
+    getLocation();
     super.initState();
   }
 
@@ -182,42 +201,22 @@ class _HomeState extends State<Home> {
           child: Icon(Icons.menu, color: Clr().primaryColor, size: 30),
         ),
       ),
-      title: Row(children: [
-        SvgPicture.asset('assets/location.svg'),
-        SizedBox(
-          width: Dim().d12,
-        ),
-        SizedBox(
-          width: Dim().d80,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: locationValue,
-              isExpanded: true,
-              icon: SvgPicture.asset('assets/dropdown.svg'),
-              style: const TextStyle(color: Color(0xff787882)),
-              items: locationList.map((String string) {
-                return DropdownMenuItem<String>(
-                  value: string,
-                  child: Text(
-                    string,
-                    style:
-                        const TextStyle(color: Color(0xff787882), fontSize: 14),
-                  ),
-                );
-              }).toList(),
-              onChanged: (t) {
-                // STM().redirect2page(ctx, Home());
-                setState(() {
-                  locationValue = t!;
-                });
-              },
-            ),
+      title: InkWell(
+        onTap: (){
+          STM().redirect2page(ctx, SelectLocation(type: 'home',));
+        },
+        child: Row(children: [
+          SvgPicture.asset('assets/location.svg'),
+          SizedBox(
+            width: Dim().d12,
           ),
-        ),
-        SizedBox(
-          width: Dim().d40,
-        )
-      ]),
+          Expanded(
+            child: Text('${city == null ?'' : city.toString()}',maxLines: 2,style: Sty().mediumText.copyWith(
+              color: Clr().black
+            ),),
+          ),
+        ]),
+      ),
       centerTitle: true,
       actions: [
         Padding(
@@ -784,7 +783,7 @@ class _HomeState extends State<Home> {
   Widget servicesLayout(ctx, index, list) {
     return InkWell(
         onTap: () {
-          STM().redirect2page(ctx, Nutritionist());
+          STM().redirect2page(ctx, Nutritionist(id: list[index]['id'],name: list[index]['name'],));
         },
         child: Padding(
           padding: EdgeInsets.only(right: Dim().d12),
@@ -1567,8 +1566,8 @@ class _HomeState extends State<Home> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     FormData body = FormData.fromMap({
       'uuid': sUUID ?? "",
-      'latitude': widget.Lat,
-      'longitude': widget.Lng,
+      'latitude': sp.getString('lat'),
+      'longitude': sp.getString('lng'),
     });
     var result = await STM().postWithToken(
         ctx, Str().loading, 'homePageDetails', body, usertoken, 'customer');

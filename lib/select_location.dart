@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -6,20 +8,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import 'home.dart';
 import 'manage/static_method.dart';
 import 'values/colors.dart';
 import 'values/strings.dart';
 import 'values/styles.dart';
-
+import 'package:flutter_google_places_hoc081098/flutter_google_places_hoc081098.dart';
+import 'package:google_api_headers/google_api_headers.dart';
+import 'package:google_maps_webservice/places.dart';
+String? sLocation;
+var controller1 = StreamController<String?>.broadcast();
 class SelectLocation extends StatefulWidget {
   final String?  weightCtrl, heightCtrl, sDietValue;
-
+  final type;
   const SelectLocation(
       {super.key,
       this.weightCtrl,
       this.heightCtrl,
-      this.sDietValue});
+      this.sDietValue,this.type});
 
   @override
   State<SelectLocation> createState() => _SelectLocationState();
@@ -41,7 +48,7 @@ class _SelectLocationState extends State<SelectLocation> {
   List<dynamic> cityList = [];
   List<dynamic> stateList = [];
 
-  String? Lat, Lng,customerID;
+  String? customerID;
   late LocationPermission permission;
   late Position position;
   AwesomeDialog? dialog;
@@ -63,6 +70,14 @@ class _SelectLocationState extends State<SelectLocation> {
   @override
   void initState() {
     getSession();
+    controller1.stream.listen(
+          (event) {
+        setState(() {
+          sLocation = sLocation;
+          sLocation != null ? widget.type == 'home'? STM().finishAffinity(ctx, Home()) : null : null;
+        });
+      },
+    );
     super.initState();
   }
 
@@ -111,14 +126,44 @@ class _SelectLocationState extends State<SelectLocation> {
                       child: SvgPicture.asset('assets/pick_location.svg'),
                     ),
                     Expanded(
-                        child: Text(
-                      Lat != null
-                          ? 'Current Location Is Selected'
-                          : 'Pick current location',
+                        child: Text('Pick current location',
                       style: Sty().mediumText.copyWith(
                           color: Clr().primaryColor,
-                          fontWeight: FontWeight.w600),
+                          fontWeight: FontWeight.w500),
                     )),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: Dim().d12),
+            InkWell(
+              onTap: () {
+                STM().redirect2page(
+                    ctx,
+                    CustomSearchScaffold('AIzaSyCSs8od16tCpuiMK-QUpMrqRdKfPckrjYI'));
+              },
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Clr().borderColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: Dim().d16, vertical: Dim().d16),
+                      child: SvgPicture.asset('assets/pick_location.svg'),
+                    ),
+                    Expanded(
+                        child: Text(
+                          sLocation != null
+                              ? '${sLocation.toString()}'
+                              : 'Pick location Manually',
+                          style: Sty().mediumText.copyWith(
+                              color: Clr().primaryColor,
+                              fontWeight: FontWeight.w500),
+                        )),
                   ],
                 ),
               ),
@@ -459,14 +504,16 @@ class _SelectLocationState extends State<SelectLocation> {
 
   // getLocation
   getLocation() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
     dialog = STM().loadingDialog(ctx, 'Fetching location');
     dialog!.show();
    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
       setState(() {
-        Lat = position.latitude.toString();
-        Lng = position.longitude.toString();
+        sp.setString('lat', position.latitude.toString());
+        sp.setString('lng', position.longitude.toString());
         STM().displayToast('Current location is selected');
         dialog!.dismiss();
+         widget.type == 'home'? STM().finishAffinity(ctx, Home()) : null;
       });
     }).catchError((e){
       dialog!.dismiss();
@@ -487,8 +534,8 @@ class _SelectLocationState extends State<SelectLocation> {
       'height_in_feet': '${PhysicalList.isEmpty ? null : PhysicalList[0]}',
       'height_in_inch': '${PhysicalList.isEmpty ? null : PhysicalList[1]}',
       'diet': PhysicalList.isEmpty ? null : PhysicalList[2],
-      'latitude': Lat,
-      'longitude': Lng,
+      'latitude': sp.getString('lat'),
+      'longitude': sp.getString('lng'),
       'address': addressCtrl.text,
       'landmark': landMarkCtrl.text,
       'pincode': pincodeCtrl.text,
@@ -502,7 +549,7 @@ class _SelectLocationState extends State<SelectLocation> {
     var success = result['success'];
     if (success) {
       sp.setBool('login', true);
-      STM().finishAffinity(ctx, Home(Lat: Lat,Lng: Lng,));
+      STM().finishAffinity(ctx, Home(Lat: sp.getString('lat'),Lng: sp.getString('lng'),));
       STM().displayToast(message);
     } else {
       var message = result['message'];
@@ -517,6 +564,78 @@ class _SelectLocationState extends State<SelectLocation> {
     if(success){
       setState(() {
         stateList = result['cities'];
+      });
+    }
+  }
+}
+class CustomSearchScaffold extends PlacesAutocompleteWidget {
+  final String sMapKey;
+
+  CustomSearchScaffold(this.sMapKey, {Key? key})
+      : super(
+    key: key,
+    apiKey: sMapKey,
+    sessionToken: const Uuid().v4(),
+    language: 'en',
+    components: [Component(Component.country, 'in')],
+  );
+
+  @override
+  _CustomSearchScaffoldState createState() => _CustomSearchScaffoldState();
+}
+
+class _CustomSearchScaffoldState extends PlacesAutocompleteState {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Clr().primaryColor,
+        title: AppBarPlacesAutoCompleteTextField(
+          cursorColor: Clr().primaryColor,
+          textStyle: Sty().mediumText,
+          textDecoration: null,
+        ),
+      ),
+      body: PlacesAutocompleteResult(
+        logo: null,
+        onTap: (p) async {
+          SharedPreferences sp = await SharedPreferences.getInstance();
+          if (p == null) {
+            return;
+          }
+          final _places = GoogleMapsPlaces(
+            apiKey: widget.apiKey,
+            apiHeaders: await const GoogleApiHeaders().getHeaders(),
+          );
+          final detail = await _places.getDetailsByPlaceId(p.placeId!);
+          final geometry = detail.result.geometry!;
+          setState(() {
+            sLocation = p.description;
+            sp.setString('lat', geometry.location.lat.toString());
+            sp.setString('lng', geometry.location.lng.toString());
+            controller1.sink.add('update');
+            STM().back2Previous(context);
+            STM().displayToast('Location is selected');
+          });
+        },
+      ),
+    );
+  }
+
+  @override
+  void onResponseError(PlacesAutocompleteResponse response) {
+    super.onResponseError(response);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(response.errorMessage ?? 'Unknown error')),
+    );
+  }
+
+  @override
+  void onResponse(PlacesAutocompleteResponse response) {
+    super.onResponse(response);
+    if (response.predictions.isNotEmpty) {
+      setState(() {
+        sLocation = response.status;
       });
     }
   }

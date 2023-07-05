@@ -1,4 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:saarathi/values/strings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -10,13 +14,36 @@ import 'order_details.dart';
 
 class MyOrders extends StatefulWidget {
   final index;
-  const MyOrders({super.key,  this.index});
+
+  const MyOrders({super.key, this.index});
+
   @override
   State<MyOrders> createState() => _MyOrdersState();
 }
 
 class _MyOrdersState extends State<MyOrders> {
   late BuildContext ctx;
+  List myOrderList = [];
+  String? usertoken;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getMyOrders();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,332 +80,139 @@ class _MyOrdersState extends State<MyOrders> {
           child: Column(
             children: [
               ListView.builder(
-                itemCount: 2,
+                itemCount: myOrderList.length,
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
-                        child: InkWell(
-                          onTap: () {
-                            STM().redirect2page(context, OrderDetails());
-                          },
-                          child: Card(
-                            color: Clr().background,
-                            margin: EdgeInsets.only(top: Dim().d12),
-                            elevation: 3,
-                            shadowColor: Colors.grey,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(Dim().d12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                children: [
-                                  Image.asset('assets/myoders.png',
-                                      height: 70, width: 110),
-                                  SizedBox(
-                                    width: Dim().d12,
-                                  ),
-                                  Expanded(
-                                      child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text('Order :',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xff2D2D2D))),
-                                          SizedBox(
-                                            width: Dim().d2,
-                                          ),
-                                          Text(' #1234',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xff2D2D2D))),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d4,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('20-Dec-2022,',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.grey)),
-                                          SizedBox(
-                                            width: Dim().d4,
-                                          ),
-                                          Text('03:00 Pm',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.grey)),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Order Total :',
-                                              style: TextStyle(fontSize: 16)),
-                                          SizedBox(
-                                            width: Dim().d4,
-                                          ),
-                                          Text('₹30',
-                                              style: TextStyle(fontSize: 16)),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Order Status :',
-                                              style: TextStyle(fontSize: 16)),
-                                          SizedBox(
-                                            width: Dim().d8,
-                                          ),
-                                          Text('Pending',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16,
-                                                  color: Color(0xffFFC107))),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                    ],
-                                  ))
-                                ],
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    child: InkWell(
+                      onTap: () {
+                        STM().redirect2page(context, OrderDetails());
+                      },
+                      child: Card(
+                        color: Clr().background,
+                        margin: EdgeInsets.only(top: Dim().d12),
+                        elevation: 3,
+                        shadowColor: Colors.grey,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Dim().d12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              STM().imageDisplay(
+                                  list: '',
+                                  url: '',
+                                  h: Dim().d120,
+                                  w: Dim().d100),
+                              SizedBox(
+                                width: Dim().d12,
                               ),
-                            ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Wrap(
+                                      children: [
+                                        Text('Order :',
+                                            style: Sty().mediumText.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xff2D2D2D))),
+                                        SizedBox(
+                                          width: Dim().d2,
+                                        ),
+                                        Text(
+                                            '${myOrderList[index]['order_no']}',
+                                            style: Sty().mediumText.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xff2D2D2D)),
+                                            maxLines: 2),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: Dim().d4,
+                                    ),
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        Text(
+                                            '${DateFormat('dd-MM-yyyy').format(DateTime.parse(myOrderList[index]['transaction_date'].toString()))}',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.grey)),
+                                        SizedBox(
+                                          width: Dim().d4,
+                                        ),
+                                        Text(
+                                            '${DateFormat.jm().format(DateTime.parse(myOrderList[index]['transaction_date'].toString()))}',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.grey)),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: Dim().d8,
+                                    ),
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        Text('Order Total :',
+                                            style: TextStyle(fontSize: 16)),
+                                        SizedBox(
+                                          width: Dim().d4,
+                                        ),
+                                        Text(
+                                            '₹${myOrderList[index]['final_amount']}',
+                                            style: TextStyle(fontSize: 16)),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: Dim().d8,
+                                    ),
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        Text('Order Status :',
+                                            style: TextStyle(fontSize: 16)),
+                                        SizedBox(
+                                          width: Dim().d8,
+                                        ),
+                                        Text(
+                                            '${myOrderList[index]['order_status'] == 0 ? 'Pending' : myOrderList[index]['order_status'] == 1 ? 'Completed' : 'Cancelled'}',
+                                            style: Sty().mediumText.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                                color: myOrderList[index]
+                                                            ['order_status'] ==
+                                                        0
+                                                    ? Color(0xffFFC107)
+                                                    : myOrderList[index][
+                                                                'order_status'] ==
+                                                            1
+                                                        ? Clr().green
+                                                        : Clr().errorRed)),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: Dim().d8,
+                                    ),
+                                    SizedBox(
+                                      height: Dim().d8,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        child: InkWell(
-                          onTap: () {
-                            STM().redirect2page(context, OrderDetails());
-                          },
-                          child: Card(
-                            color: Clr().background,
-                            margin: EdgeInsets.only(top: Dim().d12),
-                            elevation: 3,
-                            shadowColor: Colors.grey,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(Dim().d12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                children: [
-                                  Image.asset('assets/myoders2.png',
-                                      height: 70, width: 110),
-                                  SizedBox(
-                                    width: Dim().d12,
-                                  ),
-                                  Expanded(
-                                      child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text('Order :',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xff2D2D2D))),
-                                          SizedBox(
-                                            width: Dim().d2,
-                                          ),
-                                          Text(' #1234',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xff2D2D2D))),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d4,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('20-Dec-2022,',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.grey)),
-                                          SizedBox(
-                                            width: Dim().d4,
-                                          ),
-                                          Text('03:00 Pm',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.grey)),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Order Total :',
-                                              style: TextStyle(fontSize: 16)),
-                                          SizedBox(
-                                            width: Dim().d4,
-                                          ),
-                                          Text('₹30',
-                                              style: TextStyle(fontSize: 16)),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Order Status :',
-                                              style: TextStyle(fontSize: 16)),
-                                          SizedBox(
-                                            width: Dim().d8,
-                                          ),
-                                          Text('Completed',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16,
-                                                  color: Color(0xff80C342))),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                    ],
-                                  ))
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
-                        child: InkWell(
-                          onTap: () {
-                            STM().redirect2page(context, OrderDetails());
-                          },
-                          child: Card(
-                            color: Clr().background,
-                            margin: EdgeInsets.only(top: Dim().d12),
-                            elevation: 3,
-                            shadowColor: Colors.grey,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(Dim().d12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                children: [
-                                  Image.asset('assets/myoders3.png',
-                                      height: 70, width: 110),
-                                  SizedBox(
-                                    width: Dim().d12,
-                                  ),
-                                  Expanded(
-                                      child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text('Order :',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xff2D2D2D))),
-                                          SizedBox(
-                                            width: Dim().d2,
-                                          ),
-                                          Text(' #1234',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xff2D2D2D))),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d4,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('20-Dec-2022,',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.grey)),
-                                          SizedBox(
-                                            width: Dim().d4,
-                                          ),
-                                          Text('03:00 Pm',
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.grey)),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Order Total :',
-                                              style: TextStyle(fontSize: 16)),
-                                          SizedBox(
-                                            width: Dim().d4,
-                                          ),
-                                          Text('₹30',
-                                              style: TextStyle(fontSize: 16)),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text('Order Status :',
-                                              style: TextStyle(fontSize: 16)),
-                                          SizedBox(
-                                            width: Dim().d8,
-                                          ),
-                                          Text('Cancelled',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 16,
-                                                  color: Color(0xffC20909))),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                      SizedBox(
-                                        height: Dim().d8,
-                                      ),
-                                    ],
-                                  ))
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   );
                 },
               ),
@@ -387,5 +221,17 @@ class _MyOrdersState extends State<MyOrders> {
         ),
       ),
     );
+  }
+
+  /// myorders
+  void getMyOrders() async {
+    var result =
+        await STM().getWithToken(ctx, Str().loading, 'my_order', usertoken);
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        myOrderList = result['orders'];
+      });
+    }
   }
 }

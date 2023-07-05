@@ -63,6 +63,7 @@ dependencies:
   onesignal_flutter: ^3.4.1
   photo_view: ^0.14.0
   sqflite: ^2.2.8+4
+  geocoding: ^2.1.0
 
 dev_dependencies:
   # rules and activating additional ones.
