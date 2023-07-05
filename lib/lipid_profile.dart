@@ -149,7 +149,7 @@ class _LipidProfileState extends State<LipidProfile> {
                               .copyWith(fontWeight: FontWeight.w400),
                         ),
                         Text(
-                          '37 mg/dL',
+                          '${value['blood_cholesterol'].toString()}',
                           style: Sty()
                               .smallText
                               .copyWith(fontWeight: FontWeight.w400),
@@ -169,7 +169,7 @@ class _LipidProfileState extends State<LipidProfile> {
                               .copyWith(fontWeight: FontWeight.w400),
                         ),
                         Text(
-                          '116 mg/dL',
+                          '${value['ldl_cholesterol'].toString()}',
                           style: Sty()
                               .smallText
                               .copyWith(fontWeight: FontWeight.w400),
