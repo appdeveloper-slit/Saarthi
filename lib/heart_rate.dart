@@ -1,7 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/heart_rate_history.dart';
 import 'package:saarathi/values/dimens.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
 import 'bottom_navigation/bottom_navigation.dart';
@@ -17,11 +20,34 @@ class HeartRate extends StatefulWidget {
 
 class _HeartRateState extends State<HeartRate> {
   late BuildContext ctx;
+  var date;
+  var value;
+  String? usertoken;
+  bool loading = false;
+  TextEditingController valueCtrl = TextEditingController();
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getHeart();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       appBar: AppBar(
@@ -97,8 +123,9 @@ class _HeartRateState extends State<HeartRate> {
                             SizedBox(
                               height: 4,
                             ),
+                            if(date != null)
                             Text(
-                              '04 December, 2022 ',
+                              '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(date.toString() ))}',
                               style: Sty().smallText.copyWith(
                                   color: Clr().grey,
                                   fontWeight: FontWeight.w400),
@@ -110,6 +137,7 @@ class _HeartRateState extends State<HeartRate> {
                     SizedBox(
                       height: 20,
                     ),
+                    if(value != null)
                     Row(
                       children: [
                         Expanded(
@@ -132,7 +160,7 @@ class _HeartRateState extends State<HeartRate> {
                           width: 20,
                         ),
                         Text(
-                          '108 BPM',
+                          '${value.toString()}',
                           textAlign: TextAlign.end,
                           style: Sty().smallText.copyWith(
                               color: Clr().black, fontWeight: FontWeight.w400),
@@ -167,8 +195,7 @@ class _HeartRateState extends State<HeartRate> {
                 ],
               ),
               child: TextFormField(
-                // controller: mobileCtrl,
-
+                controller: valueCtrl,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Clr().formfieldbg,
@@ -203,18 +230,7 @@ class _HeartRateState extends State<HeartRate> {
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      // STM().redirect2page(ctx, HomeVisitAptDetails());
-                      // if (formKey.currentState!
-                      //     .validate()) {
-                      //   STM()
-                      //       .checkInternet(
-                      //       context, widget)
-                      //       .then((value) {
-                      //     if (value) {
-                      //       sendOtp();
-                      //     }
-                      //   });
-                      // }
+                      postHeart();
                     },
                     style: ElevatedButton.styleFrom( elevation: 0,
                         backgroundColor: Clr().primaryColor,
@@ -252,5 +268,33 @@ class _HeartRateState extends State<HeartRate> {
         ),
       ),
     );
+  }
+
+  // get hba1c
+  void postHeart() async {
+    FormData body = FormData.fromMap({
+      'heart_rate': valueCtrl.text,
+    });
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'add_heart_rate', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      getHeart();
+      STM().displayToast(message);
+      valueCtrl.clear();
+    } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  void getHeart() async {
+    FormData body = FormData.fromMap({});
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'get_heart_rate', body, usertoken, 'customer');
+    setState(() {
+      value = result['heart_rate'];
+      date = result['date']['updated_at'];
+    });
   }
 }

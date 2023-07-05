@@ -1,13 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/blood_glucose.dart';
 import 'package:saarathi/bmr_calculator.dart';
 import 'package:saarathi/heart_rate.dart';
 import 'package:saarathi/lipid_profile.dart';
 import 'package:saarathi/values/dimens.dart';
 import 'package:saarathi/hba1c.dart';
+import 'package:saarathi/values/strings.dart';
 import 'package:saarathi/weight.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bmi.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
@@ -22,62 +25,48 @@ class HealthMatrix extends StatefulWidget {
 
 class _HealthMatrixState extends State<HealthMatrix> {
   late BuildContext ctx;
-
-  List<dynamic> categoryList = [
-    {
-      'name': 'BMI Calculator',
-      'img': 'assets/bmi.svg',
-      'clr': Color(0xffF6505A),
-      'page' : BMI(),
-    },
-    {
-      'name': 'BMR Calculator',
-      'img': 'assets/bmr_cal.svg',
-      'clr': Color(0xff336699),
-      'page' : BMRCalculator(),
-    },
-    {
-      'name': 'Blood Glucose',
-      'img': 'assets/blood_glu.svg',
-      'clr': Color(0xff1FDA8D),
-      'page' : BloodGlucose(),
-    },
-    {
-      'name': 'HbA1c',
-      'img': 'assets/hba1c.svg',
-      'clr': Color(0xff70D4FF),
-      'page' : HbA1c(),
-    },
-    {
-      'name': 'Oxygen',
-      'img': 'assets/oxygen.svg',
-      'clr': Color(0xff616FEC),
-      'page' : Oxygen(),
-    },
-    {
-      'name': 'Weight',
-      'img': 'assets/weight.svg',
-      'clr': Color(0xffEC6EDF),
-      'page' : Weight(),
-    },
-
-    {
-      'name': 'Heart Rate',
-      'img': 'assets/heart_rate.svg',
-      'clr': Color(0xffFC9A40),
-      'page' : HeartRate(),
-    }
+  var liquidProfile;
+  List apiList = [
+    'get_bmi',
+    'get_bmr',
+    'get_blood_glucose',
+    'get_hba1c',
+    'get_oxygen',
+    'get_heart_rate',
   ];
+  List<dynamic> categoryList = [];
+  String? usertoken;
+  var result;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        allApi(apiList[0]);
+        // for(int a = 0 ; a < apiList.length; a++) {
+        //   allApi(apiList[a]);
+        // }
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
       appBar: AppBar(
-          elevation: 2,
+        elevation: 2,
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -109,13 +98,18 @@ class _HealthMatrixState extends State<HealthMatrix> {
                 itemBuilder: (ctx, index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: categoryLayout(ctx, index, categoryList),
+                    child: categoryList.length != apiList.length
+                        ? Padding(
+                          padding:  EdgeInsets.symmetric(vertical: Dim().d20),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                        : categoryLayout(ctx, index, categoryList),
                   );
                 }),
             SizedBox(
               height: 4,
             ),
-            Container(
+            liquidProfile == null ? Container() : Container(
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
@@ -127,7 +121,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                 ],
               ),
               child: InkWell(
-                onTap: (){
+                onTap: () {
                   STM().redirect2page(ctx, LipidProfile());
                 },
                 child: Card(
@@ -156,14 +150,18 @@ class _HealthMatrixState extends State<HealthMatrix> {
                                       style: ElevatedButton.styleFrom(
                                           elevation: 0.7,
                                           backgroundColor: Color(0xffAD55FF),
-                                          side: BorderSide(color: Clr().borderColor),
+                                          side: BorderSide(
+                                              color: Clr().borderColor),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5),
+                                            borderRadius:
+                                                BorderRadius.circular(5),
                                           )),
                                       onPressed: () {
-                                        STM().redirect2page(ctx, LipidProfile());
+                                        STM()
+                                            .redirect2page(ctx, LipidProfile());
                                       },
-                                      child: SvgPicture.asset('assets/lipid.svg')),
+                                      child:
+                                          SvgPicture.asset('assets/lipid.svg')),
                                 ),
                                 SizedBox(
                                   width: 12,
@@ -173,26 +171,16 @@ class _HealthMatrixState extends State<HealthMatrix> {
                                   children: [
                                     Text(
                                       'Lipid Profile',
-                                      style: Sty()
-                                          .mediumText
-                                          .copyWith(fontWeight: FontWeight.w400),
-                                    ),
-                                    SizedBox(
-                                      height: 4,
-                                    ),
-                                    Text(
-                                      '04 December, 2022 ',
-                                      style: Sty().smallText.copyWith(
-                                          color: Clr().grey,
+                                      style: Sty().mediumText.copyWith(
                                           fontWeight: FontWeight.w400),
                                     ),
                                     SizedBox(
                                       height: 4,
                                     ),
                                     Text(
-                                      '26.8',
+                                      '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(liquidProfile['date']['updated_at'].toString()))}',
                                       style: Sty().smallText.copyWith(
-                                          color: Clr().black,
+                                          color: Clr().grey,
                                           fontWeight: FontWeight.w400),
                                     ),
                                   ],
@@ -202,25 +190,29 @@ class _HealthMatrixState extends State<HealthMatrix> {
                             SvgPicture.asset('assets/arrow1.svg')
                           ],
                         ),
-                        SizedBox(height: 12,),
+                        SizedBox(
+                          height: 12,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                          Text(
-                            'AHDL',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w400),
-                          ),
-                          Text(
-                            '37 mg/dL',
-                            style: Sty()
-                                .smallText
-                                .copyWith(fontWeight: FontWeight.w400),
-                          ),
-                        ],),
-
-                        SizedBox(height: 8,),
+                            Text(
+                              'AHDL',
+                              style: Sty()
+                                  .mediumText
+                                  .copyWith(fontWeight: FontWeight.w400),
+                            ),
+                            Text(
+                              '${liquidProfile['blood_cholesterol'].toString()}',
+                              style: Sty()
+                                  .smallText
+                                  .copyWith(fontWeight: FontWeight.w400),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -231,14 +223,16 @@ class _HealthMatrixState extends State<HealthMatrix> {
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
                             Text(
-                              '116 mg/dL',
+                              '${liquidProfile['ldl_cholesterol'].toString()}',
                               style: Sty()
                                   .smallText
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
-                          ],),
-
-                        SizedBox(height: 8,),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -249,14 +243,16 @@ class _HealthMatrixState extends State<HealthMatrix> {
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
                             Text(
-                              '323 mg/dL',
+                              '${liquidProfile['hdl_cholesterol'].toString()}',
                               style: Sty()
                                   .smallText
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
-                          ],),
-
-                        SizedBox(height: 8,),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -267,12 +263,13 @@ class _HealthMatrixState extends State<HealthMatrix> {
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
                             Text(
-                              '1233 mg/dL',
+                              '${liquidProfile['triglycerides'].toString()}',
                               style: Sty()
                                   .smallText
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
-                          ],),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -298,7 +295,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
         ],
       ),
       child: InkWell(
-        onTap: (){
+        onTap: () {
           STM().redirect2page(ctx, List[index]['page']);
         },
         child: Card(
@@ -352,7 +349,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                           height: 4,
                         ),
                         Text(
-                          '04 December, 2022 ',
+                          '${DateFormat('d MMMM , yyyy').format(DateTime.parse(List[index]['date'].toString()))}',
                           style: Sty().smallText.copyWith(
                               color: Clr().grey, fontWeight: FontWeight.w400),
                         ),
@@ -360,7 +357,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                           height: 4,
                         ),
                         Text(
-                          '26.8',
+                          '${List[index]['value'].toString()}',
                           style: Sty().smallText.copyWith(
                               color: Clr().black, fontWeight: FontWeight.w400),
                         ),
@@ -375,5 +372,106 @@ class _HealthMatrixState extends State<HealthMatrix> {
         ),
       ),
     );
+  }
+
+  /// all api
+  void allApi(apiname) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    FormData body = FormData.fromMap({});
+
+    ///  response of get and post api in result using what type of api have...
+    result = await STM()
+        .postWithTokenWithoutDailog(ctx, apiname, body, usertoken, 'customer');
+    // var success = result['success'];
+    /// get response in list using apiname (get_timetable , "get_classroom" is api)
+    setState(() {
+      switch (apiname) {
+        case "get_bmi":
+          setState(() {
+            categoryList.add({
+              'name': 'BMI Calculator',
+              'img': 'assets/bmi.svg',
+              'clr': Color(0xffF6505A),
+              'page': BMI(),
+              'date': result['date']['updated_at'],
+              'value': result['bmi'],
+            });
+          });
+          allApi(apiList[1]);
+          break;
+        case "get_bmr":
+          setState(() {
+            categoryList.add(
+              {
+                'name': 'BMR Calculator',
+                'img': 'assets/bmr_cal.svg',
+                'clr': Color(0xff336699),
+                'page': BMRCalculator(),
+                'date': result['date']['updated_at'],
+                'value': result['bmr'],
+              },
+            );
+          });
+          allApi(apiList[2]);
+          break;
+        case "get_blood_glucose":
+          setState(() {
+            categoryList.add({
+              'name': 'Blood Glucose',
+              'img': 'assets/blood_glu.svg',
+              'clr': Color(0xff1FDA8D),
+              'page': BloodGlucose(),
+              'date': result['date']['updated_at'],
+              'value': result['blood_glucose'],
+            });
+          });
+          allApi(apiList[3]);
+          break;
+        case "get_hba1c":
+          setState(() {
+            categoryList.add({
+              'name': 'HbA1c',
+              'img': 'assets/hba1c.svg',
+              'clr': Color(0xff70D4FF),
+              'page': HbA1c(),
+              'date': result['date']['updated_at'],
+              'value': result['hba1c']
+            });
+          });
+          allApi(apiList[4]);
+          break;
+        case "get_oxygen":
+          setState(() {
+            categoryList.add({
+              'name': 'Oxygen',
+              'img': 'assets/oxygen.svg',
+              'clr': Color(0xff616FEC),
+              'page': Oxygen(),
+              'date': result['date']['updated_at'],
+              'value': result['oxygen']
+            });
+          });
+          allApi(apiList[5]);
+          break;
+        case "get_heart_rate":
+          setState(() {
+            categoryList.add({
+              'name': 'Heart Rate',
+              'img': 'assets/heart_rate.svg',
+              'clr': Color(0xffFC9A40),
+              'page': HeartRate(),
+              'date': result['date']['updated_at'],
+              'value': result['heart_rate']
+            });
+          });
+          allApi('get_lipid_profile');
+          break;
+        case "get_lipid_profile":
+          setState(() {
+            liquidProfile = result;
+          });
+          break;
+      }
+    });
   }
 }

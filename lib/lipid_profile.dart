@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/lipid_profile_history.dart';
 import 'package:saarathi/values/dimens.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'values/colors.dart';
@@ -16,7 +18,33 @@ class LipidProfile extends StatefulWidget {
 
 class _LipidProfileState extends State<LipidProfile> {
   late BuildContext ctx;
+  var date;
+  var value;
+  String? usertoken;
+  bool loading = false;
+  TextEditingController valueCtrl = TextEditingController();
+  TextEditingController valueCtrl2 = TextEditingController();
+  TextEditingController valueCtrl3 = TextEditingController();
+  TextEditingController valueCtrl4 = TextEditingController();
 
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getLiquid();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     ctx = context;
@@ -97,8 +125,9 @@ class _LipidProfileState extends State<LipidProfile> {
                             SizedBox(
                               height: 4,
                             ),
+                            if(date != null)
                             Text(
-                              '04 December, 2022 ',
+                              '${DateFormat('dd MMMM yyyy').format(DateTime.parse(date.toString()))}',
                               style: Sty().smallText.copyWith(
                                   color: Clr().grey,
                                   fontWeight: FontWeight.w400),
@@ -557,5 +586,38 @@ class _LipidProfileState extends State<LipidProfile> {
         ),
       ),
     );
+  }
+  // get hba1c
+  void postLiquid() async {
+    FormData body = FormData.fromMap({
+      'blood_cholesterol': valueCtrl.text,
+      'ldl_cholesterol': valueCtrl2.text,
+      'hdl_cholesterol':valueCtrl3.text,
+      'triglycerides': valueCtrl4.text,
+    });
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'add_lipid_profile', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      getLiquid();
+      STM().displayToast(message);
+      valueCtrl.clear();
+      valueCtrl2.clear();
+      valueCtrl3.clear();
+      valueCtrl4.clear();
+    } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  void getLiquid() async {
+    FormData body = FormData.fromMap({});
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'get_lipid_profile', body, usertoken, 'customer');
+    setState(() {
+      value = result;
+      date = result['date']['updated_at'];
+    });
   }
 }

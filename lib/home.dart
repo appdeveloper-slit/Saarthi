@@ -375,7 +375,11 @@ class _HomeState extends State<Home> {
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,mainAxisSpacing:12,crossAxisSpacing: 6,childAspectRatio: 20/13,),
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 6,
+                childAspectRatio: 20 / 13,
+              ),
               itemBuilder: (context, index) {
                 return servicesLayout(ctx, index, servicesList);
               }),
@@ -383,7 +387,8 @@ class _HomeState extends State<Home> {
         SizedBox(
           height: Dim().d8,
         ),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(
               child: InkWell(
@@ -450,45 +455,51 @@ class _HomeState extends State<Home> {
         SizedBox(
           height: Dim().d20,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Doctors Nearby Me',
-              style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-            ),
-            // InkWell(
-            //   onTap: () {
-            //     STM().redirect2page(ctx, Doctors());
-            //   },
-            //   child: Text(
-            //     'See all',
-            //     style: Sty().mediumText.copyWith(
-            //           fontWeight: FontWeight.w600,
-            //           fontSize: 14,
-            //           color: Clr().primaryColor,
-            //         ),
-            //   ),
-            // ),
-          ],
-        ),
-        SizedBox(
-          height: Dim().d16,
-        ),
-        SizedBox(
-          height: Dim().d300,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: doctorsList.length,
-            itemBuilder: (context, index) {
-              return doctorsLayout(ctx, index, doctorsList);
-            },
+        doctorsList.isEmpty
+            ? Container()
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Doctors Nearby Me',
+                    style:
+                        Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  // InkWell(
+                  //   onTap: () {
+                  //     STM().redirect2page(ctx, Doctors());
+                  //   },
+                  //   child: Text(
+                  //     'See all',
+                  //     style: Sty().mediumText.copyWith(
+                  //           fontWeight: FontWeight.w600,
+                  //           fontSize: 14,
+                  //           color: Clr().primaryColor,
+                  //         ),
+                  //   ),
+                  // ),
+                ],
+              ),
+        if (doctorsList.isNotEmpty)
+          SizedBox(
+            height: Dim().d16,
           ),
-        ),
-        SizedBox(
-          height: Dim().d20,
-        ),
+        if (doctorsList.isNotEmpty)
+          SizedBox(
+            height: Dim().d300,
+            child: ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount: doctorsList.length,
+              itemBuilder: (context, index) {
+                return doctorsLayout(ctx, index, doctorsList);
+              },
+            ),
+          ),
+        if (doctorsList.isNotEmpty)
+          SizedBox(
+            height: Dim().d20,
+          ),
         // SizedBox(
         //   height: 20,
         // ),
@@ -781,7 +792,11 @@ class _HomeState extends State<Home> {
             decoration: BoxDecoration(
                 color: Clr().white,
                 boxShadow: [
-                  BoxShadow(color: Colors.brown.shade50,offset: Offset(1, 1),spreadRadius: 1,blurRadius: 15)
+                  BoxShadow(
+                      color: Colors.brown.shade50,
+                      offset: Offset(1, 1),
+                      spreadRadius: 1,
+                      blurRadius: 15)
                 ],
                 borderRadius: BorderRadius.circular(Dim().d12)),
             child: Padding(
@@ -790,7 +805,11 @@ class _HomeState extends State<Home> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SvgPicture.asset(list[index]['image'], height: Dim().d60,width: index == 3 ? Dim().d120 : 0,),
+                  SvgPicture.asset(
+                    list[index]['image'],
+                    height: Dim().d60,
+                    width: index == 3 ? Dim().d120 : 0,
+                  ),
                   Text(
                     list[index]['name'],
                     maxLines: 1,
@@ -1007,31 +1026,31 @@ class _HomeState extends State<Home> {
                     list[index]['professional'] == null
                         ? Container()
                         : SizedBox(
-                          width: Dim().d200,
-                          child: GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: specialityList.length > 1
-                                  ? 2
-                                  : specialityList.length,
-                              gridDelegate:
-                                   SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3, mainAxisExtent: Dim().d24),
-                              itemBuilder: (context, index2) {
-                                return Text(specialityList[index2],
-                                    style: Sty()
-                                        .smallText
-                                        .copyWith(fontWeight: FontWeight.w400));
-                              }),
-                        ),
+                            width: Dim().d200,
+                            child: GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: specialityList.length > 1
+                                    ? 2
+                                    : specialityList.length,
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 3,
+                                        mainAxisExtent: Dim().d24),
+                                itemBuilder: (context, index2) {
+                                  return Text(specialityList[index2],
+                                      style: Sty().smallText.copyWith(
+                                          fontWeight: FontWeight.w400));
+                                }),
+                          ),
                     SizedBox(
                       height: Dim().d4,
                     ),
                     list[index]['languages'] == null
                         ? Container()
                         : SizedBox(
-                          width: Dim().d200,
-                          child: Text(
+                            width: Dim().d200,
+                            child: Text(
                               'Speaks : ${list[index]['languages'].toString().replaceAll('[', '').replaceAll(']', '')}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -1039,15 +1058,14 @@ class _HomeState extends State<Home> {
                                   .smallText
                                   .copyWith(fontWeight: FontWeight.w400),
                             ),
-                        ),
+                          ),
                     SizedBox(
                       height: Dim().d4,
                     ),
                     Text(
                       'Starts at : ₹ ${list[index]['appointment_details'][0]['charges']}',
-                      style: Sty()
-                          .smallText
-                          .copyWith(fontWeight: FontWeight.w400),
+                      style:
+                          Sty().smallText.copyWith(fontWeight: FontWeight.w400),
                     ),
                     SizedBox(
                       height: Dim().d4,
@@ -1056,9 +1074,8 @@ class _HomeState extends State<Home> {
                       list[index]['professional'] == null
                           ? ''
                           : '${list[index]['professional']['experience']} Years of experience',
-                      style: Sty()
-                          .smallText
-                          .copyWith(fontWeight: FontWeight.w400),
+                      style:
+                          Sty().smallText.copyWith(fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),

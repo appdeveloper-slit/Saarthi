@@ -167,7 +167,6 @@ class _LabsDetailsState extends State<LabsDetails> {
                 alignment: Alignment.centerLeft,
                 child: SizedBox(
                   height: 40,
-                  width: 280,
                   child: GridView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.zero,
@@ -449,9 +448,6 @@ class _LabsDetailsState extends State<LabsDetails> {
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: Dim().d24,
                   ),
                 ],
               ),

@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/hba1c_history.dart';
 import 'package:saarathi/values/dimens.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
 import 'oxygen.dart';
@@ -17,15 +19,38 @@ class HbA1c extends StatefulWidget {
 
 class _HbA1cState extends State<HbA1c> {
   late BuildContext ctx;
+  var date;
+  var value;
+  String? usertoken;
+  bool loading = false;
+  TextEditingController valueCtrl = TextEditingController();
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getHba1c();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       appBar: AppBar(
-          elevation: 2,
+        elevation: 2,
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -91,25 +116,27 @@ class _HbA1cState extends State<HbA1c> {
                             Text(
                               'HbA1c',
                               style: Sty().mediumText.copyWith(
-                                fontWeight: FontWeight.w400,
-                              ),
+                                    fontWeight: FontWeight.w400,
+                                  ),
                             ),
                             SizedBox(
                               height: 4,
                             ),
-                            Text(
-                              '04 December, 2022 ',
-                              style: Sty().smallText.copyWith(
-                                  color: Clr().grey,
-                                  fontWeight: FontWeight.w400),
-                            ),
+                            if (date != null)
+                              Text(
+                                '${DateFormat('dd MMMM,yyyy').format(DateTime.parse(date.toString()))}',
+                                style: Sty().smallText.copyWith(
+                                    color: Clr().grey,
+                                    fontWeight: FontWeight.w400),
+                              ),
                           ],
                         )
                       ],
                     ),
                     SizedBox(
-                      height: 20,
+                      height: Dim().d20,
                     ),
+                    if (value != null)
                     Row(
                       children: [
                         Expanded(
@@ -132,7 +159,7 @@ class _HbA1cState extends State<HbA1c> {
                           width: 12,
                         ),
                         Text(
-                          '19 mg/dl 1 mmol/L',
+                          '${value.toString()}',
                           textAlign: TextAlign.end,
                           style: Sty().smallText.copyWith(
                               color: Clr().black, fontWeight: FontWeight.w400),
@@ -167,28 +194,27 @@ class _HbA1cState extends State<HbA1c> {
                 ],
               ),
               child: TextFormField(
-                // controller: mobileCtrl,
+                controller: valueCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Clr().formfieldbg,
                   border: InputBorder.none,
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Clr().primaryColor, width: 1.0),
+                    borderSide:
+                        BorderSide(color: Clr().primaryColor, width: 1.0),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   contentPadding: EdgeInsets.all(18),
                   // label: Text('Enter Your Number'),
                   hintText: "2.5 - 23",
-                  hintStyle: TextStyle(color: Clr().hintColor,fontSize: 14),
+                  hintStyle: TextStyle(color: Clr().hintColor, fontSize: 14),
                   counterText: "",
                 ),
                 maxLength: 10,
                 validator: (value) {
                   if (value!.isEmpty ||
-                      !RegExp(r'([5-9]{1}[0-9]{9})')
-                          .hasMatch(value)) {
+                      !RegExp(r'([5-9]{1}[0-9]{9})').hasMatch(value)) {
                     return Str().invalidMobile;
                   } else {
                     return null;
@@ -196,50 +222,43 @@ class _HbA1cState extends State<HbA1c> {
                 },
               ),
             ),
-            SizedBox(height: 30,),
+            SizedBox(
+              height: 30,
+            ),
             Center(
               child: SizedBox(
                 height: 50,
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      // STM().redirect2page(ctx, HomeVisitAptDetails());
-                      // if (formKey.currentState!
-                      //     .validate()) {
-                      //   STM()
-                      //       .checkInternet(
-                      //       context, widget)
-                      //       .then((value) {
-                      //     if (value) {
-                      //       sendOtp();
-                      //     }
-                      //   });
-                      // }
+                      postHba1c();
                     },
-                    style: ElevatedButton.styleFrom( elevation: 0,
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
                         backgroundColor: Clr().primaryColor,
                         shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(10))),
+                            borderRadius: BorderRadius.circular(10))),
                     child: Text(
                       'Submit',
                       style: Sty().mediumText.copyWith(
-                        color: Clr().white,
-                        fontWeight: FontWeight.w600,),
+                            color: Clr().white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     )),
               ),
             ),
-            SizedBox(height: 20,),
+            SizedBox(
+              height: 20,
+            ),
             InkWell(
-              onTap: (){
+              onTap: () {
                 STM().redirect2page(ctx, HbA1cHistory());
               },
               child: Center(
                 child: Text(
                   'View History',
-                  style: Sty()
-                      .smallText
-                      .copyWith(color: Clr().primaryColor, fontWeight: FontWeight.w400),
+                  style: Sty().smallText.copyWith(
+                      color: Clr().primaryColor, fontWeight: FontWeight.w400),
                 ),
               ),
             ),
@@ -251,5 +270,33 @@ class _HbA1cState extends State<HbA1c> {
         ),
       ),
     );
+  }
+
+  // get hba1c
+  void postHba1c() async {
+    FormData body = FormData.fromMap({
+      'hba1c': valueCtrl.text,
+    });
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'add_hba1c', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      getHba1c();
+      STM().displayToast(message);
+      valueCtrl.clear();
+    } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  void getHba1c() async {
+    FormData body = FormData.fromMap({});
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'get_hba1c', body, usertoken, 'customer');
+    setState(() {
+      value = result['hba1c'];
+      date = result['date']['updated_at'];
+    });
   }
 }

@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/values/dimens.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'blood_glucose.dart';
 import 'bottom_navigation/bottom_navigation.dart';
@@ -15,16 +18,38 @@ class BMRCalculator extends StatefulWidget {
 
 class _BMRCalculatorState extends State<BMRCalculator> {
   late BuildContext ctx;
+  var date;
+  var value;
+  String? usertoken;
+  bool loading = false;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getBmr();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
       appBar: AppBar(
-          elevation: 2,
+        elevation: 2,
         backgroundColor: Clr().white,
         leading: InkWell(
           onTap: () {
@@ -81,16 +106,15 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                                 style: ElevatedButton.styleFrom(
                                     elevation: 0.7,
                                     backgroundColor: Color(0xff336699),
-                                    side:
-                                        BorderSide(color: Clr().borderColor),
+                                    side: BorderSide(color: Clr().borderColor),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(5),
                                     )),
                                 onPressed: () {
                                   // STM().redirect2page(ctx, HealthMatrix());
                                 },
-                                child: SvgPicture.asset(
-                                    'assets/heart_rate.svg')),
+                                child:
+                                    SvgPicture.asset('assets/heart_rate.svg')),
                           ),
                           SizedBox(
                             width: 12,
@@ -107,12 +131,13 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                               SizedBox(
                                 height: 4,
                               ),
-                              Text(
-                                '04 December, 2022 ',
-                                style: Sty().smallText.copyWith(
-                                    color: Clr().grey,
-                                    fontWeight: FontWeight.w400),
-                              ),
+                              if (date != null)
+                                Text(
+                                  '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(date.toString()))}',
+                                  style: Sty().smallText.copyWith(
+                                      color: Clr().grey,
+                                      fontWeight: FontWeight.w400),
+                                ),
                             ],
                           )
                         ],
@@ -120,6 +145,7 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                       SizedBox(
                         height: 20,
                       ),
+                      if (value != null)
                       Row(
                         children: [
                           Text(
@@ -142,7 +168,7 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                           ),
                           Expanded(
                             child: Text(
-                              '1475 Calories/day',
+                              '${value.toString()}',
                               textAlign: TextAlign.end,
                               style: Sty().mediumText.copyWith(
                                   color: Clr().black,
@@ -160,18 +186,18 @@ class _BMRCalculatorState extends State<BMRCalculator> {
               height: 40,
             ),
             Table(
-              border: TableBorder.all(color: Color(0xff189392),borderRadius: BorderRadius.circular(5)),
+              border: TableBorder.all(
+                  color: Color(0xff189392),
+                  borderRadius: BorderRadius.circular(5)),
               children: const [
-                TableRow(
-
-                    children: [
+                TableRow(children: [
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
                       "Age (y)",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15.0,
-                      fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          fontSize: 15.0, fontWeight: FontWeight.w600),
                     ),
                   ),
                   Padding(
@@ -179,8 +205,8 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                     child: Text(
                       "Males",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15.0,
-                      fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          fontSize: 15.0, fontWeight: FontWeight.w600),
                     ),
                   ),
                   Padding(
@@ -188,8 +214,8 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                     child: Text(
                       "Females",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15.0,
-                      fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          fontSize: 15.0, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ]),
@@ -219,7 +245,6 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                     ),
                   ),
                 ]),
-
                 TableRow(children: [
                   Padding(
                     padding: EdgeInsets.all(8.0),
@@ -434,5 +459,17 @@ class _BMRCalculatorState extends State<BMRCalculator> {
         ),
       ),
     );
+  }
+
+  // get bmr
+  void getBmr() async {
+    FormData body = FormData.fromMap({});
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'get_bmr', body, usertoken, 'customer');
+    setState(() {
+      value = result['bmr'];
+      date = result['date']['updated_at'];
+      loading = true;
+    });
   }
 }

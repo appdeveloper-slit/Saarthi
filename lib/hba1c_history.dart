@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:saarathi/values/dimens.dart';
-
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
 import 'oxygen_history.dart';

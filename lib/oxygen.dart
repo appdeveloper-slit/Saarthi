@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/oxygen_history.dart';
 import 'package:saarathi/values/dimens.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'heart_rate.dart';
@@ -18,6 +20,31 @@ class Oxygen extends StatefulWidget {
 
 class _OxygenState extends State<Oxygen> {
   late BuildContext ctx;
+  var date;
+  var value;
+  String? usertoken;
+  bool loading = false;
+  TextEditingController valueCtrl = TextEditingController();
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getOxygen();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +125,9 @@ class _OxygenState extends State<Oxygen> {
                             SizedBox(
                               height: 4,
                             ),
+                            if(date != null)
                             Text(
-                              '04 December, 2022 ',
+                              '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(date.toString()))}',
                               style: Sty().smallText.copyWith(
                                   color: Clr().grey,
                                   fontWeight: FontWeight.w400),
@@ -111,6 +139,7 @@ class _OxygenState extends State<Oxygen> {
                     SizedBox(
                       height: 20,
                     ),
+                    if(value != null)
                     Row(
                       children: [
                         Expanded(
@@ -133,7 +162,7 @@ class _OxygenState extends State<Oxygen> {
                           width: 12,
                         ),
                         Text(
-                          '98%',
+                          '${value.toString()}',
                           textAlign: TextAlign.end,
                           style: Sty().smallText.copyWith(
                               color: Clr().black, fontWeight: FontWeight.w400),
@@ -168,8 +197,7 @@ class _OxygenState extends State<Oxygen> {
                 ],
               ),
               child: TextFormField(
-                // controller: mobileCtrl,
-
+                controller: valueCtrl,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Clr().formfieldbg,
@@ -204,18 +232,7 @@ class _OxygenState extends State<Oxygen> {
                 width: 300,
                 child: ElevatedButton(
                     onPressed: () {
-                      // STM().redirect2page(ctx, HomeVisitAptDetails());
-                      // if (formKey.currentState!
-                      //     .validate()) {
-                      //   STM()
-                      //       .checkInternet(
-                      //       context, widget)
-                      //       .then((value) {
-                      //     if (value) {
-                      //       sendOtp();
-                      //     }
-                      //   });
-                      // }
+                      postOxygen();
                     },
                     style: ElevatedButton.styleFrom( elevation: 0,
                         backgroundColor: Clr().primaryColor,
@@ -252,5 +269,32 @@ class _OxygenState extends State<Oxygen> {
         ),
       ),
     );
+  }
+  // get hba1c
+  void postOxygen() async {
+    FormData body = FormData.fromMap({
+      'oxygen': valueCtrl.text,
+    });
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'add_oxygen', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      getOxygen();
+      STM().displayToast(message);
+      valueCtrl.clear();
+    } else {
+      STM().errorDialog(ctx, message);
+    }
+  }
+
+  void getOxygen() async {
+    FormData body = FormData.fromMap({});
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'get_oxygen', body, usertoken, 'customer');
+    setState(() {
+      value = result['oxygen'];
+      date = result['date']['updated_at'];
+    });
   }
 }

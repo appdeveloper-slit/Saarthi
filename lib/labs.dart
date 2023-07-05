@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
@@ -19,6 +18,7 @@ class _LabsState extends State<Labs> {
   late BuildContext ctx;
   String? usertoken;
   List labList = [];
+
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
@@ -85,123 +85,117 @@ class _LabsState extends State<Labs> {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 8,
-                    mainAxisExtent: 220,
+                    childAspectRatio: 6/9,
                     mainAxisSpacing: 8,
                   ),
                   shrinkWrap: true,
                   itemCount: labList.length,
                   itemBuilder: (context, index) {
-                    return SizedBox(
-                      width: MediaQuery.of(ctx).size.width / 2.5,
-                      child: Stack(
+                    return Card(
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          side: BorderSide(color: Clr().borderColor)),
+                      child: Column(
                         children: [
-                          Card(
-                            elevation: 1,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                side: BorderSide(color: Clr().borderColor)),
-                            child: Padding(
-                              padding: EdgeInsets.all(Dim().d12),
-                              child: Column(
-                                children: [
-                                  Image.network(labList[index]['image_path'].toString(), height: 65, width: 100),
-                                  SizedBox(
-                                    height: Dim().d12,
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: Dim().d12, vertical: Dim().d12),
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(Dim().d12),
+                                child: Image.network(
+                                    labList[index]['image_path'].toString(),
+                                    height: Dim().d80,
+                                    width: double.infinity,
+                                    fit: BoxFit.fitWidth)),
+                          ),
+                          Padding(
+                            padding:  EdgeInsets.symmetric(horizontal: Dim().d12),
+                            child: Text(
+                              '${labList[index]['name'].toString()}',
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: Sty().smallText.copyWith(
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  Text(
-                                    labList[index]['name'].toString(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Sty().smallText.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
-                                  SizedBox(
-                                    height: Dim().d4,
-                                  ),
-                                  Divider(
-                                    height: 2,
-                                    thickness: 1.5,
-                                  ),
-                                  SizedBox(
-                                    height: Dim().d4,
-                                  ),
-                                  Text(
-                                    'Offers ${labList[index]['tests'].length} Tests',
-                                    style: Sty().smallText.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Clr().primaryColor),
-                                  ),
-                                  SizedBox(
-                                    height: Dim().d4,
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on_outlined),
-                                      Text(
-                                        labList[index]['location'].toString(),
-                                        style: Sty().smallText.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                  // Container(decoration: BoxDecoration(color: Colors.green)),
-                                  // ElevatedButton(
-                                  //     style: ElevatedButton.styleFrom( elevation: 0,
-                                  //         backgroundColor: Clr().white,
-                                  //         side: BorderSide(color: Clr().primaryColor),
-                                  //         shape: RoundedRectangleBorder(
-                                  //           borderRadius: BorderRadius.circular(5),
-                                  //         )),
-                                  //     onPressed: () {},
-                                  //     child: Text(
-                                  //       'Add to Cart',
-                                  //       style: Sty().mediumText.copyWith(
-                                  //           fontWeight: FontWeight.w600,
-                                  //           color: Clr().primaryColor),
-                                  //     )),
-                                ],
-                              ),
                             ),
                           ),
-                          Positioned(
-                              bottom: 4,
-                              left: 4,
-                              child: InkWell(
-                                onTap: () {
-                                  STM().redirect2page(context, LabsDetails(labDetails: labList[index]));
-                                },
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.height / 4.9,
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.05,
-                                  decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Clr().grey.withOpacity(0.2),
-                                          spreadRadius: 1,
-                                          blurRadius: 25,
-                                          offset: Offset(12,
-                                              0.5), // changes position of shadow
+                          Padding(
+                            padding:  EdgeInsets.symmetric(vertical: Dim().d4,horizontal: Dim().d12),
+                            child: Divider(
+                              height: 2,
+                              thickness: 1.5,
+                            ),
+                          ),
+                          Text(
+                            'Offers ${labList[index]['tests'].length} Tests',
+                            style: Sty().smallText.copyWith(
+                                fontWeight: FontWeight.w300,
+                                color: Clr().primaryColor),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(
+                            height: Dim().d8,
+                          ),
+                          Padding(
+                            padding:  EdgeInsets.symmetric(horizontal: Dim().d12),
+                            child: Row(mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.location_on_outlined),
+                                Flexible(
+                                  child: Text(
+                                    '${labList[index]['location'].toString()}',
+                                    style: Sty().smallText.copyWith(
+                                          fontWeight: FontWeight.w300,
                                         ),
-                                      ],
-                                      color: Clr().primaryColor,
-                                      borderRadius: BorderRadius.only(
-                                          bottomRight: Radius.circular(15),
-                                          bottomLeft: Radius.circular(15))),
-                                  child: Center(
-                                    child: Text(
-                                      'Book',
-                                      style: Sty().mediumText.copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                          color: Clr().white),
-                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              ))
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: SizedBox(
+                              height: Dim().d4,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              STM().redirect2page(context,
+                                  LabsDetails(labDetails: labList[index]));
+                            },
+                            child: Container(
+                              width: MediaQuery.of(context).size.height / 4.9,
+                              height: MediaQuery.of(context).size.height * 0.05,
+                              decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Clr().grey.withOpacity(0.2),
+                                      spreadRadius: 1,
+                                      blurRadius: 25,
+                                      offset: Offset(12,
+                                          0.5), // changes position of shadow
+                                    ),
+                                  ],
+                                  color: Clr().primaryColor,
+                                  borderRadius: BorderRadius.only(
+                                      bottomRight: Radius.circular(15),
+                                      bottomLeft: Radius.circular(15))),
+                              child: Center(
+                                child: Text(
+                                  'Book',
+                                  style: Sty().mediumText.copyWith(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Clr().white),
+                                ),
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     );
@@ -213,9 +207,10 @@ class _LabsState extends State<Labs> {
 
   // labs details
   void labDetails() async {
-    var result = await STM().getWithTokenUrl(ctx, Str().loading, 'get_labs', usertoken, 'customer');
+    var result = await STM()
+        .getWithTokenUrl(ctx, Str().loading, 'get_labs', usertoken, 'customer');
     var success = result['success'];
-    if(success){
+    if (success) {
       setState(() {
         labList = result['labs'];
       });
