@@ -100,182 +100,193 @@ class _HealthMatrixState extends State<HealthMatrix> {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: categoryList.length != apiList.length
                         ? Padding(
-                          padding:  EdgeInsets.symmetric(vertical: Dim().d20),
-                          child: Center(child: CircularProgressIndicator()),
-                        )
+                            padding: EdgeInsets.symmetric(vertical: Dim().d20),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
                         : categoryLayout(ctx, index, categoryList),
                   );
                 }),
             SizedBox(
               height: 4,
             ),
-            liquidProfile == null ? Container() : Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Clr().grey.withOpacity(0.1),
-                    spreadRadius: 0.1,
-                    blurRadius: 12,
-                    offset: Offset(0, 2), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: InkWell(
-                onTap: () {
-                  STM().redirect2page(ctx, LipidProfile());
-                },
-                child: Card(
-                  elevation: 0,
-                  color: Clr().formfieldbg,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: Clr().borderColor,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(Dim().d16),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                SizedBox(
-                                  height: 60,
-                                  width: 60,
-                                  child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          elevation: 0.7,
-                                          backgroundColor: Color(0xffAD55FF),
-                                          side: BorderSide(
-                                              color: Clr().borderColor),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(5),
-                                          )),
-                                      onPressed: () {
-                                        STM()
-                                            .redirect2page(ctx, LipidProfile());
-                                      },
-                                      child:
-                                          SvgPicture.asset('assets/lipid.svg')),
-                                ),
-                                SizedBox(
-                                  width: 12,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Lipid Profile',
-                                      style: Sty().mediumText.copyWith(
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                    SizedBox(
-                                      height: 4,
-                                    ),
-                                    Text(
-                                      '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(liquidProfile['date']['updated_at'].toString()))}',
-                                      style: Sty().smallText.copyWith(
-                                          color: Clr().grey,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                            SvgPicture.asset('assets/arrow1.svg')
-                          ],
-                        ),
-                        SizedBox(
-                          height: 12,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'AHDL',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                            Text(
-                              '${liquidProfile['blood_cholesterol'].toString()}',
-                              style: Sty()
-                                  .smallText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'ALDL',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                            Text(
-                              '${liquidProfile['ldl_cholesterol'].toString()}',
-                              style: Sty()
-                                  .smallText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'CHOL',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                            Text(
-                              '${liquidProfile['hdl_cholesterol'].toString()}',
-                              style: Sty()
-                                  .smallText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'TGL',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                            Text(
-                              '${liquidProfile['triglycerides'].toString()}',
-                              style: Sty()
-                                  .smallText
-                                  .copyWith(fontWeight: FontWeight.w400),
-                            ),
-                          ],
+            liquidProfile == null
+                ? Container()
+                : Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Clr().grey.withOpacity(0.1),
+                          spreadRadius: 0.1,
+                          blurRadius: 12,
+                          offset: Offset(0, 2), // changes position of shadow
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-            )
+                    child: InkWell(
+                      onTap: () {
+                        STM().redirect2page(ctx, LipidProfile());
+                      },
+                      child: Card(
+                        elevation: 0,
+                        color: Clr().formfieldbg,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: Clr().borderColor,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(Dim().d16),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        height: 60,
+                                        width: 60,
+                                        child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                                elevation: 0.7,
+                                                backgroundColor:
+                                                    Color(0xffAD55FF),
+                                                side: BorderSide(
+                                                    color: Clr().borderColor),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                )),
+                                            onPressed: () {
+                                              STM().redirect2page(
+                                                  ctx, LipidProfile());
+                                            },
+                                            child: SvgPicture.asset(
+                                                'assets/lipid.svg')),
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Lipid Profile',
+                                            style: Sty().mediumText.copyWith(
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                          SizedBox(
+                                            height: 4,
+                                          ),
+                                          if (liquidProfile['date'] != null)
+                                            Text(
+                                              '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(liquidProfile['date'].toString()))}',
+                                              style: Sty().smallText.copyWith(
+                                                  color: Clr().grey,
+                                                  fontWeight: FontWeight.w400),
+                                            ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  SvgPicture.asset('assets/arrow1.svg')
+                                ],
+                              ),
+                              SizedBox(
+                                height: 12,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'AHDL',
+                                    style: Sty()
+                                        .mediumText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    '${liquidProfile['blood_cholesterol'].toString()}',
+                                    style: Sty()
+                                        .smallText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'ALDL',
+                                    style: Sty()
+                                        .mediumText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    '${liquidProfile['ldl_cholesterol'].toString()}',
+                                    style: Sty()
+                                        .smallText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'CHOL',
+                                    style: Sty()
+                                        .mediumText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    '${liquidProfile['hdl_cholesterol'].toString()}',
+                                    style: Sty()
+                                        .smallText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'TGL',
+                                    style: Sty()
+                                        .mediumText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    '${liquidProfile['triglycerides'].toString()}',
+                                    style: Sty()
+                                        .smallText
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
           ],
         ),
       ),
@@ -348,11 +359,12 @@ class _HealthMatrixState extends State<HealthMatrix> {
                         SizedBox(
                           height: 4,
                         ),
-                        Text(
-                          '${DateFormat('d MMMM , yyyy').format(DateTime.parse(List[index]['date'].toString()))}',
-                          style: Sty().smallText.copyWith(
-                              color: Clr().grey, fontWeight: FontWeight.w400),
-                        ),
+                        if (List[index]['date'] != null)
+                          Text(
+                            '${DateFormat('d MMMM , yyyy').format(DateTime.parse(List[index]['date'].toString()))}',
+                            style: Sty().smallText.copyWith(
+                                color: Clr().grey, fontWeight: FontWeight.w400),
+                          ),
                         SizedBox(
                           height: 4,
                         ),
@@ -393,7 +405,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/bmi.svg',
               'clr': Color(0xffF6505A),
               'page': BMI(),
-              'date': result['date']['updated_at'],
+              'date': result['date'],
               'value': result['bmi'],
             });
           });
@@ -407,7 +419,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                 'img': 'assets/bmr_cal.svg',
                 'clr': Color(0xff336699),
                 'page': BMRCalculator(),
-                'date': result['date']['updated_at'],
+                'date': result['date'],
                 'value': result['bmr'],
               },
             );
@@ -421,7 +433,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/blood_glu.svg',
               'clr': Color(0xff1FDA8D),
               'page': BloodGlucose(),
-              'date': result['date']['updated_at'],
+              'date': result['date'],
               'value': result['blood_glucose'],
             });
           });
@@ -434,7 +446,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/hba1c.svg',
               'clr': Color(0xff70D4FF),
               'page': HbA1c(),
-              'date': result['date']['updated_at'],
+              'date': result['date'],
               'value': result['hba1c']
             });
           });
@@ -447,7 +459,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/oxygen.svg',
               'clr': Color(0xff616FEC),
               'page': Oxygen(),
-              'date': result['date']['updated_at'],
+              'date': result['date'],
               'value': result['oxygen']
             });
           });
@@ -460,7 +472,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/heart_rate.svg',
               'clr': Color(0xffFC9A40),
               'page': HeartRate(),
-              'date': result['date']['updated_at'],
+              'date': result['date'],
               'value': result['heart_rate']
             });
           });

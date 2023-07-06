@@ -412,7 +412,7 @@ class _ProductPageState extends State<ProductPage> {
                                     _refreshData();
                                     _addItem(
                                       v['id'],
-                                      varientid ?? -1,
+                                      varientid ?? 0,
                                       varientname ?? v['name'].toString(),
                                       v['image'].toString(),
                                       varientsellingprice ??

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
@@ -90,7 +89,11 @@ class _MyOrdersState extends State<MyOrders> {
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     child: InkWell(
                       onTap: () {
-                        STM().redirect2page(context, OrderDetails());
+                        STM().redirect2page(
+                            context,
+                            OrderDetails(
+                              order: myOrderList[index],
+                            ));
                       },
                       child: Card(
                         color: Clr().background,
@@ -104,8 +107,14 @@ class _MyOrdersState extends State<MyOrders> {
                           child: Row(
                             children: [
                               STM().imageDisplay(
-                                  list: '',
-                                  url: '',
+                                  list: myOrderList[index]['cover_image']
+                                          .isEmpty
+                                      ? ''
+                                      : myOrderList[index]['cover_image'],
+                                  url: myOrderList[index]['cover_image']
+                                          .isEmpty
+                                      ? ''
+                                      : myOrderList[index]['cover_image'],
                                   h: Dim().d120,
                                   w: Dim().d100),
                               SizedBox(
@@ -184,17 +193,17 @@ class _MyOrdersState extends State<MyOrders> {
                                           width: Dim().d8,
                                         ),
                                         Text(
-                                            '${myOrderList[index]['order_status'] == 0 ? 'Pending' : myOrderList[index]['order_status'] == 1 ? 'Completed' : 'Cancelled'}',
+                                            '${myOrderList[index]['order_status']}',
                                             style: Sty().mediumText.copyWith(
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 16,
                                                 color: myOrderList[index]
                                                             ['order_status'] ==
-                                                        0
+                                                        'Pending'
                                                     ? Color(0xffFFC107)
                                                     : myOrderList[index][
                                                                 'order_status'] ==
-                                                            1
+                                                            'Completed'
                                                         ? Clr().green
                                                         : Clr().errorRed)),
                                       ],
