@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/values/dimens.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
 import 'values/colors.dart';
@@ -16,7 +18,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
   late BuildContext ctx;
 
   List<dynamic> historyList = [];
-
+  bool loading = false;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController dobCtrl = TextEditingController();
   TextEditingController dobCtrl1 = TextEditingController();
@@ -73,6 +75,27 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
         dobCtrl1 = TextEditingController(text: s);
       });
     }
+  }
+
+  String? usertoken;
+
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getLipid();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
   }
 
   @override
@@ -267,6 +290,31 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
                 ),
               ],
             ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                height: 40,
+                width: 120,
+                child: ElevatedButton(
+                    onPressed: () {
+                      getLipid(
+                          fromdate: dobCtrl.text, todate: dobCtrl1.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Clr().primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3))),
+                    child: Text(
+                      'Submit',
+                      style: Sty().mediumText.copyWith(
+                        color: Clr().white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )),
+              ),
+            ),
             SizedBox(
               height: 30,
             ),
@@ -279,10 +327,10 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
             SizedBox(
               height: 20,
             ),
-            ListView.builder(
+            historyList.isEmpty ?  Text('No History') : ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: 8,
+                itemCount: historyList.length,
                 // padding: EdgeInsets.only(top: 2,bottom: 12),
                 itemBuilder: (ctx, index) {
                   return Padding(
@@ -314,7 +362,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '14-12-2022',
+                  '${DateFormat('dd-MM-yyy').format(DateTime.parse(List[index]['updated_at']))}',
                   style: Sty().mediumText.copyWith(
                       color: Color(0xffAD55FF),
                       fontWeight: FontWeight.w400),
@@ -328,7 +376,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
                       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                     ),
                     Text(
-                      '37 mg/dL',
+                      '${List[index]['blood_cholesterol']}mg/dL',
                       style: Sty().smallText.copyWith(
                           fontWeight: FontWeight.w400, color: Color(0xffAD55FF),),
                     ),
@@ -343,7 +391,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
                       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                     ),
                     Text(
-                      '116 mg/dL',
+                      '${List[index]['ldl_cholesterol']} mg/dL',
                       style: Sty().smallText.copyWith(
                           fontWeight: FontWeight.w400, color: Color(0xffAD55FF),),
                     ),
@@ -358,7 +406,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
                       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                     ),
                     Text(
-                      '323 mg/dL',
+                      '${List[index]['hdl_cholesterol']} mg/dL',
                       style: Sty().smallText.copyWith(
                           fontWeight: FontWeight.w400, color: Color(0xffAD55FF),),
                     ),
@@ -373,7 +421,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
                       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
                     ),
                     Text(
-                      '1233 mg/dL',
+                      '${List[index]['triglycerides']} mg/dL',
                       style: Sty().smallText.copyWith(
                           fontWeight: FontWeight.w400, color: Color(0xffAD55FF),),
                     ),
@@ -389,4 +437,17 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
       ],
     );
   }
+
+  void getLipid({fromdate, todate}) async {
+    FormData body = FormData.fromMap({
+      'from_date': fromdate,
+      'to_date': todate,
+    });
+    var result = await STM().postWithTokenWithoutDailog(ctx, 'get_lipid_profile_history', body, usertoken, 'customer');
+    setState(() {
+      historyList = result['data'];
+      loading = true;
+    });
+  }
+
 }

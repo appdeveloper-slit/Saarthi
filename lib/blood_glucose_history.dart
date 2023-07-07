@@ -309,7 +309,7 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
             ),),
             SizedBox(height: 20,),
 
-            ListView.builder(
+            historyList.isEmpty ? Text('No History') : ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: historyList.length,
@@ -362,15 +362,11 @@ class _BloodGlucoseHistoryState extends State<BloodGlucoseHistory> {
       'to_date': todate,
     });
     var result = await STM().postWithTokenWithoutDailog(ctx, 'get_blood_glucose_history', body, usertoken, 'customer');
-    if (result['data'].isNotEmpty) {
       setState(() {
         // value = result['data'][0]['blood_glucose'];
         // date = result['data'][0]['updated_at'];
         historyList = result['data'];
         loading = true;
       });
-    } else {
-      STM().displayToast('No Fasting Blood Sugar Reading');
-    }
   }
 }

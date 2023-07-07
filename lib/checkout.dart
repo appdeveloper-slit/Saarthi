@@ -626,6 +626,7 @@ class CheckOutpage extends State<CheckOut> {
       'delivery_charges': 0,
       'shipping_address_id': addressid,
       'payment_mode': 'online',
+      'discount': discount == null ? 0 : discount.toString(),
     });
     var result = await STM().postWithToken(
         ctx, Str().processing, 'place_order', body, usertoken, 'customer');

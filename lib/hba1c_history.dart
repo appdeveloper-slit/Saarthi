@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:saarathi/values/dimens.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'manage/static_method.dart';
 import 'oxygen_history.dart';
@@ -20,7 +23,7 @@ class _HbA1cHistoryState extends State<HbA1cHistory> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController dobCtrl = TextEditingController();
   TextEditingController dobCtrl1 = TextEditingController();
-
+  bool loading = false;
   Future datePicker() async {
     DateTime? picked = await showDatePicker(
       context: ctx,
@@ -73,7 +76,26 @@ class _HbA1cHistoryState extends State<HbA1cHistory> {
       });
     }
   }
+  String? usertoken;
 
+  getSession() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    setState(() {
+      usertoken = sp.getString('customerId') ?? '';
+    });
+    STM().checkInternet(context, widget).then((value) {
+      if (value) {
+        getHba1c();
+        print(usertoken);
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getSession();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     ctx = context;
@@ -256,16 +278,40 @@ class _HbA1cHistoryState extends State<HbA1cHistory> {
                 ),
               ],
             ),
+            SizedBox(height: 20,),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                height: 40,
+                width: 120,
+                child: ElevatedButton(
+                    onPressed: () {
+                      getHba1c(
+                          fromdate: dobCtrl.text, todate: dobCtrl1.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Clr().primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3))),
+                    child: Text(
+                      'Submit',
+                      style: Sty().mediumText.copyWith(
+                        color: Clr().white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )),
+              ),
+            ),
             SizedBox(height: 30,),
             Text('History',style: Sty().largeText.copyWith(
               fontSize: 20,
             ),),
             SizedBox(height: 20,),
-
-            ListView.builder(
+            historyList.isEmpty ?  Text('No History') : ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: 8,
+                itemCount: historyList.length,
                 // padding: EdgeInsets.only(top: 2,bottom: 12),
                 itemBuilder: (ctx, index) {
                   return Padding(
@@ -273,9 +319,6 @@ class _HbA1cHistoryState extends State<HbA1cHistory> {
                     child: historyLayout(ctx, index, historyList),
                   );
                 }),
-
-
-
           ],
         ),
       ),
@@ -290,17 +333,17 @@ class _HbA1cHistoryState extends State<HbA1cHistory> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '14-12-2022',
+              '${DateFormat('dd-MM-yyy').format(DateTime.parse(List[index]['updated_at']))}',
               style: Sty()
                   .mediumText
                   .copyWith(fontWeight: FontWeight.w400),
             ),
             Text(
-              '19mg/dl 1 mmoI/L',
+              '${List[index]['hba1c']}%mg/dl',
               style: Sty()
                   .smallText
                   .copyWith(fontWeight: FontWeight.w400,
-                  color: Color(0xff70D4FF)),
+                  color: Color(0xff1FDA8D)),
             ),
           ],),
         SizedBox(height: 20,)
@@ -308,4 +351,19 @@ class _HbA1cHistoryState extends State<HbA1cHistory> {
     );
 
   }
+
+
+  // get bmi
+  void getHba1c({fromdate, todate}) async {
+    FormData body = FormData.fromMap({
+      'from_date': fromdate,
+      'to_date': todate,
+    });
+    var result = await STM().postWithTokenWithoutDailog(ctx, 'get_hba1c_history', body, usertoken, 'customer');
+      setState(() {
+        historyList = result['data'];
+        loading = true;
+      });
+  }
+
 }
