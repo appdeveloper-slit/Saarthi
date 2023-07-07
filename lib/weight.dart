@@ -183,6 +183,7 @@ class _WeightState extends State<Weight> {
                                   SizedBox(
                                     height: Dim().d4,
                                   ),
+                                  if(date != null)
                                   Text(
                                     '${DateFormat('d MMMM, y').format(DateTime.parse(date))}',
                                     style: Sty().smallText.copyWith(
@@ -502,31 +503,34 @@ class _WeightState extends State<Weight> {
         ctx, 'get_weight_history', body, usertoken, 'customer');
     if (result['data'].isNotEmpty) {
       setState(() {
-        value = result['data'][0]['weight'];
-        weightCtrl = TextEditingController(text: result['data'][0]['weight']);
-        date = result['data'][0]['updated_at'];
-        historyList = result['data'];
         loading = true;
+        value = result['data'][0]['weight'];
+        weightCtrl = TextEditingController(
+            text: result['data'][0]['weight']);
+        date = result['data'][0]['updated_at'];
+        historyList = result['data'] == null ? '0' : result['data'];
       });
     } else {
-      STM().displayToast('No Weights');
+      setState(() {
+        loading = true;
+      });
     }
   }
 
-
   // add weight
-void addWeight(weight) async {
+  void addWeight(weight) async {
     FormData body = FormData.fromMap({
       'weight': weight,
     });
-    var result = await STM().postWithToken(ctx, Str().processing,'add_weight', body, usertoken, 'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().processing, 'add_weight', body, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       STM().displayToast(message);
       getWeight();
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
-}
+  }
 }

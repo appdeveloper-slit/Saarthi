@@ -215,7 +215,7 @@ class _BMIState extends State<BMI> {
     var result = await STM().postWithTokenWithoutDailog(ctx, 'get_bmi', body, usertoken, 'customer');
     setState(() {
       value = result['bmi'];
-      date = result['date']['updated_at'];
+      date = result['date'];
       loading = true;
     });
   }

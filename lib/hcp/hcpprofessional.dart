@@ -204,6 +204,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                           addspecialityList.clear();
                           int position = categoryList.indexWhere((element) => element['name'].toString() == categoryValue.toString());
                           specialList = categoryList[position]['specaility'];
+                          print(specialList);
                         });
                       },
                     ),
@@ -557,11 +558,14 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
       setState(() => categoryerror = "Your Professional field is required");
       _isValid = false;
     }
-    if (addspecialityList.isEmpty) {
-      setState(() {
-        specialitieserror = "Your speciality is required";
-      });
-      _isValid = false;
+    if(specialList.isNotEmpty) {
+      if (addspecialityList.isEmpty) {
+        setState(() {
+          specialitieserror = "Your speciality is required";
+        });
+        _isValid = false;
+      }
+      _isValid = true;
     }
     if (opdaddress.text.isNotEmpty) {
       if (sLocation == null) {

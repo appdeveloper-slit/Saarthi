@@ -58,7 +58,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     ;
     return WillPopScope(
       onWillPop: () async {
-        STM().replacePage(ctx, MyOrders());
+        STM().finishAffinity(ctx, MyOrders());
         return false;
       },
       child: Scaffold(
@@ -69,7 +69,7 @@ class _OrderDetailsState extends State<OrderDetails> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().replacePage(ctx, MyOrders());
+              STM().finishAffinity(ctx, MyOrders());
             },
             child: Icon(
               Icons.arrow_back_rounded,

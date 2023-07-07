@@ -419,7 +419,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                 'img': 'assets/bmr_cal.svg',
                 'clr': Color(0xff336699),
                 'page': BMRCalculator(),
-                'date': result['date'],
+                'date': result['date']['updated_at'],
                 'value': result['bmr'],
               },
             );

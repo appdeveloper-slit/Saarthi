@@ -441,7 +441,6 @@ class _HomeVisitState extends State<HomeVisit> {
               STM().redirect2page(ctx, MyWallet());
             },
             child: Container(
-              height: 100,
               width: 108,
               decoration: BoxDecoration(
                 boxShadow: [
@@ -475,6 +474,8 @@ class _HomeVisitState extends State<HomeVisit> {
                         ),
                         Text(
                           'My Wallet',
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
                           style: Sty().mediumText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
@@ -486,7 +487,6 @@ class _HomeVisitState extends State<HomeVisit> {
             ),
           ),
           Container(
-            height: 100,
             width: 108,
             decoration: BoxDecoration(
               boxShadow: [
@@ -524,6 +524,8 @@ class _HomeVisitState extends State<HomeVisit> {
                         ),
                         Text(
                           'Appt Slots',
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
                           style: Sty().mediumText.copyWith(
                               fontSize: 14, fontWeight: FontWeight.w400),
                         ),
@@ -537,7 +539,6 @@ class _HomeVisitState extends State<HomeVisit> {
               STM().redirect2page(ctx, MyProfile());
             },
             child: Container(
-              height: 100,
               width: 108,
               decoration: BoxDecoration(
                 boxShadow: [
@@ -571,6 +572,8 @@ class _HomeVisitState extends State<HomeVisit> {
                         ),
                         Text(
                           'My Profile',
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
                           style: Sty().mediumText.copyWith(
                               fontSize: 14, fontWeight: FontWeight.w400),
                         ),
@@ -604,7 +607,6 @@ class _HomeVisitState extends State<HomeVisit> {
                 STM().openWeb('https://sonibro.com/saarathi/privacy_policy');
               },
                 child: Container(
-                  height: 120,
                   width: 108,
                   decoration: BoxDecoration(
                     boxShadow: [
@@ -637,8 +639,9 @@ class _HomeVisitState extends State<HomeVisit> {
                               height: 8,
                             ),
                             Text(
-                              'Privacy\nPolicy',
+                              'Privacy Policy',
                               textAlign: TextAlign.center,
+                              maxLines: 2,
                               style: Sty().mediumText.copyWith(
                                   fontSize: 14, fontWeight: FontWeight.w400),
                             ),
@@ -651,7 +654,6 @@ class _HomeVisitState extends State<HomeVisit> {
                 STM().openWeb('https://sonibro.com/saarathi/terms_conditions');
               },
                 child: Container(
-                  height: 120,
                   width: 110,
                   decoration: BoxDecoration(
                     boxShadow: [
@@ -684,8 +686,9 @@ class _HomeVisitState extends State<HomeVisit> {
                               height: 8,
                             ),
                             Text(
-                              'Terms &\nConditions',
+                              'Terms & Conditions',
                               textAlign: TextAlign.center,
+                              maxLines:2,
                               style: Sty().mediumText.copyWith(
                                   fontSize: 14, fontWeight: FontWeight.w400),
                             ),
@@ -698,7 +701,6 @@ class _HomeVisitState extends State<HomeVisit> {
                 STM().openWeb('https://sonibro.com/saarathi/refund_policy');
               },
                 child: Container(
-                  height: 120,
                   width: 108,
                   decoration: BoxDecoration(
                     boxShadow: [
@@ -731,8 +733,9 @@ class _HomeVisitState extends State<HomeVisit> {
                               height: Dim().d8,
                             ),
                             Text(
-                              'Refund\nPolicy',
+                              'Refund Policy',
                               textAlign: TextAlign.center,
+                              maxLines: 2,
                               style: Sty().mediumText.copyWith(
                                   fontSize: 14, fontWeight: FontWeight.w400),
                             ),

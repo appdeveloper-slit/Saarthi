@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:saarathi/values/dimens.dart';
+import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'blood_glucose.dart';
@@ -22,7 +23,7 @@ class _BMRCalculatorState extends State<BMRCalculator> {
   var value;
   String? usertoken;
   bool loading = false;
-
+ TextEditingController bmrctrl = TextEditingController();
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
@@ -180,6 +181,66 @@ class _BMRCalculatorState extends State<BMRCalculator> {
                     ],
                   ),
                 ),
+              ),
+            ),
+            SizedBox(
+              height: Dim().d24,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Clr().grey.withOpacity(0.1),
+                    spreadRadius: 0.5,
+                    blurRadius: 12,
+                    offset: Offset(0, 8), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: TextFormField(
+                controller: bmrctrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Clr().formfieldbg,
+                  border: InputBorder.none,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                    BorderSide(color: Clr().primaryColor, width: 1.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: EdgeInsets.all(18),
+                  // label: Text('Enter Your Number'),
+                  hintText: "Enter the BMR",
+                  hintStyle:
+                  TextStyle(color: Clr().hintColor, fontSize: 14),
+                  counterText: "",
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Center(
+              child: SizedBox(
+                height: 50,
+                width: 300,
+                child: ElevatedButton(
+                    onPressed: () {
+                      addBMR(bmrctrl.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Clr().primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                    child: Text(
+                      'Submit',
+                      style: Sty().mediumText.copyWith(
+                        color: Clr().white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )),
               ),
             ),
             SizedBox(
@@ -471,5 +532,21 @@ class _BMRCalculatorState extends State<BMRCalculator> {
       date = result['date']['updated_at'];
       loading = true;
     });
+  }
+
+  void addBMR(bmr) async {
+    FormData body = FormData.fromMap({
+      'bmr': bmr,
+    });
+    var result = await STM().postWithToken(
+        ctx, Str().processing, 'add_bmr', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      STM().displayToast(message);
+      getBmr();
+    } else {
+      STM().errorDialog(ctx, message);
+    }
   }
 }

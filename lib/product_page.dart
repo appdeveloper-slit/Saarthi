@@ -426,6 +426,7 @@ class _ProductPageState extends State<ProductPage> {
                                           msg: 'Item added to cart',
                                           toastLength: Toast.LENGTH_SHORT,
                                           gravity: ToastGravity.CENTER);
+
                                       print(addToCart[position]['price']);
                                     });
                                   },

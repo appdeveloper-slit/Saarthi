@@ -45,7 +45,6 @@ class _BloodGlucoseState extends State<BloodGlucose> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-
     return Scaffold(
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       appBar: AppBar(
@@ -173,7 +172,7 @@ class _BloodGlucoseState extends State<BloodGlucose> {
                     ),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: Dim().d20,
                   ),
                   Text(
                     'Enter Your Fasting Blood Sugar (FBS) Reading ',
@@ -181,7 +180,7 @@ class _BloodGlucoseState extends State<BloodGlucose> {
                         color: Clr().black, fontWeight: FontWeight.w400),
                   ),
                   SizedBox(
-                    height: 20,
+                    height: Dim().d20,
                   ),
                   Container(
                     decoration: BoxDecoration(
