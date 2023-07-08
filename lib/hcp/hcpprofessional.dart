@@ -200,7 +200,6 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                         setState(() {
                           categoryValue = t.toString();
                           categoryerror = null;
-                          specialList.clear();
                           addspecialityList.clear();
                           int position = categoryList.indexWhere((element) => element['name'].toString() == categoryValue.toString());
                           specialList = categoryList[position]['specaility'];
@@ -218,7 +217,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                 SizedBox(
                   height: Dim().d20,
                 ),
-                categoryValue == 'hcp'?  RichText(
+                specialList.isNotEmpty ?  RichText(
                   text: TextSpan(
                       text: 'Specialities',
                       style: Sty()
@@ -228,10 +227,10 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                         TextSpan(text: ' *', style: TextStyle(color: Clr().red))
                       ]),
                 ) : Container(),
-                categoryValue == 'hcp'?  SizedBox(
+                specialList.isNotEmpty?  SizedBox(
                   height: Dim().d12,
                 ) : Container(),
-                categoryValue == 'hcp'?  InkWell(
+                specialList.isNotEmpty  ?  InkWell(
                   onTap: () {
                     categoryValue == null
                         ? STM().displayToast('Please select category first')

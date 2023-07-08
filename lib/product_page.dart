@@ -576,7 +576,7 @@ class _ProductPageState extends State<ProductPage> {
             SizedBox(
               height: Dim().d32,
             ),
-            if(addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id']))
+            // if(addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id']))
               Container(
                 decoration: BoxDecoration(
                     boxShadow: [
@@ -598,8 +598,15 @@ class _ProductPageState extends State<ProductPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      addToCart.isEmpty ?
                       Text(
-                        '₹ ${addToCart.isEmpty ? 0.0 : addToCart[position]['price']}',
+                        '₹ ${varientsellingprice != null ? varientsellingprice : v['selling_price'].toString()}',
+                        style: Sty().mediumText.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Clr().white),
+                      ) : Text(
+                        '₹ ${position == -1 ? varientsellingprice != null ? varientsellingprice : v['selling_price'].toString() : addToCart[position]['price']}',
                         style: Sty().mediumText.copyWith(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -609,7 +616,23 @@ class _ProductPageState extends State<ProductPage> {
                         height: 30,
                         child: ElevatedButton(
                             onPressed: () {
-                              STM().redirect2page(ctx, MyCart());
+                              if(addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id'])){
+                                STM().redirect2page(ctx, MyCart());
+                              }else{
+                                _addItem(
+                                  v['id'],
+                                  varientid ?? 0,
+                                  varientname ?? v['name'].toString(),
+                                  v['image'].toString(),
+                                  varientsellingprice ??
+                                      v['selling_price'].toString(),
+                                  varientsellingprice ??
+                                      v['selling_price'].toString(),
+                                  1,
+                                ).then((value) {
+                                  STM().redirect2page(ctx, CheckOut());
+                                });
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
@@ -693,7 +716,7 @@ class _ProductPageState extends State<ProductPage> {
     if (counter > 0) {
       _updateItem(
               addToCart[index]['medicine_id'],
-          addToCart[index]['varientid'] ?? 0,
+              addToCart[index]['varientid'] ?? 0,
               addToCart[index]['name'].toString(),
               addToCart[index]['image'].toString(),
               newPrice.toString(),

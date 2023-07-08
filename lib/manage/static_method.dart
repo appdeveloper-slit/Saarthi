@@ -840,6 +840,26 @@ class STM {
     return name.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
   }
 
+
+  canceldialog({context, message,funtion}) {
+    return showDialog(context: context, builder: (index){
+      return AlertDialog(
+        content: Text(message,style: Sty().mediumText,),
+        actions: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              InkWell(onTap: funtion ,child: Text('Yes',style: Sty().smallText)),
+              InkWell(onTap: (){
+                STM().back2Previous(context);
+              },child: Text('No',style: Sty().smallText)),
+            ],
+          ),
+          SizedBox(height: Dim().d12,),
+        ],
+      );
+    });
+  }
+
   imageDisplay({list, url, h, w}) {
     return SizedBox(
         height: h,

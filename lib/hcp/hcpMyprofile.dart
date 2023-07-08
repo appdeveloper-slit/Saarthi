@@ -99,12 +99,21 @@ class _MyProfileState extends State<MyProfile> {
               SizedBox(
                 height: Dim().d20,
               ),
-              Text(
-                'Delete my account',
-                style: Sty().mediumText.copyWith(
-                      color: Clr().red,
-                      fontWeight: FontWeight.w600,
-                    ),
+              InkWell(onTap: (){
+                STM().canceldialog(
+                    message: 'Are you sure want to delete this account?',
+                    funtion: () {
+                      deletAccount();
+                    },
+                    context: ctx);
+              },
+                child: Text(
+                  'Delete my account',
+                  style: Sty().mediumText.copyWith(
+                        color: Clr().red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
               ),
               const Divider(),
             ],
@@ -286,6 +295,19 @@ class _MyProfileState extends State<MyProfile> {
                       professionaldata: userdetails['professional'],
                     ))
                 : STM().redirect2page(ctx, AddBankDetails());
+  }
+
+
+  void deletAccount() async {
+    var result = await STM().getWithTokenUrl(
+        ctx, Str().deleting, 'delete_profile', hcptoken, 'hcp');
+    var success = result['success'];
+    if (success) {
+      STM().displayToast('${result['message']}');
+      STM().finishAffinity(ctx, SignIn());
+    } else {
+      STM().errorDialog(ctx, '${result['message']}');
+    }
   }
 
   // getprofile

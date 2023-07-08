@@ -225,8 +225,8 @@ class _LabsState extends State<Labs> {
   void labDetails() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     FormData body = FormData.fromMap({
-      'latitude': sp.getString('lat'),
-      'longitude': sp.getString('lng'),
+      'latitude': sp.getString('lat').toString(),
+      'longitude': sp.getString('lng').toString(),
     });
     var result = await STM().postWithToken(
         ctx, Str().loading, 'get_labs', body, usertoken, 'customer');

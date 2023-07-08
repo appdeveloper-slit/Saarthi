@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:dio/dio.dart';
 import 'package:double_back_to_close/double_back_to_close.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -52,6 +54,7 @@ class _HomeState extends State<Home> {
   late BuildContext ctx;
   dynamic userDetails;
   String? laguagesList;
+  AwesomeDialog? dialog;
   List<dynamic> dayList = [
     {"id": "0", "name": "Sunday"},
     {"id": "1", "name": "Monday"},
@@ -135,27 +138,23 @@ class _HomeState extends State<Home> {
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey<ScaffoldState>();
   String? usertoken, sUUID,city;
 
-  getLocation() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    double lat = double.parse(sp.getString('lat').toString());
-    double lng = double.parse(sp.getString('lng').toString());
-    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
-    setState(() {
-      Placemark placeMark = placemarks[0];
-      city = placeMark.subLocality;
-      print(city);
-    });
-  }
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     await Permission.camera.request();
     await Permission.microphone.request();
     var status = await OneSignal.shared.getDeviceState();
+    double lat = double.parse(sp.getString('lat').toString());
+    double lng = double.parse(sp.getString('lng').toString());
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
       sUUID = status?.userId;
+      Placemark placeMark = placemarks[0];
+      city = placeMark.subLocality;
+      print('${city}gREG');
     });
+
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getHome();
@@ -167,8 +166,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    getSession();
-    getLocation();
+    permissionHandle();
     super.initState();
   }
 
@@ -918,7 +916,7 @@ class _HomeState extends State<Home> {
               height: Dim().d8,
             ),
             Text(
-              'height',
+              'Height',
               style: Sty().smallText,
             ),
           ],
@@ -1583,5 +1581,39 @@ class _HomeState extends State<Home> {
         doctorsList = result['near_by_doctors'];
       });
     }
+  }
+
+  Future<void> permissionHandle() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      getLocation();
+    }
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.deniedForever) {
+      STM().displayToast('Location permission is required');
+      await Geolocator.openAppSettings();
+    }
+  }
+  // getLocation
+  getLocation() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    dialog = STM().loadingDialog(ctx, 'Fetching location');
+    dialog!.show();
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      setState(() {
+        sp.setString('lat', position.latitude.toString());
+        sp.setString('lng', position.longitude.toString());
+        STM().displayToast('Current location is selected');
+        dialog!.dismiss();
+        getSession();
+      });
+    }).catchError((e) {
+      dialog!.dismiss();
+    });
   }
 }

@@ -89,8 +89,8 @@ class _SetTimeState extends State<SetTime> {
               spacing: Dim().d80,
               is24HourMode: false,
               isShowSeconds: false,
-              normalTextStyle: TextStyle(fontSize: Dim().d32),
-              highlightedTextStyle: TextStyle(color: Clr().primaryColor,fontSize: Dim().d32,),
+              normalTextStyle: TextStyle(fontSize: Dim().d24),
+              highlightedTextStyle: TextStyle(color: Clr().primaryColor,fontSize: Dim().d24,),
               onTimeChange: (value){
                 setState(() {
                   time = DateFormat.jm().format(value);

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../manage/static_method.dart';
@@ -51,7 +52,7 @@ class _MyAddressPageState extends State<MyAddressPage> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-      widget.route == 1 ? STM().replacePage(ctx, CheckOut()) : STM().back2Previous(ctx);
+      widget.route == 1 ? STM().replacePage(ctx, CheckOut()) : STM().finishAffinity(ctx, Home());
         return false;
       },
       child: Scaffold(
@@ -61,7 +62,7 @@ class _MyAddressPageState extends State<MyAddressPage> {
         appBar: AppBar(
           leading: InkWell(
             onTap: () {
-              widget.route == 1 ? STM().replacePage(ctx, CheckOut()) : STM().back2Previous(ctx);
+              widget.route == 1 ? STM().replacePage(ctx, CheckOut()) : STM().finishAffinity(ctx, Home());
             },
             child: Icon(
               Icons.arrow_back,

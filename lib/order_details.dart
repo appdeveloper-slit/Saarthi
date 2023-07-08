@@ -34,6 +34,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         print(usertoken);
+        print(widget.order['id']);
       }
     });
   }
@@ -58,7 +59,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     ;
     return WillPopScope(
       onWillPop: () async {
-        STM().finishAffinity(ctx, MyOrders());
+        STM().back2Previous(ctx);
         return false;
       },
       child: Scaffold(
@@ -69,7 +70,7 @@ class _OrderDetailsState extends State<OrderDetails> {
           backgroundColor: Clr().white,
           leading: InkWell(
             onTap: () {
-              STM().finishAffinity(ctx, MyOrders());
+              STM().back2Previous(ctx);
             },
             child: Icon(
               Icons.arrow_back_rounded,
@@ -321,7 +322,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                           SizedBox(
                             height: 6,
                           ),
-                          Text('${widget.order['shipping_address']['address']}',
+                          Text(
+                              '${widget.order['shipping_address']['address']} ${widget.order['shipping_address']['state']['name']} ${widget.order['shipping_address']['city']['name']}  ${widget.order['shipping_address']['pincode']} \n ${widget.order['shipping_address']['mobile']}',
                               style: Sty().mediumText.copyWith(
                                   fontWeight: FontWeight.w500,
                                   fontSize: 14,
@@ -353,56 +355,60 @@ class _OrderDetailsState extends State<OrderDetails> {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          width: 1.5,
-                          color: Color(0xffECECEC),
-                        ),
-                        borderRadius: BorderRadius.circular(5)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: SvgPicture.asset(
-                                  'assets/orderdetails.svg',
-                                  height: 25,
-                                  width: 25,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                                height: 10,
-                              ),
-                              Text(
-                                'Invoice download',
-                                style: TextStyle(
-                                    color: Color(0xff3B3B3B),
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 18),
-                              ),
-                            ],
+                  child: InkWell(onTap: (){
+                    STM().openWeb('${widget.order['invoice_path'].toString()}');
+                  },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            width: 1.5,
+                            color: Color(0xffECECEC),
                           ),
-                          Icon(Icons.arrow_forward_ios_outlined, size: 20),
-                        ],
+                          borderRadius: BorderRadius.circular(5)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: SvgPicture.asset(
+                                    'assets/orderdetails.svg',
+                                    height: 25,
+                                    width: 25,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                  height: 10,
+                                ),
+                                Text(
+                                  'Invoice download',
+                                  style: TextStyle(
+                                      color: Color(0xff3B3B3B),
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 18),
+                                ),
+                              ],
+                            ),
+                            Icon(Icons.arrow_forward_ios_outlined, size: 20),
+                          ],
+                        ),
                       ),
+                      // child: Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     Text(
+                      //       'BIGsaver20',
+                      //       style: TextStyle(color: Color(0xff989797)),
+                      //     ),
+                      //     Icon(Icons.arrow_forward_ios_outlined,size: 20),
+                      //   ],
+                      // ),
                     ),
-                    // child: Row(
-                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //   children: [
-                    //     Text(
-                    //       'BIGsaver20',
-                    //       style: TextStyle(color: Color(0xff989797)),
-                    //     ),
-                    //     Icon(Icons.arrow_forward_ios_outlined,size: 20),
-                    //   ],
-                    // ),
                   ),
                 ),
                 SizedBox(
@@ -530,27 +536,29 @@ class _OrderDetailsState extends State<OrderDetails> {
                             style: Sty()
                                 .mediumText
                                 .copyWith(color: Clr().errorRed))
-                        : SizedBox(
-                            height: 50,
-                            width: 300,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  OrderCancel(widget.order['id']);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    elevation: 0,
-                                    backgroundColor: Clr().primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10))),
-                                child: Text(
-                                  'Cancel product',
-                                  style: Sty().mediumText.copyWith(
-                                        color: Clr().white,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                )),
-                          ),
+                        : widget.order['order_status'] == 'Completed'
+                            ? Container()
+                            : SizedBox(
+                                height: 50,
+                                width: 300,
+                                child: ElevatedButton(
+                                    onPressed: () {
+                                      OrderCancel(widget.order['id']);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        backgroundColor: Clr().primaryColor,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10))),
+                                    child: Text(
+                                      'Cancel Order',
+                                      style: Sty().mediumText.copyWith(
+                                            color: Clr().white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    )),
+                              ),
                 SizedBox(
                   height: Dim().d32,
                 ),
@@ -574,18 +582,15 @@ class _OrderDetailsState extends State<OrderDetails> {
       setState(() {
         check = true;
       });
+
       AwesomeDialog(
               headerAnimationLoop: true,
               dismissOnTouchOutside: true,
               dismissOnBackKeyPress: true,
               title: 'Success',
               desc: message,
-              btnOkText: "OK",
               dialogType: DialogType.success,
               context: context,
-              btnOkOnPress: () {
-                STM().back2Previous(context);
-              },
               btnOkColor: Clr().successGreen)
           .show();
     } else {

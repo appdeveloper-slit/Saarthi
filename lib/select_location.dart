@@ -17,16 +17,20 @@ import 'values/styles.dart';
 import 'package:flutter_google_places_hoc081098/flutter_google_places_hoc081098.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'package:google_maps_webservice/places.dart';
+
 String? sLocation;
 var controller1 = StreamController<String?>.broadcast();
+
 class SelectLocation extends StatefulWidget {
-  final String?  weightCtrl, heightCtrl, sDietValue;
+  final String? weightCtrl, heightCtrl, sDietValue;
   final type;
+
   const SelectLocation(
       {super.key,
       this.weightCtrl,
       this.heightCtrl,
-      this.sDietValue,this.type});
+      this.sDietValue,
+      this.type});
 
   @override
   State<SelectLocation> createState() => _SelectLocationState();
@@ -61,6 +65,9 @@ class _SelectLocationState extends State<SelectLocation> {
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getCity();
+        setState(() {
+          widget.type != 'home' ? sLocation = null : sLocation = null;
+        });
         print(customerID);
       }
     });
@@ -71,10 +78,14 @@ class _SelectLocationState extends State<SelectLocation> {
   void initState() {
     getSession();
     controller1.stream.listen(
-          (event) {
+      (event) {
         setState(() {
           sLocation = sLocation;
-          sLocation != null ? widget.type == 'home'? STM().finishAffinity(ctx, Home()) : null : null;
+          sLocation != null
+              ? widget.type == 'home'
+                  ? STM().finishAffinity(ctx, Home())
+                  : null
+              : null;
         });
       },
     );
@@ -105,7 +116,8 @@ class _SelectLocationState extends State<SelectLocation> {
       padding: EdgeInsets.all(Dim().d16),
       child: Form(
         key: formKey,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             box(h: Dim().d8),
             InkWell(
@@ -126,7 +138,8 @@ class _SelectLocationState extends State<SelectLocation> {
                       child: SvgPicture.asset('assets/pick_location.svg'),
                     ),
                     Expanded(
-                        child: Text('Pick current location',
+                        child: Text(
+                      'Pick current location',
                       style: Sty().mediumText.copyWith(
                           color: Clr().primaryColor,
                           fontWeight: FontWeight.w500),
@@ -140,7 +153,8 @@ class _SelectLocationState extends State<SelectLocation> {
               onTap: () {
                 STM().redirect2page(
                     ctx,
-                    CustomSearchScaffold('AIzaSyCSs8od16tCpuiMK-QUpMrqRdKfPckrjYI'));
+                    CustomSearchScaffold(
+                        'AIzaSyCSs8od16tCpuiMK-QUpMrqRdKfPckrjYI'));
               },
               child: Card(
                 elevation: 0,
@@ -157,18 +171,19 @@ class _SelectLocationState extends State<SelectLocation> {
                     ),
                     Expanded(
                         child: Text(
-                          sLocation != null
-                              ? '${sLocation.toString()}'
-                              : 'Pick location Manually',
-                          style: Sty().mediumText.copyWith(
-                              color: Clr().primaryColor,
-                              fontWeight: FontWeight.w500),
-                        )),
+                      sLocation != null
+                          ? '${sLocation.toString()}'
+                          : 'Pick location Manually',
+                      style: Sty().mediumText.copyWith(
+                          color: Clr().primaryColor,
+                          fontWeight: FontWeight.w500),
+                    )),
                   ],
                 ),
               ),
             ),
             box(h: Dim().d32),
+            if( widget.type != 'home')
             Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -202,9 +217,11 @@ class _SelectLocationState extends State<SelectLocation> {
                 ),
               ),
             ),
+            if( widget.type != 'home')
             SizedBox(
               height: Dim().d20,
             ),
+            if( widget.type != 'home')
             Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -239,9 +256,11 @@ class _SelectLocationState extends State<SelectLocation> {
                 ),
               ),
             ),
+            if( widget.type != 'home')
             SizedBox(
               height: Dim().d20,
             ),
+            if( widget.type != 'home')
             Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -277,9 +296,11 @@ class _SelectLocationState extends State<SelectLocation> {
                 ),
               ),
             ),
+            if( widget.type != 'home')
             SizedBox(
               height: Dim().d20,
             ),
+            if( widget.type != 'home')
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
@@ -304,8 +325,8 @@ class _SelectLocationState extends State<SelectLocation> {
                   hint: Text(
                     'Select State',
                     style: Sty().smallText.copyWith(
-                      color: Clr().shimmerColor,
-                    ),
+                          color: Clr().shimmerColor,
+                        ),
                   ),
                   icon: Icon(
                     Icons.keyboard_arrow_down,
@@ -335,19 +356,20 @@ class _SelectLocationState extends State<SelectLocation> {
                 ),
               ),
             ),
-            _dropdownError1 == null
+            _dropdownError1 != null
                 ? const SizedBox.shrink()
                 : Padding(
-              padding:
-              EdgeInsets.only(left: Dim().d16, top: Dim().d8),
-              child: Text(
-                _dropdownError1 ?? "",
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
+                    padding: EdgeInsets.only(left: Dim().d16, top: Dim().d8),
+                    child: Text(
+                      _dropdownError1 ?? "",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+            if( widget.type != 'home')
             SizedBox(
               height: Dim().d24,
             ),
+            if( widget.type != 'home')
             Container(
               padding: EdgeInsets.symmetric(
                   horizontal: Dim().d16, vertical: Dim().d4),
@@ -373,8 +395,8 @@ class _SelectLocationState extends State<SelectLocation> {
                   hint: Text(
                     'Select City',
                     style: Sty().smallText.copyWith(
-                      color: Clr().shimmerColor,
-                    ),
+                          color: Clr().shimmerColor,
+                        ),
                   ),
                   icon: Icon(
                     Icons.keyboard_arrow_down,
@@ -404,16 +426,17 @@ class _SelectLocationState extends State<SelectLocation> {
             _dropdownError == null
                 ? SizedBox.shrink()
                 : Padding(
-              padding:
-              EdgeInsets.only(left: Dim().d16, top: Dim().d8),
-              child: Text(
-                _dropdownError ?? "",
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
+                    padding: EdgeInsets.only(left: Dim().d16, top: Dim().d8),
+                    child: Text(
+                      _dropdownError ?? "",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+            if( widget.type != 'home')
             SizedBox(
               height: Dim().d52,
             ),
+            if( widget.type != 'home')
             Align(
               alignment: Alignment.center,
               child: SizedBox(
@@ -507,15 +530,16 @@ class _SelectLocationState extends State<SelectLocation> {
     SharedPreferences sp = await SharedPreferences.getInstance();
     dialog = STM().loadingDialog(ctx, 'Fetching location');
     dialog!.show();
-   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
       setState(() {
         sp.setString('lat', position.latitude.toString());
         sp.setString('lng', position.longitude.toString());
         STM().displayToast('Current location is selected');
         dialog!.dismiss();
-         widget.type == 'home'? STM().finishAffinity(ctx, Home()) : null;
+        widget.type == 'home' ? STM().finishAffinity(ctx, Home()) : null;
       });
-    }).catchError((e){
+    }).catchError((e) {
       dialog!.dismiss();
     });
   }
@@ -530,7 +554,7 @@ class _SelectLocationState extends State<SelectLocation> {
     //Input
     FormData body = FormData.fromMap({
       'customer_id': customerID,
-      'weight': PhysicalList.isEmpty ? null :  PhysicalList[3],
+      'weight': PhysicalList.isEmpty ? null : PhysicalList[3],
       'height_in_feet': '${PhysicalList.isEmpty ? null : PhysicalList[0]}',
       'height_in_inch': '${PhysicalList.isEmpty ? null : PhysicalList[1]}',
       'diet': PhysicalList.isEmpty ? null : PhysicalList[2],
@@ -543,42 +567,50 @@ class _SelectLocationState extends State<SelectLocation> {
       'city': cityCtrl.text,
     });
     //Output
-    var result = await STM().postWithToken(ctx, Str().loading, "other_detail", body,customerID,'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().loading, "other_detail", body, customerID, 'customer');
     if (!mounted) return;
     var message = result['message'];
     var success = result['success'];
     if (success) {
       sp.setBool('login', true);
-      STM().finishAffinity(ctx, Home(Lat: sp.getString('lat'),Lng: sp.getString('lng'),));
+      STM().finishAffinity(
+          ctx,
+          Home(
+            Lat: sp.getString('lat'),
+            Lng: sp.getString('lng'),
+          ));
       STM().displayToast(message);
     } else {
       var message = result['message'];
       STM().errorDialog(ctx, message);
     }
   }
+
   // get state and city
 
   void getCity() async {
     var result = await STM().getOpen(ctx, Str().loading, 'get_cities');
     var success = result['success'];
-    if(success){
+    if (success) {
       setState(() {
         stateList = result['cities'];
       });
     }
   }
 }
+
 class CustomSearchScaffold extends PlacesAutocompleteWidget {
   final String sMapKey;
 
   CustomSearchScaffold(this.sMapKey, {Key? key})
       : super(
-    key: key,
-    apiKey: sMapKey,
-    sessionToken: const Uuid().v4(),
-    language: 'en',
-    components: [Component(Component.country, 'in')],
-  );
+          key: key,
+          apiKey: sMapKey,
+          sessionToken: const Uuid().v4(),
+          language: 'en',
+          components: [Component(Component.country, 'in')],
+        );
 
   @override
   _CustomSearchScaffoldState createState() => _CustomSearchScaffoldState();
@@ -613,7 +645,9 @@ class _CustomSearchScaffoldState extends PlacesAutocompleteState {
             sLocation = p.description;
             sp.setString('lat', geometry.location.lat.toString());
             sp.setString('lng', geometry.location.lng.toString());
-            controller1.sink.add('update');
+            print(sp.getString('lat'));
+            print(sp.getString('lng'));
+            controller1.sink.add(sLocation);
             STM().back2Previous(context);
             STM().displayToast('Location is selected');
           });
