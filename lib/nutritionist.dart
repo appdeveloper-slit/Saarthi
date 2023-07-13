@@ -61,12 +61,12 @@ class _NutritionistState extends State<Nutritionist> {
             color: Clr().appbarTextColor,
           ),
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.all(Dim().d16),
-            child: SvgPicture.asset('assets/filter.svg'),
-          )
-        ],
+        // actions: [
+        //   Padding(
+        //     padding: EdgeInsets.all(Dim().d16),
+        //     child: SvgPicture.asset('assets/filter.svg'),
+        //   )
+        // ],
         centerTitle: true,
         title: Text(
           '${widget.name}',
@@ -104,12 +104,13 @@ class _NutritionistState extends State<Nutritionist> {
     List typelist = [];
     List specialityList = [];
     typelist = list[index]['appointment_details'];
-
-    for (int a = 0;
-        a < list[index]['professional']['speciality_name'].length;
-        a++) {
-      specialityList
-          .add(list[index]['professional']['speciality_name'][a]['name']);
+    if(list[index]['professional']['speciality_name'] != null){
+      for (int a = 0;
+      a < list[index]['professional']['speciality_name'].length;
+      a++) {
+        specialityList
+            .add(list[index]['professional']['speciality_name'][a]['name']);
+      }
     }
     return Container(
       margin: EdgeInsets.only(bottom: 10),
@@ -130,82 +131,58 @@ class _NutritionistState extends State<Nutritionist> {
                       h: Dim().d120,
                       w: Dim().d100),
                   SizedBox(
-                    width: 12,
+                    width: Dim().d12,
                   ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Row(
+                        Row(mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Expanded(
-                              child: Text(
-                                'Dr.${list[index]['first_name']} ${list[index]['last_name']}',
-                                style: Sty()
-                                    .mediumText
-                                    .copyWith(fontWeight: FontWeight.w600),
-                              ),
+                            SvgPicture.asset('assets/map_pin.svg'),
+                            SizedBox(
+                              width: Dim().d4,
                             ),
-                            Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                SvgPicture.asset('assets/map_pin.svg'),
-                                SizedBox(
-                                  width: 4,
-                                ),
-                                Text(
-                                  '${list[index]['distance']} KM',
-                                  style: Sty().smallText.copyWith(
-                                      color: Clr().primaryColor,
-                                      fontWeight: FontWeight.w600),
-                                )
-                              ],
-                            )
+                            Text(
+                              '${list[index]['distance']} KM',
+                              textAlign: TextAlign.end,
+                              style: Sty().smallText.copyWith(
+                                  color: Clr().primaryColor,
+                                  fontWeight: FontWeight.w600),
+                            ),
                           ],
                         ),
-                        SizedBox(
-                          height: 6,
+                        Text(
+                          '${list[index]['first_name']} ${list[index]['last_name']}',
+                          style: Sty()
+                              .mediumText
+                              .copyWith(fontWeight: FontWeight.w600),
                         ),
-                        list[index]['professional'] == null
-                            ? Container()
-                            : SizedBox(
+                        if (list[index]['professional']['speciality_name'] != null)
+                          SizedBox(
+                            width: Dim().d200,
+                            child: Text(specialityList.toString().replaceAll('[', '').replaceAll(']', ''),
+                                maxLines: 1,
+                                style: Sty()
+                                    .smallText
+                                    .copyWith(fontWeight: FontWeight.w400)),
+                          ),
+                        SizedBox(
+                          height: Dim().d4,
+                        ),
+                        if(list[index]['languages'] != null)
+                            SizedBox(
                                 width: Dim().d220,
-                                child: GridView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: specialityList.length > 1
-                                        ? 2
-                                        : specialityList.length,
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 3,
-                                            mainAxisExtent: Dim().d28),
-                                    itemBuilder: (context, index2) {
-                                      return Text(specialityList[index2],
-                                          style: Sty().smallText.copyWith(
-                                              fontWeight: FontWeight.w400));
-                                    }),
-                              ),
-                        SizedBox(
-                          height: 6,
-                        ),
-                        list[index]['languages'] == null
-                            ? Container()
-                            : SizedBox(
-                                width: Dim().d200,
                                 child: Text(
                                   'Speaks : ${list[index]['languages'].toString().replaceAll('[', '').replaceAll(']', '')}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                   style: Sty()
                                       .smallText
                                       .copyWith(fontWeight: FontWeight.w400),
                                 ),
                               ),
                         SizedBox(
-                          height: 6,
+                          height: Dim().d4,
                         ),
                         Text(
                           list[index]['professional'] == null
@@ -216,7 +193,7 @@ class _NutritionistState extends State<Nutritionist> {
                               .copyWith(fontWeight: FontWeight.w400),
                         ),
                         SizedBox(
-                          height: 6,
+                          height: Dim().d4,
                         ),
                         Text(
                           '${list[index]['city']['name']}',
@@ -230,7 +207,7 @@ class _NutritionistState extends State<Nutritionist> {
                 ],
               ),
               SizedBox(
-                height: 4,
+                height: Dim().d20,
               ),
               Align(
                 alignment: Alignment.centerLeft,
@@ -240,49 +217,55 @@ class _NutritionistState extends State<Nutritionist> {
                 ),
               ),
               SizedBox(
-                height: 8,
+                height: Dim().d12,
               ),
               GridView.builder(
-                  itemCount: typelist.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: BouncingScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, childAspectRatio: 9 /4),
+                    crossAxisCount: 3,
+                    childAspectRatio: 6/3,
+                    crossAxisSpacing: 1,
+                    mainAxisSpacing: 1,
+                  ),
+                  shrinkWrap: true,
+                  itemCount: typelist.length,
                   itemBuilder: (context, index) {
+                    var v = typelist[index];
                     return Column(crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Wrap(crossAxisAlignment: WrapCrossAlignment.center,
+                        Text(
+                          typelist[index]['type'] == 1
+                              ? 'Online'
+                              : typelist[index]['type'] == 2
+                              ? 'OPD'
+                              : 'Home Visit',
+                          style: Sty()
+                              .mediumText
+                              .copyWith(fontWeight: FontWeight.w600,),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Row(
                           children: [
                             typelist[index]['type'] == 1
                                 ? SvgPicture.asset(
-                                    'assets/online_consultation.svg')
+                                'assets/online_consultation.svg')
                                 : typelist[index]['type'] == 2
-                                    ? SvgPicture.asset('assets/opd.svg')
-                                    : SvgPicture.asset(
-                                        'assets/home_visit.svg'),
-                            SizedBox(
-                              width: 6,
-                            ),
-                            Text(
-                              typelist[index]['type'] == 1
-                                  ? 'Online'
-                                  : typelist[index]['type'] == 2
-                                      ? 'OPD'
-                                      : 'Home Visit',
-                              style: Sty()
-                                  .mediumText
-                                  .copyWith(fontWeight: FontWeight.w600,),
-                            ),
+                                ? SvgPicture.asset('assets/opd.svg')
+                                : SvgPicture.asset(
+                                'assets/home_visit.svg'),
+                            SizedBox(width: Dim().d4),
+                            Text('₹${typelist[index]['charges']}',
+                                style: Sty().smallText.copyWith( color: Clr().primaryColor)),
                           ],
-                        ),
-                        Text('₹ ${typelist[index]['charges']}',
-                            style: Sty().smallText.copyWith( color: Clr().primaryColor)),
+                        )
                       ],
                     );
                   }),
+              SizedBox(height: Dim().d20),
               SizedBox(
-                height: 50,
-                width: 300,
+                height: Dim().d52,
+                width: Dim().d300,
                 child: ElevatedButton(
                     onPressed: () {
                       STM().redirect2page(
@@ -322,6 +305,7 @@ class _NutritionistState extends State<Nutritionist> {
       'longitude': sp.getString('lng'),
       'category_id': widget.id,
     });
+
     var result = await STM().postWithToken(
         ctx, Str().loading, 'doctor_by_category', body, usertoken, 'customer');
     var success = result['success'];

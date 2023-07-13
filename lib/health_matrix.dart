@@ -84,7 +84,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
           ),
           centerTitle: true,
           title: Text(
-            'HealthMatrix',
+            'Health Metrics',
             style: Sty()
                 .largeText
                 .copyWith(fontSize: 20, fontWeight: FontWeight.w600),
@@ -190,7 +190,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                                             ),
                                             if (liquidProfile['date'] != null)
                                               Text(
-                                                '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(liquidProfile['date']['updated_at'].toString()))}',
+                                                '${DateFormat('dd MMMM, yyyy').format(DateTime.parse(liquidProfile['date'].toString()))}',
                                                 style: Sty().smallText.copyWith(
                                                     color: Clr().grey,
                                                     fontWeight: FontWeight.w400),
@@ -425,7 +425,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
                 'img': 'assets/bmr_cal.svg',
                 'clr': Color(0xff336699),
                 'page': BMRCalculator(v: true),
-                'date': result['date']['updated_at'],
+                'date': result['date'],
                 'value': result['bmr'],
               },
             );
@@ -439,7 +439,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/blood_glu.svg',
               'clr': Color(0xff1FDA8D),
               'page': BloodGlucose(v: true),
-              'date': result['date'],
+              'date': result['date'] ,
               'value': result['blood_glucose'],
             });
           });
@@ -452,7 +452,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/hba1c.svg',
               'clr': Color(0xff70D4FF),
               'page': HbA1c(v: true),
-              'date': result['date']['updated_at'],
+              'date': result['date'],
               'value': result['hba1c']
             });
           });
@@ -465,7 +465,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/oxygen.svg',
               'clr': Color(0xff616FEC),
               'page': Oxygen(v: true),
-              'date': result['date']['updated_at'],
+              'date': result['date'] ,
               'value': result['oxygen']
             });
           });
@@ -478,7 +478,7 @@ class _HealthMatrixState extends State<HealthMatrix> {
               'img': 'assets/heart_rate.svg',
               'clr': Color(0xffFC9A40),
               'page': HeartRate(v: true),
-              'date': result['date']['updated_at'],
+              'date': result['date'] ,
               'value': result['heart_rate']
             });
           });

@@ -193,8 +193,9 @@ class _EnrollForProgramState extends State<EnrollForProgram> {
   }
 
   void myPrograms() async {
+    FormData body = FormData.fromMap({});
     var result = await STM()
-        .getWithToken(ctx, Str().loading, 'userProgramList', usertoken);
+        .postWithToken(ctx, Str().loading, 'userProgramList', body , usertoken,'customer');
     setState(() {
       programList = result['program_list'];
     });

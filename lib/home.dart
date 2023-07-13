@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:double_back_to_close/double_back_to_close.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
@@ -12,6 +13,7 @@ import 'package:saarathi/add_new_patient.dart';
 import 'package:saarathi/blood_glucose.dart';
 import 'package:saarathi/heart_rate.dart';
 import 'package:saarathi/lab_details.dart';
+import 'package:saarathi/localstore.dart';
 import 'package:saarathi/manage/static_method.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:saarathi/notifications.dart';
@@ -27,6 +29,9 @@ import 'package:saarathi/values/strings.dart';
 import 'package:saarathi/values/styles.dart';
 import 'package:saarathi/your_cart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'apt_details_home_visit.dart';
+import 'apt_details_ol.dart';
+import 'apt_details_telecall.dart';
 import 'bmi.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'doctors.dart';
@@ -35,6 +40,7 @@ import 'enroll_program.dart';
 import 'health_matrix.dart';
 import 'labs.dart';
 import 'log_in.dart';
+import 'my_appointments.dart';
 import 'my_profile.dart';
 import 'nutritionist.dart';
 import 'pharmacy.dart';
@@ -43,8 +49,9 @@ import 'set_medic_reminder.dart';
 
 class Home extends StatefulWidget {
   final String? Lat, Lng;
+  final type;
 
-  const Home({super.key, this.Lat, this.Lng});
+  const Home({super.key, this.Lat, this.Lng, this.type});
 
   @override
   State<Home> createState() => _HomeState();
@@ -64,6 +71,7 @@ class _HomeState extends State<Home> {
     {"id": "5", "name": "Friday"},
     {"id": "6", "name": "Saturday"},
   ];
+  List<dynamic> addToCart = [];
   List<dynamic> matrixList = [
     {
       'name': 'BMI',
@@ -103,6 +111,19 @@ class _HomeState extends State<Home> {
     }
   ];
 
+  void _refreshData() async {
+    dynamic data = await Store.getItems();
+    setState(() {
+      addToCart = data;
+    });
+  }
+
+  Future<void> _addItem(
+      medicine_id, varientid, name, image, price, actualPrice, counter) async {
+    await Store.createItem(
+        medicine_id, varientid, name, image, price, actualPrice, counter);
+  }
+
   List<dynamic> programList = [];
   List<Map<String, dynamic>> servicesList = [
     {
@@ -113,7 +134,7 @@ class _HomeState extends State<Home> {
     {
       'id': 2,
       'image': 'assets/nutritionist.svg',
-      'name': 'Nutrition',
+      'name': 'Nutritionist',
     },
     {
       'id': 3,
@@ -136,8 +157,8 @@ class _HomeState extends State<Home> {
   String t = "0";
   String? sValue = 'Home';
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey<ScaffoldState>();
-  String? usertoken, sUUID,city;
-
+  String? usertoken, sUUID, city;
+  var time;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -147,17 +168,17 @@ class _HomeState extends State<Home> {
     double lat = double.parse(sp.getString('lat').toString());
     double lng = double.parse(sp.getString('lng').toString());
     List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+    Placemark placeMark = placemarks[0];
+    city = placeMark.subLocality;
+    print('${city}gREG');
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
       sUUID = status?.userId;
-      Placemark placeMark = placemarks[0];
-      city = placeMark.subLocality;
-      print('${city}gREG');
     });
-
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getHome();
+        _refreshData();
         print(usertoken);
         print(sUUID);
       }
@@ -166,7 +187,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    permissionHandle();
+    widget.type == 'from otp' ? permissionHandle() : getSession();
     super.initState();
   }
 
@@ -200,8 +221,12 @@ class _HomeState extends State<Home> {
         ),
       ),
       title: InkWell(
-        onTap: (){
-          STM().redirect2page(ctx, SelectLocation(type: 'home',));
+        onTap: () {
+          STM().redirect2page(
+              ctx,
+              SelectLocation(
+                type: 'home',
+              ));
         },
         child: Row(children: [
           SvgPicture.asset('assets/location.svg'),
@@ -209,24 +234,28 @@ class _HomeState extends State<Home> {
             width: Dim().d12,
           ),
           Expanded(
-            child: Text('${city == null ?'' : city.toString()}',maxLines: 2,style: Sty().mediumText.copyWith(
-              color: Clr().black
-            ),),
+            child: Text(
+              '${city == null ? '' : city.toString()}',
+              maxLines: 2,
+              style: Sty().mediumText.copyWith(color: Clr().black),
+            ),
           ),
         ]),
       ),
       centerTitle: true,
       actions: [
-        Padding(
-          padding: EdgeInsets.only(left: Dim().d52),
-          child: InkWell(
-              onTap: () {
-                STM().redirect2page(ctx, MyCart());
-              },
-              child: SvgPicture.asset(
-                'assets/my_cart.svg',
-                height: 22,
-              )),
+        InkWell(
+          onTap: () {
+            // STM().redirect2page(context, NotificationPage());
+            STM().redirect2page(
+                ctx,
+                MyCart(
+                  type: 'home',
+                ));
+          },
+          child: addToCart.length > 0
+              ? SvgPicture.asset('assets/AddCart.svg')
+              : SvgPicture.asset('assets/my_cart.svg'),
         ),
         SizedBox(
           width: 20,
@@ -271,8 +300,7 @@ class _HomeState extends State<Home> {
               ),
               InkWell(
                 onTap: () {
-                  STM()
-                      .redirect2page(ctx, const PhysicalDetails(sType: 'home'));
+                  STM().redirect2page(ctx, PhysicalDetails(sType: 'home'));
                 },
                 child: Text(
                   'Edit',
@@ -330,7 +358,8 @@ class _HomeState extends State<Home> {
         Padding(
           padding: EdgeInsets.only(left: 6),
           child: Text(
-            'Health Matrix',
+            // 'Health Matrix',
+            ' Health Metrics',
             style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
@@ -497,119 +526,130 @@ class _HomeState extends State<Home> {
           SizedBox(
             height: Dim().d20,
           ),
-        // SizedBox(
-        //   height: 20,
-        // ),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   children: [
-        //     Text(
-        //       'Medicines',
-        //       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-        //     ),
-        //     InkWell(
-        //       onTap: () {
-        //         STM().redirect2page(ctx, Pharmacy());
-        //       },
-        //       child: Text(
-        //         'See all',
-        //         style: Sty().mediumText.copyWith(
-        //               fontWeight: FontWeight.w600,
-        //               fontSize: 14,
-        //               color: Clr().primaryColor,
-        //             ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        // SizedBox(
-        //   height: 12,
-        // ),
-        // SizedBox(
-        //   height: 230,
-        //   child: ListView.builder(
-        //     shrinkWrap: true,
-        //     scrollDirection: Axis.horizontal,
-        //     itemCount: 6,
-        //     itemBuilder: (context, index) {
-        //       return medicineLayout(ctx, index, medicineList);
-        //     },
-        //   ),
-        // ),
-        // SizedBox(
-        //   height: Dim().d20,
-        // ),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   children: [
-        //     Text(
-        //       ' Nearby Labs',
-        //       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-        //     ),
-        //     InkWell(
-        //       onTap: () {
-        //         STM().redirect2page(ctx, Labs());
-        //       },
-        //       child: Text(
-        //         'See all',
-        //         style: Sty().mediumText.copyWith(
-        //               fontWeight: FontWeight.w600,
-        //               fontSize: 14,
-        //               color: Clr().primaryColor,
-        //             ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        // SizedBox(
-        //   height: 12,
-        // ),
-        // SizedBox(
-        //   height: 230,
-        //   child: ListView.builder(
-        //     shrinkWrap: true,
-        //     scrollDirection: Axis.horizontal,
-        //     itemCount: 6,
-        //     itemBuilder: (context, index) {
-        //       return labLayout(ctx, index, Lablist);
-        //     },
-        //   ),
-        // ),
-        // SizedBox(
-        //   height: 20,
-        // ),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   children: [
-        //     Text(
-        //       'Upcoming Appointment',
-        //       style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
-        //     ),
-        //     Text(
-        //       'See all',
-        //       style: Sty().mediumText.copyWith(
-        //             fontWeight: FontWeight.w600,
-        //             fontSize: 14,
-        //             color: Clr().primaryColor,
-        //           ),
-        //     ),
-        //   ],
-        // ),
-        // SizedBox(
-        //   height: 12,
-        // ),
-        // SizedBox(
-        //   height: 145,
-        //   child: ListView.builder(
-        //     shrinkWrap: true,
-        //     scrollDirection: Axis.horizontal,
-        //     // itemCount: resultList.length,
-        //     itemCount: 5,
-        //     itemBuilder: (context, index) {
-        //       return appointmentLayout(ctx, index, appointmentList);
-        //     },
-        //   ),
-        // ),
+        if (medicineList.isNotEmpty)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBe
+            tween,
+            children: [
+              Text(
+                'Medicines',
+                style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+              ),
+              InkWell(
+                onTap: () {
+                  STM().redirect2page(ctx, Pharmacy());
+                },
+                child: Text(
+                  'See all',
+                  style: Sty().mediumText.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Clr().primaryColor,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        if (medicineList.isNotEmpty)
+          SizedBox(
+            height: Dim().d12,
+          ),
+        if (medicineList.isNotEmpty)
+          SizedBox(
+            height: Dim().d220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: medicineList.length,
+              itemBuilder: (context, index) {
+                return medicineLayout(ctx, index, medicineList);
+              },
+            ),
+          ),
+        if (Lablist.isNotEmpty)
+          SizedBox(
+            height: Dim().d20,
+          ),
+        if (Lablist.isNotEmpty)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                ' Nearby Labs',
+                style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+              ),
+              InkWell(
+                onTap: () {
+                  STM().redirect2page(ctx, Labs());
+                },
+                child: Text(
+                  'See all',
+                  style: Sty().mediumText.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Clr().primaryColor,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        if (Lablist.isNotEmpty)
+          SizedBox(
+            height: Dim().d12,
+          ),
+        if (Lablist.isNotEmpty)
+          SizedBox(
+            height: Dim().d220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: Lablist.length,
+              itemBuilder: (context, index) {
+                return labLayout(ctx, index, Lablist);
+              },
+            ),
+          ),
+        if (appointmentList.isNotEmpty)
+          SizedBox(
+            height: Dim().d20,
+          ),
+        if (appointmentList.isNotEmpty)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Upcoming Appointment',
+                style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+              ),
+              InkWell(
+                onTap: () {
+                  STM().redirect2page(ctx, MyAppointments());
+                },
+                child: Text(
+                  'See all',
+                  style: Sty().mediumText.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Clr().primaryColor,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        if (appointmentList.isNotEmpty)
+          SizedBox(
+            height: Dim().d12,
+          ),
+        if (appointmentList.isNotEmpty)
+          SizedBox(
+            height: Dim().d150,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              // itemCount: resultList.length,
+              itemCount: appointmentList.length,
+              itemBuilder: (context, index) {
+                return appointmentLayout(ctx, index, appointmentList);
+              },
+            ),
+          ),
       ]),
     );
   }
@@ -781,7 +821,12 @@ class _HomeState extends State<Home> {
   Widget servicesLayout(ctx, index, list) {
     return InkWell(
         onTap: () {
-          STM().redirect2page(ctx, Nutritionist(id: list[index]['id'],name: list[index]['name'],));
+          STM().redirect2page(
+              ctx,
+              Nutritionist(
+                id: list[index]['id'],
+                name: list[index]['name'],
+              ));
         },
         child: Padding(
           padding: EdgeInsets.only(right: Dim().d12),
@@ -962,13 +1007,20 @@ class _HomeState extends State<Home> {
     List typelist = [];
     List specialityList = [];
     typelist = list[index]['appoitment_types'];
-
     for (int a = 0;
         a < list[index]['professional']['speciality_name'].length;
         a++) {
       specialityList
           .add(list[index]['professional']['speciality_name'][a]['name']);
     }
+    List<Text> listPro() {
+      return specialityList
+          .map((e) => Text(e,
+              maxLines: 1,
+              style: Sty().smallText.copyWith(fontWeight: FontWeight.w400)))
+          .toList();
+    }
+
     return Card(
       elevation: 0.6,
       shape: RoundedRectangleBorder(
@@ -978,7 +1030,7 @@ class _HomeState extends State<Home> {
         width: MediaQuery.of(ctx).size.width / 1.15,
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Row(
               children: [
@@ -1020,26 +1072,20 @@ class _HomeState extends State<Home> {
                         // )
                       ],
                     ),
-                    list[index]['professional'] == null
-                        ? Container()
-                        : SizedBox(
-                            width: Dim().d200,
-                            child: GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: specialityList.length > 1
-                                    ? 2
-                                    : specialityList.length,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 3,
-                                        mainAxisExtent: Dim().d24),
-                                itemBuilder: (context, index2) {
-                                  return Text(specialityList[index2],
-                                      style: Sty().smallText.copyWith(
-                                          fontWeight: FontWeight.w400));
-                                }),
-                          ),
+                    if (list[index]['professional']['speciality_name']
+                        .isNotEmpty)
+                      SizedBox(
+                        width: Dim().d200,
+                        child: Text(
+                            specialityList
+                                .toString()
+                                .replaceAll('[', '')
+                                .replaceAll(']', ''),
+                            maxLines: 1,
+                            style: Sty()
+                                .smallText
+                                .copyWith(fontWeight: FontWeight.w400)),
+                      ),
                     SizedBox(
                       height: Dim().d4,
                     ),
@@ -1078,51 +1124,48 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
-            Row(
+            Wrap(
+              spacing: Dim().d12,
               children: [
-                typelist.contains('Online Consultation')
-                    ? Row(
-                        children: [
-                          SvgPicture.asset('assets/online_consultation.svg'),
-                          SizedBox(
-                            width: 6,
-                          ),
-                          Text(
-                            'Online Consultation',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      )
-                    : Container(),
-                SizedBox(
-                  width: 16,
-                ),
-                typelist.contains('OPD')
-                    ? Row(
-                        children: [
-                          SvgPicture.asset('assets/opd.svg'),
-                          SizedBox(
-                            width: 6,
-                          ),
-                          Text(
-                            'OPD',
-                            style: Sty()
-                                .mediumText
-                                .copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      )
-                    : Container(),
-              ],
-            ),
-            typelist.contains('Home Visit')
-                ? Row(
+                if (typelist.contains('Online Consultation'))
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      SvgPicture.asset('assets/online_consultation.svg'),
+                      SizedBox(
+                        width: Dim().d4,
+                      ),
+                      Text(
+                        'Online',
+                        style: Sty()
+                            .mediumText
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                if (typelist.contains('OPD'))
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      SvgPicture.asset('assets/opd.svg'),
+                      SizedBox(
+                        width: Dim().d4,
+                      ),
+                      Text(
+                        'OPD',
+                        style: Sty()
+                            .mediumText
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                if (typelist.contains('Home Visit'))
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       SvgPicture.asset('assets/home_visit.svg'),
                       SizedBox(
-                        width: 6,
+                        width: Dim().d4,
                       ),
                       Text(
                         'Home Visit',
@@ -1131,11 +1174,12 @@ class _HomeState extends State<Home> {
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                     ],
-                  )
-                : Container(),
+                  ),
+              ],
+            ),
             SizedBox(
-              height: 50,
-              width: 300,
+              height: Dim().d52,
+              width: Dim().d300,
               child: ElevatedButton(
                   onPressed: () {
                     STM().redirect2page(
@@ -1259,85 +1303,121 @@ class _HomeState extends State<Home> {
   }
 
 //Medicines
-  Widget medicineLayout(ctx, index, List) {
+  Widget medicineLayout(ctx, index, list) {
     return SizedBox(
-      width: 160,
-      child: Container(
-        width: MediaQuery.of(ctx).size.width / 2.5,
-        child: Card(
-          elevation: 0.6,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: BorderSide(color: Clr().borderColor)),
-          child: Padding(
-            padding: EdgeInsets.all(Dim().d12),
-            child: Column(
-              children: [
-                InkWell(
-                    onTap: () {
-                      STM().redirect2page(ctx, ProductPage());
+      width: Dim().d180,
+      child: Card(
+        elevation: 0.6,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: Clr().borderColor)),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                height: Dim().d2,
+              ),
+              InkWell(
+                onTap: () {
+                  STM().redirect2page(
+                      ctx,
+                      ProductPage(
+                        details: list[index],
+                      ));
+                },
+                child: SizedBox(
+                  height: Dim().d72,
+                  width: double.infinity,
+                  child: STM().imageDisplay(
+                      list: list[index]['image'], url: list[index]['image']),
+                ),
+              ),
+              Text(
+                '${list[index]['name'].toString()}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Sty().smallText.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    '₹ ${list[index]['selling_price']}',
+                    style: Sty().mediumText.copyWith(
+                          fontWeight: FontWeight.w300,
+                        ),
+                  ),
+                  SizedBox(
+                    width: Dim().d8,
+                  ),
+                  Text(
+                    '₹ ${list[index]['price']}',
+                    style: Sty().microText.copyWith(
+                          fontWeight: FontWeight.w300,
+                          color: Color(0xffC2C2C2),
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: Dim().d36,
+                child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _refreshData();
+                        addToCart
+                                .map((e) => e['medicine_id'])
+                                .contains(list[index]['id'])
+                            ? Fluttertoast.showToast(
+                                msg: 'Item is already added in cart',
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER)
+                            : _addItem(
+                                list[index]['id'],
+                                list[index]['medicine_variant'][0]['id'],
+                                list[index]['medicine_variant'][0]
+                                        ['variant_name']
+                                    .toString(),
+                                list[index]['image'].toString(),
+                                list[index]['medicine_variant'][0]
+                                        ['selling_price']
+                                    .toString(),
+                                list[index]['medicine_variant'][0]
+                                        ['selling_price']
+                                    .toString(),
+                                1,
+                              ).then((value) {
+                                _refreshData();
+                                Fluttertoast.showToast(
+                                    msg: 'Item added to cart',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER);
+                              });
+                      });
+                      // STM().redirect2page(ctx, MyCart());
                     },
-                    child: Image.asset('assets/medicine.png')),
-                SizedBox(
-                  height: 12,
-                ),
-                Text(
-                  'Baidynath Kesari Kalpsfsfgfsgg',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Sty().smallText.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                SizedBox(
-                  height: 12,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '₹400',
-                      style: Sty().mediumText.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    SizedBox(
-                      width: 8,
-                    ),
-                    Text(
-                      '₹700',
-                      style: Sty().microText.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xffC2C2C2),
-                            decoration: TextDecoration.lineThrough,
-                          ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 12,
-                ),
-                SizedBox(
-                  height: 40,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: Clr().white,
-                          side: BorderSide(color: Clr().primaryColor),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          )),
-                      onPressed: () {
-                        STM().redirect2page(ctx, MyCart());
-                      },
-                      child: Text(
-                        'Add to Cart',
-                        style: Sty().mediumText.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Clr().primaryColor),
-                      )),
-                ),
-              ],
-            ),
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(width: 1, color: Clr().primaryColor),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                    child: Text(
+                      'Add to Cart',
+                      style: Sty().smallText.copyWith(
+                          fontSize: Dim().d14,
+                          color: Clr().primaryColor,
+                          fontWeight: FontWeight.w400),
+                    )),
+              ),
+              SizedBox(
+                height: Dim().d2,
+              ),
+            ],
           ),
         ),
       ),
@@ -1345,179 +1425,231 @@ class _HomeState extends State<Home> {
   }
 
   //Lablist
-  Widget labLayout(ctx, index, List) {
+  Widget labLayout(ctx, index, list) {
     return SizedBox(
-      width: 145,
-      child: Container(
-        width: MediaQuery.of(ctx).size.width / 2.5,
-        child: Card(
-          elevation: 0.6,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-              side: BorderSide(color: Clr().borderColor)),
-          child: Column(
-            children: [
-              ClipRRect(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10)),
-                  child: Image.asset('assets/lab.png')),
-              SizedBox(
-                height: 12,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: Dim().d8),
-                child: Text(
-                  'NirAmaya Pathlabs ',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Sty().smallText.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: Dim().d8),
-                child: Row(
-                  children: [
-                    SvgPicture.asset('assets/map_pin.svg'),
-                    SizedBox(
-                      width: 8,
+      width: Dim().d180,
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Clr().borderColor)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: Dim().d12, vertical: Dim().d12),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(Dim().d12),
+                  child: STM().imageDisplay(
+                      url: list[index]['image_path'],
+                      list: list[index]['image_path'],
+                      h: Dim().d80,
+                      w: double.infinity)),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+              child: Text(
+                '${list[index]['name'].toString()}',
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: Sty().smallText.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
-                    Text(
-                      'Dombivli',
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.location_on_outlined),
+                  Flexible(
+                    child: Text(
+                      '${list[index]['location'].toString()}',
+                      style: Sty().smallText.copyWith(
+                            fontWeight: FontWeight.w300,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Sty().smallText.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                STM().redirect2page(
+                    context, LabsDetails(labDetails: list[index]));
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.height / 4.9,
+                height: MediaQuery.of(context).size.height * 0.05,
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Clr().grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 25,
+                        offset: Offset(12, 0.5), // changes position of shadow
+                      ),
+                    ],
+                    color: Clr().primaryColor,
+                    borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(15),
+                        bottomLeft: Radius.circular(15))),
+                child: Center(
+                  child: Text(
+                    'Book',
+                    style: Sty().mediumText.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Clr().white),
+                  ),
                 ),
               ),
-              SizedBox(
-                height: 12,
-              ),
-              SizedBox(
-                height: 40,
-                width: 100,
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: Clr().white,
-                        side: BorderSide(color: Clr().primaryColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        )),
-                    onPressed: () {
-                      STM().redirect2page(ctx, LabsDetails());
-                    },
-                    child: Text(
-                      'Book',
-                      style: Sty().mediumText.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Clr().primaryColor),
-                    )),
-              ),
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
   }
 
   //Upcoming Appointment
-  Widget appointmentLayout(ctx, index, List) {
-    return SizedBox(
-      width: MediaQuery.of(ctx).size.width / 1.2,
-      child: Card(
-        margin: const EdgeInsets.only(right: 10),
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        color: Clr().primaryColor,
-        child: Padding(
-          padding: EdgeInsets.all(Dim().d12),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Image.asset('assets/doc2.png'),
-                  SizedBox(
-                    width: 14,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget appointmentLayout(ctx, index, list) {
+    return InkWell(
+      onTap: () {
+        list[index]['appointment_type'] == "2"
+            ? STM().redirect2page(
+                ctx,
+                TeleCallAppointmentDetails(
+                  details: list[index],
+                  time: time,
+                ))
+            : list[index]['appointment_type'] == "1"
+                ? STM().redirect2page(
+                    ctx,
+                    AppointmentolDetails(
+                      details: list[index],
+                      time: time,
+                    ))
+                : STM().redirect2page(
+                    ctx,
+                    HomeVisitAptDetails(
+                      details: list[index],
+                      time: time,
+                    ));
+      },
+      child: SizedBox(
+        width: Dim().d300,
+        child: Card(
+          margin: const EdgeInsets.only(right: 10),
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          color: Clr().primaryColor,
+          child: Padding(
+            padding: EdgeInsets.all(Dim().d8),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(Dim().d56),
+                        child: STM().imageDisplay(
+                            url: list[index]['hcp']['profile_pic'],
+                            list: list[index]['hcp']['profile_pic'],
+                            h: Dim().d80,
+                            w: Dim().d80)),
+                    SizedBox(
+                      width: Dim().d14,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${list[index]['hcp']['first_name']} ${list[index]['hcp']['last_name']}',
+                            style: Sty().mediumText.copyWith(
+                                fontWeight: FontWeight.w400,
+                                color: Clr().white),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(
+                            height: Dim().d8,
+                          ),
+                          if (list[index]['hcp']['professional']
+                                  ['speciality_name'] !=
+                              null)
+                            Text(
+                                list[index]['hcp']['professional']
+                                    ['speciality_name'][0]['name'],
+                                style: TextStyle(
+                                    color: Clr().white, fontSize: Dim().d14)),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: Dim().d8,
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Clr().white,
+                    )
+                  ],
+                ),
+                const Divider(
+                  color: Color(0xffffffff),
+                  thickness: 1,
+                ),
+                SizedBox(
+                  height: Dim().d4,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          'Dr. Imran Syahir',
-                          style: Sty().extraLargeText.copyWith(
-                              fontWeight: FontWeight.w500, color: Clr().white),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        SvgPicture.asset('assets/calendar.svg'),
                         SizedBox(
-                          height: 8,
+                          width: Dim().d4,
                         ),
                         Text(
-                          'General Doctor',
-                          style: Sty().mediumText.copyWith(
-                              fontWeight: FontWeight.w300, color: Clr().white),
-                        )
+                            list[index]['is_reschedule'] == 1
+                                ? DateFormat('EEE, dd MMMM').format(
+                                    DateTime.parse(list[index]
+                                            ['reschedule_date']
+                                        .toString()))
+                                : DateFormat('EEE, dd MMMM').format(
+                                    DateTime.parse(list[index]['booking_date']
+                                        .toString())),
+                            style: TextStyle(
+                                fontSize: Dim().d14, color: Clr().white)),
                       ],
                     ),
-                  ),
-                  SizedBox(
-                    width: 8,
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Clr().white,
-                  )
-                ],
-              ),
-              const Divider(
-                color: Color(0xffffffff),
-                thickness: 1,
-              ),
-              SizedBox(
-                height: 4,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      SvgPicture.asset('assets/calendar.svg'),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      Text(
-                        'Sun,12 June',
-                        style: Sty().mediumText.copyWith(color: Clr().white),
-                      )
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      SvgPicture.asset('assets/clock.svg'),
-                      SizedBox(
-                        width: 4,
-                      ),
-                      Text(
-                        '11:00-12:00 AM',
-                        style: Sty().mediumText.copyWith(color: Clr().white),
-                      )
-                    ],
-                  ),
-                ],
-              )
-            ],
+                    Row(
+                      children: [
+                        SvgPicture.asset('assets/clock.svg'),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Text(
+                            list[index]['is_reschedule'] == 1
+                                ? DateFormat.jm().format(DateTime.parse(
+                                    '${list[index]['reschedule_date'].toString()} ${list[index]['reschedule_slot']['slot']}'))
+                                : DateFormat.jm().format(DateTime.parse(
+                                    '${list[index]['booking_date'].toString()} ${list[index]['slot']['slot']}')),
+                            style: TextStyle(
+                                fontSize: Dim().d14, color: Clr().white)),
+                      ],
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -1579,6 +1711,9 @@ class _HomeState extends State<Home> {
         programList = result['programs'];
         medicationList = result['reminders'];
         doctorsList = result['near_by_doctors'];
+        getMedicine();
+        labDetails();
+        getBooking('');
       });
     }
   }
@@ -1598,6 +1733,7 @@ class _HomeState extends State<Home> {
       await Geolocator.openAppSettings();
     }
   }
+
   // getLocation
   getLocation() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -1605,7 +1741,7 @@ class _HomeState extends State<Home> {
     dialog!.show();
     await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((Position position) {
-      setState(() {
+      setState(() async {
         sp.setString('lat', position.latitude.toString());
         sp.setString('lng', position.longitude.toString());
         STM().displayToast('Current location is selected');
@@ -1615,5 +1751,48 @@ class _HomeState extends State<Home> {
     }).catchError((e) {
       dialog!.dismiss();
     });
+  }
+
+  void getMedicine() async {
+    var result = await STM()
+        .getWithoutDialogToken(ctx, 'get_medicine', usertoken, 'customer');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        medicineList = result['medicines'];
+      });
+    }
+  }
+
+  // labs details
+  void labDetails() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    FormData body = FormData.fromMap({
+      'latitude': sp.getString('lat').toString(),
+      'longitude': sp.getString('lng').toString(),
+    });
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'get_labs', body, usertoken, 'customer');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        Lablist = result['labs'];
+      });
+    }
+  }
+
+  void getBooking(id) async {
+    FormData body = FormData.fromMap({
+      'patient_id': id,
+    });
+    var result = await STM().postWithTokenWithoutDailog(
+        ctx, 'appointment_history', body, usertoken, 'customer');
+    var success = result['success'];
+    if (success) {
+      setState(() {
+        appointmentList = result['upcoming_appointments'];
+        time = result['time'];
+      });
+    }
   }
 }

@@ -21,14 +21,21 @@ class Pharmacy extends StatefulWidget {
 class _PharmacyState extends State<Pharmacy> {
   late BuildContext ctx;
   List<dynamic> pharmacyList = [];
-
+  List<dynamic> filterList = [];
   bool isLoading = true;
   List<dynamic> addToCart = [];
+  TextEditingController editingController = TextEditingController();
 
-  Future<void> _updateItem(
-      medicine_id, varientid, name, image, price, actualPrice, counter) async {
+  Future<void> _updateItem(medicine_id, varientid, name, image, price,
+      actualPrice, counter) async {
     await Store.updateItem(
-        medicine_id, varientid, name, image, price, actualPrice, counter);
+        medicine_id,
+        varientid,
+        name,
+        image,
+        price,
+        actualPrice,
+        counter);
   }
 
   void _refreshData() async {
@@ -40,10 +47,16 @@ class _PharmacyState extends State<Pharmacy> {
     });
   }
 
-  Future<void> _addItem(
-      medicine_id, varientid, name, image, price, actualPrice, counter) async {
+  Future<void> _addItem(medicine_id, varientid, name, image, price, actualPrice,
+      counter) async {
     await Store.createItem(
-        medicine_id, varientid, name, image, price, actualPrice, counter);
+        medicine_id,
+        varientid,
+        name,
+        image,
+        price,
+        actualPrice,
+        counter);
   }
 
   String? usertoken, sUUID;
@@ -63,6 +76,8 @@ class _PharmacyState extends State<Pharmacy> {
       }
     });
   }
+
+  bool click = false;
 
   @override
   void initState() {
@@ -92,7 +107,27 @@ class _PharmacyState extends State<Pharmacy> {
                 color: Clr().black,
               ),
             ),
-            title: Text(
+            title: click ? TextFormField(
+              controller: editingController,
+              keyboardType: TextInputType.text,
+              onChanged: searchresult,
+              style: Sty().mediumText.copyWith(color: Clr().black),
+              decoration: Sty().TextFormFieldOutlineStyle.copyWith(
+                fillColor: Clr().white,
+                filled: true,
+                prefixIcon: Padding(
+                  padding: EdgeInsets.all(Dim().d14),
+                  child: SvgPicture.asset(
+                    'assets/images/search.svg',
+                    color: const Color(0xff747474),
+                    height: Dim().d16,
+                  ),
+                ),
+                hintText: 'Search...',
+                hintStyle:
+                Sty().mediumText.copyWith(color: Color(0xff7F7A7A)),
+              ),
+            ) : Text(
               'Pharmacy',
               style: TextStyle(color: Clr().black, fontSize: 20),
             ),
@@ -102,12 +137,14 @@ class _PharmacyState extends State<Pharmacy> {
                 padding: const EdgeInsets.all(0),
                 child: InkWell(
                     onTap: () {
-                      STM().redirect2page(context, Pharmacy());
+                      setState(() {
+                        click = true;
+                      });
                     },
                     child: SvgPicture.asset('assets/search.svg')),
               ),
               SizedBox(
-                width: 20,
+                width: Dim().d20,
               ),
               InkWell(
                 onTap: () {
@@ -116,7 +153,9 @@ class _PharmacyState extends State<Pharmacy> {
                 },
                 child: Padding(
                     padding: EdgeInsets.only(right: 16),
-                    child: SvgPicture.asset('assets/my_cart.svg')),
+                    child: addToCart.length > 0 ? SvgPicture.asset(
+                        'assets/AddCart.svg') : SvgPicture.asset(
+                        'assets/my_cart.svg')),
               ),
             ],
             backgroundColor: Clr().white,
@@ -140,146 +179,166 @@ class _PharmacyState extends State<Pharmacy> {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
+                    mainAxisExtent: 270,
                     childAspectRatio: 3 / 5,
                     mainAxisSpacing: 4,
                   ),
                   shrinkWrap: true,
                   itemCount: pharmacyList.length,
-                  itemBuilder: (context, index) => Container(
-                    decoration: BoxDecoration(color: Colors.white),
-                    child: InkWell(
-                      onTap: () {
-                        STM().redirect2page(
-                            ctx, ProductPage(details: pharmacyList[index]));
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: Border(
-                          right: BorderSide(color: Clr().lightGrey),
-                          bottom: BorderSide(color: Clr().lightGrey),
-                          top: BorderSide(color: Clr().lightGrey),
-                        )),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: Dim().d12, vertical: Dim().d14),
-                              child: Container(
-                                height: Dim().d120,
-                                child: Image.network(
-                                    '${pharmacyList[index]['image'].toString()}',
-                                    width: double.infinity),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: Dim().d12),
-                                child: Text(
-                                    '${pharmacyList[index]['name'].toString()}',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: Dim().d16,
-                                        fontWeight: FontWeight.w400)),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: Dim().d12),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                        '₹${pharmacyList[index]['selling_price']}',
-                                        style: Sty().mediumText.copyWith(
-                                            fontSize: Dim().d14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff2D2D2D))),
-                                    SizedBox(width: Dim().d12),
-                                    Text(' ₹${pharmacyList[index]['price']}',
-                                        style: TextStyle(
-                                          fontSize: Dim().d14,
-                                          color: Colors.grey,
-                                          decoration:
-                                              TextDecoration.lineThrough,
-                                          fontWeight: FontWeight.w400,
-                                          decorationThickness: 2,
-                                        )),
-                                  ],
+                  itemBuilder: (context, index) =>
+                      Container(
+                        decoration: BoxDecoration(color: Colors.white),
+                        child: InkWell(
+                          onTap: () {
+                            STM().redirect2page(
+                                ctx, ProductPage(details: pharmacyList[index]));
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(color: Clr().lightGrey),
+                                  bottom: BorderSide(color: Clr().lightGrey),
+                                  top: BorderSide(color: Clr().lightGrey),
+                                )),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: Dim().d12,
+                                      vertical: Dim().d14),
+                                  child: Container(
+                                    height: Dim().d120,
+                                    child: Image.network(
+                                        '${pharmacyList[index]['image']
+                                            .toString()}',
+                                        width: double.infinity),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: Dim().d36,
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _refreshData();
-                                      addToCart
+                                Padding(
+                                  padding:
+                                  EdgeInsets.symmetric(horizontal: Dim().d12),
+                                  child: Text(
+                                      '${pharmacyList[index]['name']
+                                          .toString()}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: Dim().d16,
+                                          fontWeight: FontWeight.w400)),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: Dim().d12),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                            '₹${pharmacyList[index]['selling_price']}',
+                                            style: Sty().mediumText.copyWith(
+                                                fontSize: Dim().d14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff2D2D2D))),
+                                        SizedBox(width: Dim().d12),
+                                        Text(
+                                            ' ₹${pharmacyList[index]['price']}',
+                                            style: TextStyle(
+                                              fontSize: Dim().d14,
+                                              color: Colors.grey,
+                                              decoration:
+                                              TextDecoration.lineThrough,
+                                              fontWeight: FontWeight.w400,
+                                              decorationThickness: 2,
+                                            )),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: Dim().d36,
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _refreshData();
+                                          addToCart
                                               .map((e) => e['medicine_id'])
                                               .contains(
-                                                  pharmacyList[index]['id'])
-                                          ? Fluttertoast.showToast(
+                                              pharmacyList[index]['id'])
+                                              ? Fluttertoast.showToast(
                                               msg:
-                                                  'Item is already added in cart',
+                                              'Item is already added in cart',
                                               toastLength: Toast.LENGTH_SHORT,
                                               gravity: ToastGravity.CENTER)
-                                          : _addItem(
-                                              pharmacyList[index]['id'],
-                                              0,
-                                              pharmacyList[index]['name']
-                                                  .toString(),
-                                              pharmacyList[index]['image']
-                                                  .toString(),
-                                              pharmacyList[index]
-                                                      ['selling_price']
-                                                  .toString(),
-                                              pharmacyList[index]
-                                                      ['selling_price']
-                                                  .toString(),
-                                              1,
-                                            ).then((value) {
-                                              _refreshData();
-                                              Fluttertoast.showToast(
-                                                  msg: 'Item added to cart',
-                                                  toastLength:
-                                                      Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.CENTER);
-                                            });
-                                    });
-                                    // STM().redirect2page(ctx, MyCart());
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      elevation: 0,
-                                      backgroundColor: Colors.white,
-                                      side: BorderSide(
-                                          width: 2, color: Clr().primaryColor),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
+                                              : _addItem(
+                                            pharmacyList[index]['id'],
+                                            pharmacyList[index]['medicine_variant'][0]['id'],
+                                              pharmacyList[index]['medicine_variant'][0]['variant_name']
+                                                .toString(),
+                                            pharmacyList[index]['image']
+                                                .toString(),
+                                            pharmacyList[index]['medicine_variant'][0]
+                                            ['selling_price']
+                                                .toString(),
+                                            pharmacyList[index]['medicine_variant'][0]
+                                            ['selling_price']
+                                                .toString(),
+                                            1,
+                                          ).then((value) {
+                                            _refreshData();
+                                            Fluttertoast.showToast(
+                                                msg: 'Item added to cart',
+                                                toastLength:
+                                                Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.CENTER);
+                                          });
+                                        });
+                                        // STM().redirect2page(ctx, MyCart());
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          backgroundColor: Colors.white,
+                                          side: BorderSide(
+                                              width: 2,
+                                              color: Clr().primaryColor),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
                                               BorderRadius.circular(10))),
-                                  child: Text(
-                                    'Add to Cart',
-                                    style: Sty().smallText.copyWith(
-                                        fontSize: Dim().d14,
-                                        color: Clr().primaryColor,
-                                        fontWeight: FontWeight.w600),
-                                  )),
+                                      child: Text(
+                                        'Add to Cart',
+                                        style: Sty().smallText.copyWith(
+                                            fontSize: Dim().d14,
+                                            color: Clr().primaryColor,
+                                            fontWeight: FontWeight.w600),
+                                      )),
+                                ),
+                                SizedBox(
+                                  height: Dim().d12,
+                                )
+                              ],
                             ),
-                            SizedBox(
-                              height: Dim().d12,
-                            )
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
                 ),
               ],
             ),
           )),
     );
+  }
+
+  void searchresult(String value) {
+    if (value.isEmpty) {
+      setState(() {
+        pharmacyList = filterList;
+      });
+    } else {
+      setState(() {
+        pharmacyList = filterList.where((element) {
+          final resultTitle = element['name'].toLowerCase();
+          final input = value.toLowerCase();
+          return resultTitle.toString().toLowerCase().startsWith(input.toString().toLowerCase());
+        }).toList();
+      });
+    }
   }
 
   /// api
@@ -289,7 +348,8 @@ class _PharmacyState extends State<Pharmacy> {
     var success = result['success'];
     if (success) {
       setState(() {
-        pharmacyList = result['medicines'];
+        filterList = result['medicines'];
+        pharmacyList = filterList;
       });
     }
   }

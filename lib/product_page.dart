@@ -31,7 +31,7 @@ class _ProductPageState extends State<ProductPage> {
   CarouselController sliderCtrl = CarouselController();
   TextEditingController pincodeCtrl = TextEditingController();
 
-  String? varientname, varientprice, varientsellingprice;
+  String? varientname, varientprice, varientsellingprice,varientdiscount;
   int? varientid;
 
   // List<dynamic> sliderList = ['assets/mybooking.png'];
@@ -62,6 +62,7 @@ class _ProductPageState extends State<ProductPage> {
       addToCart = data;
       isLoading = false;
     });
+    print(addToCart);
   }
 
   String? usertoken;
@@ -84,6 +85,11 @@ class _ProductPageState extends State<ProductPage> {
       usertoken = sp.getString('customerId') ?? '';
       v = widget.details;
       sliderList.add(v['image']);
+      varientid = v['medicine_variant'][0]['id'];
+      varientsellingprice = v['medicine_variant'][0]['selling_price'].toString();
+      varientprice = v['medicine_variant'][0]['price'].toString();
+      varientname = v['medicine_variant'][0]['variant_name'];
+      varientdiscount = v['medicine_variant'][0]['discount_percentage'].toString();
     });
     STM().checkInternet(context, widget).then((value) {
       if (value) {
@@ -102,9 +108,7 @@ class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-    int position = varientid != null
-        ? addToCart.indexWhere((element) => element['varientid']  == varientid)
-        : addToCart.indexWhere((element) => element['medicine_id'] == v['id']);
+    int position =  addToCart.indexWhere((element) => element['varientid'] == varientid);
     return Scaffold(
       backgroundColor: Clr().white,
       appBar: AppBar(
@@ -212,15 +216,8 @@ class _ProductPageState extends State<ProductPage> {
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d20),
-                  child: varientname != null
-                      ? Text(
-                          '${varientname}',
-                          style: Sty()
-                              .mediumText
-                              .copyWith(fontWeight: FontWeight.w400),
-                        )
-                      : Text(
-                          '${v['name'].toString()}',
+                  child: Text(
+                          '${v['name'].toString()} ${varientname}',
                           style: Sty()
                               .mediumText
                               .copyWith(fontWeight: FontWeight.w400),
@@ -246,18 +243,15 @@ class _ProductPageState extends State<ProductPage> {
                                     right: Dim().d12,
                                   ),
                                   child: SizedBox(
-                                    width: Dim().d220,
                                     child: ElevatedButton(
                                         onPressed: () {
                                           setState(() {
                                             varientid = pack['id'];
-                                            varientsellingprice =
-                                                pack['selling_price']
-                                                    .toString();
-                                            varientprice =
-                                                pack['price'].toString();
+                                            varientsellingprice = pack['selling_price'].toString();
+                                            varientprice = pack['price'].toString();
                                             varientname = pack['variant_name'];
-                                            print(varientid);
+                                            varientdiscount = pack['discount_percentage'].toString();
+                                            print(varientdiscount);
                                           });
                                         },
                                         child: Text(
@@ -324,23 +318,15 @@ class _ProductPageState extends State<ProductPage> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: varientsellingprice != null
-                                          ? Text(
+                                      child: Text(
                                               '₹ ${varientsellingprice}',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontSize: Dim().d14,
-                                                  fontWeight: FontWeight.w600),
-                                            )
-                                          : Text(
-                                              '₹ ${v['selling_price'].toString()}',
                                               style: Sty().mediumText.copyWith(
                                                   fontSize: Dim().d14,
                                                   fontWeight: FontWeight.w600),
                                             ),
                                     ),
                                     Expanded(
-                                      child: varientprice != null
-                                          ? Text(' ₹ ${varientprice}',
+                                      child:  Text(' ₹ ${varientprice}',
                                               style: TextStyle(
                                                 fontSize: Dim().d14,
                                                 color: Colors.grey,
@@ -348,17 +334,10 @@ class _ProductPageState extends State<ProductPage> {
                                                     TextDecoration.lineThrough,
                                                 decorationThickness: 2,
                                               ))
-                                          : Text(' ₹ ${v['price'].toString()}',
-                                              style: TextStyle(
-                                                fontSize: Dim().d14,
-                                                color: Colors.grey,
-                                                decoration:
-                                                    TextDecoration.lineThrough,
-                                                decorationThickness: 2,
-                                              )),
+                                          ,
                                     ),
                                     Text(
-                                      '15%OFF',
+                                      '${varientdiscount}%OFF',
                                       style: Sty().mediumText.copyWith(
                                           fontSize: Dim().d14,
                                           color: Clr().red),
@@ -371,8 +350,7 @@ class _ProductPageState extends State<ProductPage> {
                       SizedBox(
                         width: Dim().d8,
                       ),
-
-                      addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id'])
+                      addToCart.map((e) => e['varientid']).contains(varientid)
                           ? SizedBox(
                               width: Dim().d76,
                               child: Row(
@@ -412,13 +390,11 @@ class _ProductPageState extends State<ProductPage> {
                                     _refreshData();
                                     _addItem(
                                       v['id'],
-                                      varientid ?? 0,
-                                      varientname ?? v['name'].toString(),
+                                      varientid ,
+                                      '${v['name'].toString()} ${varientname}' ,
                                       v['image'].toString(),
-                                      varientsellingprice ??
-                                          v['selling_price'].toString(),
-                                      varientsellingprice ??
-                                          v['selling_price'].toString(),
+                                      varientsellingprice,
+                                      varientsellingprice,
                                       1,
                                     ).then((value) {
                                       _refreshData();
@@ -426,8 +402,6 @@ class _ProductPageState extends State<ProductPage> {
                                           msg: 'Item added to cart',
                                           toastLength: Toast.LENGTH_SHORT,
                                           gravity: ToastGravity.CENTER);
-
-                                      print(addToCart[position]['price']);
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -437,7 +411,7 @@ class _ProductPageState extends State<ProductPage> {
                                         borderRadius: BorderRadius.circular(5)),
                                   ),
                                   child: Text(
-                                     'Add to Cart',
+                                    'Add to Cart',
                                     style: Sty().smallText.copyWith(
                                         fontSize: Dim().d14,
                                         color: Clr().white,
@@ -577,80 +551,80 @@ class _ProductPageState extends State<ProductPage> {
               height: Dim().d32,
             ),
             // if(addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id']))
-              Container(
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Clr().grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 12,
-                        offset:
-                        Offset(12, 0.5), // changes position of shadow
-                      ),
-                    ],
-                    color: Clr().primaryColor,
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(15),
-                        topLeft: Radius.circular(15))),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: Dim().d24, vertical: Dim().d16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      addToCart.isEmpty ?
-                      Text(
-                        '₹ ${varientsellingprice != null ? varientsellingprice : v['selling_price'].toString()}',
-                        style: Sty().mediumText.copyWith(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Clr().white),
-                      ) : Text(
-                        '₹ ${position == -1 ? varientsellingprice != null ? varientsellingprice : v['selling_price'].toString() : addToCart[position]['price']}',
-                        style: Sty().mediumText.copyWith(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Clr().white),
-                      ),
-                      SizedBox(
-                        height: 30,
-                        child: ElevatedButton(
-                            onPressed: () {
-                              if(addToCart.map((e) => varientid != null ? e['varientid'] : e['medicine_id']).contains(varientid != null ? varientid : v['id'])){
-                                STM().redirect2page(ctx, MyCart());
-                              }else{
-                                _addItem(
-                                  v['id'],
-                                  varientid ?? 0,
-                                  varientname ?? v['name'].toString(),
-                                  v['image'].toString(),
-                                  varientsellingprice ??
-                                      v['selling_price'].toString(),
-                                  varientsellingprice ??
-                                      v['selling_price'].toString(),
-                                  1,
-                                ).then((value) {
-                                  STM().redirect2page(ctx, CheckOut());
-                                });
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Clr().white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                            ),
-                            child: Text(
-                              'Continue',
-                              style: Sty().smallText.copyWith(
-                                  color: Clr().primaryColor,
-                                  fontWeight: FontWeight.w600),
-                            )),
-                      )
-                    ],
-                  ),
+            Container(
+              decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Clr().grey.withOpacity(0.5),
+                      spreadRadius: 1,
+                      blurRadius: 12,
+                      offset: Offset(12, 0.5), // changes position of shadow
+                    ),
+                  ],
+                  color: Clr().primaryColor,
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(15),
+                      topLeft: Radius.circular(15))),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: Dim().d24, vertical: Dim().d16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    addToCart.isEmpty
+                        ? Text(
+                            '₹ ${varientsellingprice}',
+                            style: Sty().mediumText.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Clr().white),
+                          )
+                        : Text(
+                            '₹ ${position == -1 ? varientsellingprice : addToCart[position]['price']}',
+                            style: Sty().mediumText.copyWith(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Clr().white),
+                          ),
+                    SizedBox(
+                      height: 30,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            if (addToCart
+                                .map((e) => e['varientid'])
+                                .contains(varientid)) {
+                              STM().redirect2page(ctx, MyCart());
+                            } else {
+                              _addItem(
+                                v['id'],
+                                varientid,
+                                '${v['name'].toString()} ${varientname}',
+                                v['image'].toString(),
+                                varientsellingprice,
+                                varientsellingprice,
+                                1,
+                              ).then((value) {
+                                STM().redirect2page(ctx, CheckOut());
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: Clr().white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5)),
+                          ),
+                          child: Text(
+                            'Continue',
+                            style: Sty().smallText.copyWith(
+                                color: Clr().primaryColor,
+                                fontWeight: FontWeight.w600),
+                          )),
+                    )
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -666,23 +640,25 @@ class _ProductPageState extends State<ProductPage> {
   removeItem(index) {
     int counter = addToCart[index]['counter'];
     var acutal;
-    try{
+    try {
       acutal = double.parse(addToCart[index]['actualPrice'].toString());
-    }catch(_) {
+    } catch (_) {
       acutal = int.parse(addToCart[index]['actualPrice'].toString());
-    };
+    }
+    ;
     var price;
-    try{
+    try {
       price = double.parse(addToCart[index]['price'].toString());
-    }catch(_) {
+    } catch (_) {
       price = int.parse(addToCart[index]['price'].toString());
-    };
+    }
+    ;
     counter--;
     var newPrice = price - acutal;
     if (counter > 0) {
       _updateItem(
               addToCart[index]['medicine_id'],
-              addToCart[index]['varientid'] ?? 0,
+              addToCart[index]['varientid'] ,
               addToCart[index]['name'].toString(),
               addToCart[index]['image'].toString(),
               newPrice.toString(),
@@ -700,23 +676,25 @@ class _ProductPageState extends State<ProductPage> {
   addItem(index) {
     int counter = addToCart[index]['counter'];
     var acutal;
-    try{
-       acutal = double.parse(addToCart[index]['actualPrice'].toString());
-    }catch(_) {
+    try {
+      acutal = double.parse(addToCart[index]['actualPrice'].toString());
+    } catch (_) {
       acutal = int.parse(addToCart[index]['actualPrice'].toString());
-    };
+    }
+    ;
     var price;
-    try{
+    try {
       price = double.parse(addToCart[index]['price'].toString());
-    }catch(_) {
+    } catch (_) {
       price = int.parse(addToCart[index]['price'].toString());
-    };
+    }
+    ;
     counter++;
     var newPrice = price + acutal;
     if (counter > 0) {
       _updateItem(
               addToCart[index]['medicine_id'],
-              addToCart[index]['varientid'] ?? 0,
+              addToCart[index]['varientid'],
               addToCart[index]['name'].toString(),
               addToCart[index]['image'].toString(),
               newPrice.toString(),

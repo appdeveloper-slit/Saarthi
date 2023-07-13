@@ -121,6 +121,7 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
                             .copyWith(fontWeight: FontWeight.w400),
                       ),
                       SizedBox(height: Dim().d4,),
+                      if(v['hcp']['professional']['speciality_name'] != null)
                       Text(
                         v['hcp']['professional']['speciality_name'][0]['name'],
                         style: Sty()
@@ -177,6 +178,21 @@ class _TeleCallAppointmentDetailsState extends State<TeleCallAppointmentDetails>
             Text(
               'OPD',
               style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'OPD Address',
+              style: Sty().mediumText.copyWith(fontWeight: FontWeight.w600,color: Clr().primaryColor),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Text(
+              '${v['hcp']['professional']['map_address'].toString()}',
+              style:
+              Sty().smallText.copyWith(fontWeight: FontWeight.w300,),
             ),
             SizedBox(
               height: 20,

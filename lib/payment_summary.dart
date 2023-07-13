@@ -15,6 +15,7 @@ import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'add_new_patient.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'coupons.dart';
 
 var controller = StreamController<String?>.broadcast();
 
@@ -24,26 +25,41 @@ class PaymentSummary extends StatefulWidget {
   final int? totalValue;
   final int? type;
 
-  const PaymentSummary({super.key, this.labdetails, this.testDetails, this.totalValue,this.type});
+  const PaymentSummary(
+      {super.key,
+      this.labdetails,
+      this.testDetails,
+      this.totalValue,
+      this.type});
 
   @override
-  State<PaymentSummary> createState() => _PaymentSummaryState();
+  State<StatefulWidget> createState() {
+    return PaymentSummarypage();
+  }
 }
 
-class _PaymentSummaryState extends State<PaymentSummary> {
+class PaymentSummarypage extends State<PaymentSummary> {
   late BuildContext ctx;
   String? usertoken;
   List<dynamic> patientlist = [];
+  TextEditingController homeAddressCtrl = TextEditingController();
+  TextEditingController mobileCtrl = TextEditingController();
   List testids = [];
   var datetime;
+  var total;
+  static StreamController<dynamic> controller2 =
+      StreamController<dynamic>.broadcast();
   List<Map<String, dynamic>> patientDetailsList = [];
+  TextEditingController coupanCtrl = TextEditingController();
+  var discount;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     setState(() {
       usertoken = sp.getString('customerId') ?? '';
+      datetime = DateFormat('yyyy-MM-dd').format(DateTime.now());
     });
-    for(int a = 0; a < widget.testDetails.length; a++){
+    for (int a = 0; a < widget.testDetails.length; a++) {
       setState(() {
         testids.add(widget.testDetails[a]['id']);
       });
@@ -60,10 +76,11 @@ class _PaymentSummaryState extends State<PaymentSummary> {
   void initState() {
     // TODO: implement initState
     getSession();
-    controller.stream.listen(
-      (event) {
-        print(event.toString());
-        getPatient();
+    controller2.stream.listen(
+      (dynamic event) {
+        setState(() {
+          getPatient();
+        });
       },
     );
     super.initState();
@@ -159,12 +176,12 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            widget.labdetails[0]['dayname'],
+                                            '${widget.labdetails[0]['dayname']}',
                                             style: Sty().mediumText.copyWith(
                                                 fontWeight: FontWeight.w500),
                                           ),
                                           Text(
-                                            widget.labdetails[0]['timename'],
+                                            '${widget.labdetails[0]['timename']}',
                                             style: Sty().mediumText.copyWith(
                                                 fontWeight: FontWeight.w500),
                                           ),
@@ -400,6 +417,110 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                   SizedBox(
                     height: Dim().d16,
                   ),
+                  if(widget.type == 0)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                    child: Text(
+                      'Enter home address',
+                      style: Sty().largeText.copyWith(
+                          fontWeight: FontWeight.w600, color: Clr().primaryColor),
+                    ),
+                  ),
+                  if(widget.type == 0)
+                  SizedBox(
+                    height: Dim().d12,
+                  ),
+                  if(widget.type == 0)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                    child: TextFormField(
+                      controller: homeAddressCtrl,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Home address is required';
+                        }
+                      },
+                      minLines: 3,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Clr().formfieldbg,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Clr().transparent)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                          BorderSide(color: Clr().primaryColor, width: 1.0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: Dim().d20, vertical: Dim().d16),
+                        hintText: "Enter Address",
+                        hintStyle: Sty()
+                            .mediumText
+                            .copyWith(color: Clr().shimmerColor, fontSize: 14),
+                        counterText: "",
+                      ),
+                    ),
+                  ),
+                  if(widget.type == 0)
+                  SizedBox(
+                    height: Dim().d20,
+                  ),
+                  if(widget.type == 0)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                    child: Text(
+                      'Enter contact number',
+                      style: Sty().largeText.copyWith(
+                          fontWeight: FontWeight.w600, color: Clr().primaryColor),
+                    ),
+                  ),
+                  if(widget.type == 0)
+                  SizedBox(
+                    height: Dim().d12,
+                  ),
+                  if(widget.type == 0)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                    child: TextFormField(
+                      controller: mobileCtrl,
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Mobile number is required';
+                        }
+                        if (value.length != 10) {
+                          return 'Mobile number digits must be 10';
+                        }
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Clr().formfieldbg,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Clr().transparent)),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                          BorderSide(color: Clr().primaryColor, width: 1.0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding:
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        // label: Text('Enter Your Number'),
+                        hintText: "Enter Mobile Number",
+                        hintStyle: Sty()
+                            .mediumText
+                            .copyWith(color: Clr().shimmerColor, fontSize: 14),
+                        counterText: "",
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                     child: Row(
@@ -419,7 +540,7 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                               ],
                             ),
                             child: TextFormField(
-                              // controller: mobileCtrl,
+                              controller: coupanCtrl,
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
                                 filled: true,
@@ -427,9 +548,7 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                                 enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide.none,
                                     borderRadius: BorderRadius.circular(5)),
-
                                 fillColor: Clr().white,
-
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
                                       color: Clr().primaryColor, width: 1.0),
@@ -455,6 +574,7 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                           child: ElevatedButton(
                               onPressed: () {
                                 // STM().redirect2page(ctx, AddNewPatient());
+                                applyCoupan();
                               },
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
@@ -477,13 +597,17 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'View all coupons',
-                        style: Sty()
-                            .smallText
-                            .copyWith(fontSize: 12, color: Clr().primaryColor),
+                    child: InkWell(
+                      onTap: () {
+                        STM().redirect2page(ctx, Coupons());
+                      },
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          'View all coupons',
+                          style: Sty().smallText.copyWith(
+                              fontSize: 12, color: Clr().primaryColor),
+                        ),
                       ),
                     ),
                   ),
@@ -541,31 +665,31 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                               SizedBox(
                                 height: Dim().d8,
                               ),
-                              // Padding(
-                              //   padding:
-                              //       EdgeInsets.symmetric(horizontal: Dim().d8),
-                              //   child: Row(
-                              //     mainAxisAlignment:
-                              //         MainAxisAlignment.spaceBetween,
-                              //     children: [
-                              //       Text(
-                              //         'Discount',
-                              //         style: TextStyle(
-                              //             fontSize: 16,
-                              //             fontWeight: FontWeight.w400),
-                              //       ),
-                              //       Text(
-                              //         '₹ 0',
-                              //         style: TextStyle(
-                              //             fontSize: 16,
-                              //             fontWeight: FontWeight.w500),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // ),
-                              // SizedBox(
-                              //   height: Dim().d8,
-                              // ),
+                              Padding(
+                                padding:
+                                    EdgeInsets.symmetric(horizontal: Dim().d8),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Discount',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                    Text(
+                                      '₹ ${discount == null ? 0 : discount.toString()}',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: Dim().d8,
+                              ),
                             ],
                           ),
                         ),
@@ -599,7 +723,7 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                                           ),
                                     ),
                                     Text(
-                                      '₹ ${widget.totalValue}',
+                                      '₹ ${total ?? widget.totalValue}',
                                       style: Sty().largeText.copyWith(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
@@ -645,7 +769,7 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '₹ ${widget.totalValue}',
+                          '₹ ${total ?? widget.totalValue}',
                           style: Sty().mediumText.copyWith(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -666,7 +790,11 @@ class _PaymentSummaryState extends State<PaymentSummary> {
                       child: ElevatedButton(
                           onPressed: () {
                             // STM().redirect2page(ctx, DrName());
-                            paymentLab();
+                            if(patientDetailsList.isNotEmpty) {
+                              paymentLab();
+                            }else{
+                              STM().displayToast('Select Patient is required');
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
@@ -826,25 +954,58 @@ class _PaymentSummaryState extends State<PaymentSummary> {
     );
   }
 
-  // paynow
- void paymentLab() async {
+  /// applycoupan
+  void applyCoupan() async {
     FormData body = FormData.fromMap({
-    'patient_id': patientDetailsList[0]['id'],
-    'lab_id': widget.labdetails[0]['id'],
-    'charge': widget.totalValue,
-    'coupon_code': '',
-    'booking_date': datetime,
-    'test_ids': jsonEncode(testids),
-    'type': widget.type,
-      'total':widget.totalValue,
+      'coupon_code': coupanCtrl.text,
+      'amount': widget.totalValue,
     });
-    var result = await STM().postWithToken(ctx, Str().processing, 'book_lab_appointment', body, usertoken, 'customer');
+    var result = await STM().postWithToken(
+        ctx, Str().processing, 'apply_coupon', body, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
+      setState(() {
+        STM().displayToast(message);
+        total = result['data'].toString();
+        try {
+          discount = double.parse(widget.totalValue.toString()) -
+              double.parse(result['data'].toString());
+        } catch (_) {
+          discount = int.parse(widget.totalValue.toString()) -
+              int.parse(result['data'].toString());
+        }
+        ;
+      });
+    } else {
+      STM().errorDialog(ctx, message);
+      coupanCtrl.clear();
+    }
+  }
+
+  // paynow
+  void paymentLab() async {
+    FormData body = FormData.fromMap({
+      'address': homeAddressCtrl.text,
+      'mobile': mobileCtrl.text,
+      'patient_id': patientDetailsList[0]['id'],
+      'lab_id': widget.labdetails[0]['id'],
+      'charge': total == null ? widget.totalValue : total,
+      'coupon_code': coupanCtrl.text.isEmpty ? '' : coupanCtrl.text,
+      'discount': discount,
+      'booking_date': datetime,
+      'test_ids': jsonEncode(testids),
+      'type': widget.type,
+      'total': widget.totalValue,
+    });
+    var result = await STM().postWithToken(ctx, Str().processing,
+        'book_lab_appointment', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
       STM().successDialogWithAffinity(ctx, message, Home());
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
- }
+  }
 }

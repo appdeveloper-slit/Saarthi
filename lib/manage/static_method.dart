@@ -503,8 +503,8 @@ class STM {
         result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -535,8 +535,8 @@ class STM {
         // result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -567,8 +567,8 @@ class STM {
         // result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -591,7 +591,7 @@ class STM {
         result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // STM().errorDialog(ctx, e.message);
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -618,8 +618,7 @@ class STM {
         // result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -649,8 +648,8 @@ class STM {
         result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -680,8 +679,8 @@ class STM {
         result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -708,8 +707,8 @@ class STM {
         result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -743,8 +742,8 @@ class STM {
         // result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      dialog.dismiss();
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -779,8 +778,7 @@ class STM {
         // result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // dialog.dismiss();
-      // STM().errorDialog(ctx, e.message);
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }
@@ -804,7 +802,7 @@ class STM {
         result = json.decode(response.data.toString());
       }
     } on DioError catch (e) {
-      // STM().errorDialog(ctx, e.message);
+      STM().errorDialog(ctx, 'Something went wrong Please try again later');
     }
     return result;
   }

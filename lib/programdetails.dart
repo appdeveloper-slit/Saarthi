@@ -72,14 +72,14 @@ class _ProgramDetailsState extends State<ProgramDetails> {
                   '${programDetails['qr_code_image']}',
                 )),
             SizedBox(height: Dim().d8),
-            Align(
-                alignment: Alignment.center,
-                child: Text(
-                  '${programDetails['qr_code']}',
-                  style: Sty().mediumText,
-                )),
+            // Align(
+            //     alignment: Alignment.center,
+            //     child: Text(
+            //       '${programDetails['qr_code']}',
+            //       style: Sty().mediumText,
+            //     )),
          widget.stype == 'done'? Container() : SizedBox(height: Dim().d40),
-            widget.stype == 'done'? Container() :  Center(
+            programDetails['is_enroll'] == true ? Container() :  Center(
               child: SizedBox(
                 height: 50,
                 width: 300,

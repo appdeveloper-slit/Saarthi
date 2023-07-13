@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:saarathi/checkout.dart';
+import 'package:saarathi/payment_summary.dart';
+import 'package:saarathi/review_apt_call.dart';
+import 'package:saarathi/review_apt_home_visit.dart';
+import 'package:saarathi/review_apt_ol.dart';
 import 'package:saarathi/values/strings.dart';
+import 'package:saarathi/values/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../manage/static_method.dart';
@@ -44,7 +49,7 @@ class _CouponsState extends State<Coupons> {
     ctx = context;
     return WillPopScope(
       onWillPop: () async {
-        STM().replacePage(ctx, CheckOut());
+        STM().back2Previous(ctx);
         return false;
       },
       child: Scaffold(
@@ -53,7 +58,7 @@ class _CouponsState extends State<Coupons> {
           elevation: 2,
           leading: InkWell(
             onTap: () {
-              STM().replacePage(ctx, CheckOut());
+              STM().back2Previous(ctx);
             },
             child: Icon(
               Icons.arrow_back,
@@ -71,18 +76,36 @@ class _CouponsState extends State<Coupons> {
           padding: EdgeInsets.all(Dim().d16),
           child: Column(
             children: [
-              ListView.builder(
+              coupanList.isEmpty ?  SizedBox(
+                height: MediaQuery.of(ctx).size.height / 1.3,
+                child: Center(
+                  child: Text('No Coupans',style: Sty().mediumText),
+                ),
+              ) : ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: coupanList.length,
                 itemBuilder: (context, index) {
-                  return InkWell(onTap: (){
-                    CheckOutpage.controller1.sink.add({
-                      'name': coupanList[index]['coupon_code'].toString(),
-                      'discount': coupanList[index]['discount'].toString(),
-                    });
-                    STM().back2Previous(ctx);
-                  },
+                  return InkWell(
+                    onTap: () {
+                      CheckOutpage.controller1.sink.add({
+                        'name': coupanList[index]['coupon_code'].toString(),
+                        'discount': coupanList[index]['discount'].toString(),
+                      });
+                      PaymentSummarypage.controller2.sink.add({
+                        'name': coupanList[index]['coupon_code'].toString(),
+                      });
+                      TeleCallConsultationpage.controller3.sink.add({
+                        'name': coupanList[index]['coupon_code'].toString(),
+                      });
+                      HomeVisitConsultationpage.controller4.sink.add({
+                        'name': coupanList[index]['coupon_code'].toString(),
+                      });
+                      OnlineConsultationpage.controller5.sink.add({
+                        'name': coupanList[index]['coupon_code'].toString(),
+                      });
+                      STM().back2Previous(ctx);
+                    },
                     child: Card(
                       color: Clr().white,
                       elevation: 0.5,
@@ -94,7 +117,8 @@ class _CouponsState extends State<Coupons> {
                       child: Padding(
                         padding:
                             EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Card(
                               elevation: 0,
@@ -109,7 +133,8 @@ class _CouponsState extends State<Coupons> {
                                   children: [
                                     Align(
                                       alignment: Alignment.center,
-                                      child: Text('${coupanList[index]['coupon_code']}',
+                                      child: Text(
+                                          '${coupanList[index]['coupon_code']}',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w400,

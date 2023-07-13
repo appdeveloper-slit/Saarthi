@@ -7,10 +7,14 @@ import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 import 'checkout.dart';
+import 'home.dart';
 import 'localstore.dart';
 import 'pharmacy.dart';
 
 class MyCart extends StatefulWidget {
+  final type;
+  const MyCart({super.key,this.type});
+
   @override
   State<MyCart> createState() => _MyCartState();
 }
@@ -64,8 +68,8 @@ class _MyCartState extends State<MyCart> {
   Widget build(BuildContext context) {
     ctx = context;
     return WillPopScope(
-      onWillPop: ()async{
-        STM().replacePage(ctx,Pharmacy());
+      onWillPop: () async{
+       widget.type == 'home'? STM().finishAffinity(ctx,Home()) : STM().replacePage(ctx,Pharmacy());
         return false;
       },
       child: Scaffold(
@@ -76,7 +80,7 @@ class _MyCartState extends State<MyCart> {
           elevation: 2,
           leading: InkWell(
             onTap: () {
-              STM().replacePage(ctx,Pharmacy());
+              widget.type == 'home'? STM().finishAffinity(ctx,Home()) : STM().replacePage(ctx,Pharmacy());
             },
             child: Icon(
               Icons.arrow_back,
@@ -222,7 +226,7 @@ class _MyCartState extends State<MyCart> {
                 },
               ),
             ),
-            Padding(
+            addToCart.isEmpty ? Container() : Padding(
               padding: EdgeInsets.symmetric(horizontal: 32, vertical: 8),
               child: Column(
                 children: [
@@ -244,10 +248,9 @@ class _MyCartState extends State<MyCart> {
                     ),
                   ),
                   SizedBox(
-                    height: 20,
-                    width: 60,
+                    height: Dim().d20,
                   ),
-                  SizedBox(
+                  addToCart.isEmpty ? Container() : SizedBox(
                     height: 50,
                     width: 300,
                     child: ElevatedButton(

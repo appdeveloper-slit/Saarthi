@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +7,7 @@ import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'bottom_navigation/bottom_navigation.dart';
+import 'coupons.dart';
 import 'manage/static_method.dart';
 import 'my_appointments.dart';
 import 'values/colors.dart';
@@ -18,16 +21,23 @@ class HomeVisitConsultation extends StatefulWidget {
   const HomeVisitConsultation({super.key, this.homedetails, this.reshedule});
 
   @override
-  State<HomeVisitConsultation> createState() => _HomeVisitConsultationState();
+  State<StatefulWidget> createState() {
+    return HomeVisitConsultationpage();
+  }
 }
 
-class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
+class HomeVisitConsultationpage extends State<HomeVisitConsultation> {
   late BuildContext ctx;
   String? usertoken;
   TextEditingController homeAddressCtrl = TextEditingController();
   TextEditingController complainCtrl = TextEditingController();
   TextEditingController mobileCtrl = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  static StreamController<dynamic> controller4 =
+  StreamController<dynamic>.broadcast();
+  TextEditingController coupanCtrl = TextEditingController();
+  var discount,total;
+
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -54,6 +64,13 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
   @override
   void initState() {
     getSession();
+    controller4.stream.listen(
+          (dynamic event) {
+        setState(() {
+          coupanCtrl = TextEditingController(text: event['name'].toString());
+        });
+      },
+    );
     super.initState();
   }
 
@@ -112,7 +129,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Dr.${widget.homedetails[0]['hcpname'].toString()}',
+                            '${widget.homedetails[0]['hcpname'].toString()}',
                             style: Sty()
                                 .mediumText
                                 .copyWith(fontWeight: FontWeight.w600),
@@ -405,45 +422,63 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                 SizedBox(
                   height: 20,
                 ),
+                if(widget.reshedule != 'yes')
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          // controller: mobileCtrl,
-                          keyboardType: TextInputType.name,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Clr().formfieldbg,
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide:
-                                    BorderSide(color: Clr().transparent)),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Clr().primaryColor, width: 1.0),
-                              borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                spreadRadius: 1,
+                                blurRadius: 15,
+                                offset: Offset(
+                                    0, 0), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: TextFormField(
+                            controller: coupanCtrl,
+                            keyboardType: TextInputType.name,
+                            decoration: InputDecoration(
+                              filled: true,
+                              border: InputBorder.none,
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(5)),
+                              fillColor: Clr().white,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Clr().primaryColor, width: 1.0),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              // label: Text('Enter Your Number'),
+                              hintText: "Enter coupon code",
+                              hintStyle: Sty().mediumText.copyWith(
+                                  color: Clr().shimmerColor, fontSize: 14),
+                              counterText: "",
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            // label: Text('Enter Your Number'),
-                            hintText: "Enter coupon code",
-                            hintStyle: Sty().mediumText.copyWith(
-                                color: Clr().shimmerColor, fontSize: 14),
-                            counterText: "",
                           ),
                         ),
                       ),
+                      if(widget.reshedule != 'yes')
                       SizedBox(
                         width: 8,
                       ),
+                      if(widget.reshedule != 'yes')
                       SizedBox(
                         height: 46,
                         width: 100,
                         child: ElevatedButton(
                             onPressed: () {
                               // STM().redirect2page(ctx, AddNewPatient());
+                              applyCoupan();
                             },
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
@@ -461,21 +496,28 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                     ],
                   ),
                 ),
+                if(widget.reshedule != 'yes')
                 SizedBox(
                   height: 8,
                 ),
+                if(widget.reshedule != 'yes')
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'View all coupons',
-                      style: Sty()
-                          .smallText
-                          .copyWith(fontSize: 12, color: Clr().primaryColor),
+                  child: InkWell(
+                    onTap: () {
+                      STM().redirect2page(ctx, Coupons());
+                    },
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'View all coupons',
+                        style: Sty().smallText.copyWith(
+                            fontSize: 12, color: Clr().primaryColor),
+                      ),
                     ),
                   ),
                 ),
+                if(widget.reshedule != 'yes')
                 SizedBox(
                   height: 20,
                 ),
@@ -542,27 +584,27 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                               ],
                             ),
                           ),
-                          // SizedBox(
-                          //   height: 4,
-                          // ),
-                          // Padding(
-                          //   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                          //   child: Row(
-                          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //     children: [
-                          //       Text(
-                          //         'Discount',
-                          //         style:
-                          //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                          //       ),
-                          //       Text(
-                          //         '₹90',
-                          //         style:
-                          //         Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
+                          SizedBox(
+                            height: 4,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Discount',
+                                  style:
+                                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                                ),
+                                Text(
+                                  '₹ ${discount == null ? 0 : discount.toString()}',
+                                  style:
+                                  Sty().mediumText.copyWith(fontWeight: FontWeight.w400),
+                                ),
+                              ],
+                            ),
+                          ),
                           const Divider(),
                           Padding(
                             padding:
@@ -577,7 +619,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                                       .copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 Text(
-                                  '₹ ${widget.homedetails[0]['total'].toString()}',
+                                  '₹ ${total ?? widget.homedetails[0]['total'].toString()}',
                                   style: Sty()
                                       .mediumText
                                       .copyWith(fontWeight: FontWeight.w600),
@@ -595,7 +637,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                       padding:  EdgeInsets.only(bottom: Dim().d12),
                       child: Center(
                         child: SizedBox(
-                            height: 30,
+                            height: Dim().d56,
                             child: ElevatedButton(
                                 onPressed: () {
                                   // STM().redirect2page(ctx, HomeVisitConsultation());
@@ -641,7 +683,7 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '₹ ${widget.homedetails[0]['total'].toString()}',
+                                    '₹ ${total ?? widget.homedetails[0]['total'].toString()}',
                                     style: Sty().mediumText.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: Clr().white),
@@ -711,8 +753,8 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
       'patient_id': widget.homedetails[0]['patientid'],
       'consultation_fee': widget.homedetails[0]['charges'],
       'gst': widget.homedetails[0]['gst'],
-      'discount': '',
-      'total_amount': widget.homedetails[0]['total'],
+      'discount': discount,
+      'total_amount': total ?? widget.homedetails[0]['total'],
       'complain':widget.homedetails[0]['complain'],
     });
     var result = await STM().postWithToken(
@@ -723,6 +765,35 @@ class _HomeVisitConsultationState extends State<HomeVisitConsultation> {
       STM().successDialogWithReplace(ctx, message, Home());
     } else {
       STM().errorDialog(ctx, message);
+    }
+  }
+
+
+  /// applycoupan
+  void applyCoupan() async {
+    FormData body = FormData.fromMap({
+      'coupon_code': coupanCtrl.text,
+      'amount':  widget.homedetails[0]['total'],
+    });
+    var result = await STM().postWithToken(
+        ctx, Str().processing, 'apply_coupon', body, usertoken, 'customer');
+    var success = result['success'];
+    var message = result['message'];
+    if (success) {
+      setState(() {
+        STM().displayToast(message);
+        total = result['data'].toString();
+        try {
+          discount = double.parse(widget.homedetails[0]['total'].toString()) -
+              double.parse(result['data'].toString());
+        } catch (_) {
+          discount = int.parse(widget.homedetails[0]['total'].toString()) -
+              int.parse(result['data'].toString());
+        };
+      });
+    } else {
+      STM().errorDialog(ctx, message);
+      coupanCtrl.clear();
     }
   }
 

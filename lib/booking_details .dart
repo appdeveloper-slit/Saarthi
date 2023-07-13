@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:saarathi/home.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../manage/static_method.dart';
 import '../values/colors.dart';
@@ -10,10 +12,11 @@ import '../values/dimens.dart';
 import '../values/styles.dart';
 import 'bottom_navigation/bottom_navigation.dart';
 
-
 class BookingDetails extends StatefulWidget {
   final dynamic labdetails;
+
   const BookingDetails({super.key, this.labdetails});
+
   @override
   State<BookingDetails> createState() => _BookingDetailsState();
 }
@@ -50,7 +53,7 @@ class _BookingDetailsState extends State<BookingDetails> {
       bottomNavigationBar: bottomBarLayout(ctx, 0),
       backgroundColor: Clr().white,
       appBar: AppBar(
-          elevation: 2,
+        elevation: 2,
         leading: InkWell(
           onTap: () {
             STM().back2Previous(ctx);
@@ -73,10 +76,11 @@ class _BookingDetailsState extends State<BookingDetails> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: Dim().d4,vertical: Dim().d4),
+              padding: EdgeInsets.symmetric(
+                  horizontal: Dim().d4, vertical: Dim().d4),
               child: Card(
                 color: Clr().background,
-                margin: EdgeInsets.only(top:Dim().d12),
+                margin: EdgeInsets.only(top: Dim().d12),
                 elevation: 3,
                 shadowColor: Colors.grey,
                 shape: RoundedRectangleBorder(
@@ -85,56 +89,67 @@ class _BookingDetailsState extends State<BookingDetails> {
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      Image.network(labdetails['lab']['image_path'].toString(),height:Dim().d80,width: Dim().d120),
+                      Image.network(labdetails['lab']['image_path'].toString(),
+                          height: Dim().d80, width: Dim().d120),
                       SizedBox(
-                        width:Dim().d12,
+                        width: Dim().d12,
                       ),
                       Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(labdetails['lab']['name'].toString(),
+                              style: Sty().mediumText.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xff2D2D2D))),
+                          SizedBox(
+                            height: Dim().d4,
+                          ),
+                          Text(labdetails['lab']['available_days'].toString(),
+                              style: TextStyle(fontSize: 16)),
+                          SizedBox(
+                            height: Dim().d8,
+                          ),
+                          Text(labdetails['lab']['available_time'].toString(),
+                              style: TextStyle(fontSize: 16)),
+                          SizedBox(
+                            height: Dim().d8,
+                          ),
+                          Row(
                             children: [
-                              Text(labdetails['lab']['name'].toString(),
-                                  style:
-                                  Sty().mediumText.copyWith(
-                                      fontWeight:
-                                      FontWeight.w600,
-                                      color: Color(0xff2D2D2D)
-                                  )),
+                              Text('Starts at',
+                                  style: TextStyle(fontSize: Dim().d16)),
                               SizedBox(
-                                height: Dim().d4,
+                                width: Dim().d4,
                               ),
-                              Text(labdetails['lab']['available_days'].toString(),style: TextStyle(fontSize: 16)),
-                              SizedBox(
-                                height: Dim().d8,
-                              ),
-                              Text(labdetails['lab']['available_time'].toString(),style: TextStyle(fontSize: 16)),
-                              SizedBox(
-                                height: Dim().d8,
-                              ),
-                              Row(
-                                children: [
-                                  Text('Starts at',style: TextStyle(fontSize: Dim().d16)),
-                                  SizedBox(width: Dim().d4,),
-                                  Text('₹ ${labdetails['lab']['starts_at'].toString()}',style: TextStyle(fontSize: Dim().d16)),
-                                ],
-                              ),
-                              SizedBox(
-                                height: Dim().d8,
-                              ),
-                              Text(labdetails['type'] == '1' ? 'Completed' : labdetails['type'] == '2' ? 'Cancelled' : 'Pending',
-                                  // 'Completed',
-                                  style:
-                                  Sty().mediumText.copyWith(
-                                      fontWeight:
-                                      FontWeight.w600,fontSize: 16,
-                                      color: labdetails['type'] == '1' ? Clr().green : labdetails['type'] == '2' ? Clr().red : Color(0xffFFC107)
-                                  )),
-                              SizedBox(
-                                height: Dim().d8,
-                              ),
+                              Text(
+                                  '₹ ${labdetails['lab']['starts_at'].toString()}',
+                                  style: TextStyle(fontSize: Dim().d16)),
                             ],
-                          ))
+                          ),
+                          SizedBox(
+                            height: Dim().d8,
+                          ),
+                          Text(
+                              labdetails['status'] == 1
+                                  ? 'Completed'
+                                  : labdetails['status'] == 2
+                                      ? 'Cancelled'
+                                      : 'Pending',
+                              // 'Completed',
+                              style: Sty().mediumText.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: labdetails['status'] == 1
+                                      ? Clr().green
+                                      : labdetails['status'] == 2
+                                          ? Clr().red
+                                          : Color(0xffFFC107))),
+                          SizedBox(
+                            height: Dim().d8,
+                          ),
+                        ],
+                      ))
                     ],
                   ),
                 ),
@@ -143,9 +158,80 @@ class _BookingDetailsState extends State<BookingDetails> {
             SizedBox(
               height: Dim().d16,
             ),
+            if (labdetails['type'] == "0")
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                child: Text(
+                  'Home Address',
+                  style: Sty().largeText.copyWith(
+                      fontWeight: FontWeight.w600, color: Clr().primaryColor),
+                ),
+              ),
+            if (labdetails['type'] == "0")
+              SizedBox(
+                height: Dim().d8,
+              ),
+            if (labdetails['type'] == "0")
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                color: Color(0xFFFBFBFB),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text(
+                      '${labdetails['address']}',
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w300),
+                    ),
+                  ),
+                ),
+              ),
+            if (labdetails['type'] == "0")
+              SizedBox(
+                height: Dim().d16,
+              ),
+            if (labdetails['type'] == "0")
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: Dim().d16),
+                child: Text(
+                  'Mobile Number',
+                  style: Sty().largeText.copyWith(
+                      fontWeight: FontWeight.w600, color: Clr().primaryColor),
+                ),
+              ),
+            if (labdetails['type'] == "0")
+              SizedBox(
+                height: Dim().d8,
+              ),
+            if (labdetails['type'] == "0")
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                color: Color(0xFFFBFBFB),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text(
+                      '${labdetails['mobile']}',
+                      style: Sty()
+                          .mediumText
+                          .copyWith(fontWeight: FontWeight.w300),
+                    ),
+                  ),
+                ),
+              ),
+            if (labdetails['type'] == "0")
+              SizedBox(
+                height: Dim().d16,
+              ),
             Card(
               elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               color: Color(0xFFFBFBFB),
               child: Column(
                 children: [
@@ -156,14 +242,14 @@ class _BookingDetailsState extends State<BookingDetails> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Padding(
-                            padding:  EdgeInsets.only(left: Dim().d8),
+                            padding: EdgeInsets.only(left: Dim().d8),
                             child: Text(
                               'Payment Deatails',
                               style: Sty().largeText.copyWith(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                // fontFamily: Outfit
-                              ),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    // fontFamily: Outfit
+                                  ),
                             ),
                           ),
                         ),
@@ -181,8 +267,7 @@ class _BookingDetailsState extends State<BookingDetails> {
                               Text(
                                 '₹ ${labdetails['charge']}',
                                 style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500),
+                                    fontSize: 16, fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),
@@ -190,7 +275,6 @@ class _BookingDetailsState extends State<BookingDetails> {
                         SizedBox(
                           height: Dim().d8,
                         ),
-
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: Dim().d8),
                           child: Row(
@@ -199,13 +283,13 @@ class _BookingDetailsState extends State<BookingDetails> {
                               Text(
                                 'Discount',
                                 style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w400),
+                                    fontSize: Dim().d16,
+                                    fontWeight: FontWeight.w400),
                               ),
                               Text(
-                                '₹ 0',
+                                '₹ ${labdetails['discount'] ?? 0}',
                                 style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500),
+                                    fontSize: 16, fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),
@@ -213,17 +297,19 @@ class _BookingDetailsState extends State<BookingDetails> {
                         SizedBox(
                           height: Dim().d8,
                         ),
-
                       ],
                     ),
                   ),
-
                   Divider(
                     height: 2,
                     thickness: 1.5,
                   ),
                   Padding(
-                    padding:  EdgeInsets.only(top: Dim().d2,bottom: Dim().d16,left:Dim().d16,right: Dim().d16 ),
+                    padding: EdgeInsets.only(
+                        top: Dim().d2,
+                        bottom: Dim().d16,
+                        left: Dim().d16,
+                        right: Dim().d16),
                     child: Column(
                       children: [
                         SizedBox(
@@ -237,16 +323,16 @@ class _BookingDetailsState extends State<BookingDetails> {
                               Text(
                                 'Total',
                                 style: Sty().largeText.copyWith(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                               Text(
                                 '₹ ${labdetails['total']}',
                                 style: Sty().largeText.copyWith(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),
@@ -262,7 +348,8 @@ class _BookingDetailsState extends State<BookingDetails> {
             ),
             Card(
               elevation: 3,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               color: Color(0xFFFBFBFB),
               child: Padding(
                 padding: EdgeInsets.all(16.0),
@@ -273,44 +360,174 @@ class _BookingDetailsState extends State<BookingDetails> {
                       child: Text(
                         'Address',
                         style: Sty().largeText.copyWith(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          // fontFamily: Outfit
-                        ),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              // fontFamily: Outfit
+                            ),
                       ),
                     ),
                     SizedBox(height: Dim().d12),
                     Text(
                       labdetails['lab']['address'].toString(),
-                      style: TextStyle(fontSize: Dim().d16, fontWeight: FontWeight.w400),
+                      style: TextStyle(
+                          fontSize: Dim().d16, fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
               ),
             ),
+            SizedBox(height: Dim().d12),
+            SizedBox(
+              height: Dim().d8,
+            ),
+            InkWell(
+              onTap: () async {
+                await launchUrl(
+                    Uri.parse('${labdetails['invoice'].toString()}'),
+                    mode: LaunchMode.externalNonBrowserApplication);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      width: 1.5,
+                      color: Color(0xffECECEC),
+                    ),
+                    borderRadius: BorderRadius.circular(5)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SvgPicture.asset(
+                              'assets/orderdetails.svg',
+                              height: 25,
+                              width: 25,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                            height: 10,
+                          ),
+                          Text(
+                            'Invoice download',
+                            style: TextStyle(
+                                color: Color(0xff3B3B3B),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 18),
+                          ),
+                        ],
+                      ),
+                      Icon(Icons.arrow_forward_ios_outlined, size: 20),
+                    ],
+                  ),
+                ),
+                // child: Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Text(
+                //       'BIGsaver20',
+                //       style: TextStyle(color: Color(0xff989797)),
+                //     ),
+                //     Icon(Icons.arrow_forward_ios_outlined,size: 20),
+                //   ],
+                // ),
+              ),
+            ),
+            if (labdetails['status'] == 1)
+              SizedBox(
+                height: Dim().d8,
+              ),
+            if (labdetails['status'] == 1)
+            InkWell(
+              onTap: () async {
+                await launchUrl(Uri.parse('${labdetails['report'].toString()}'),
+                    mode: LaunchMode.externalNonBrowserApplication);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                      width: 1.5,
+                      color: Color(0xffECECEC),
+                    ),
+                    borderRadius: BorderRadius.circular(5)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SvgPicture.asset(
+                              'assets/orderdetails.svg',
+                              height: 25,
+                              width: 25,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                            height: 10,
+                          ),
+                          Text(
+                            'Report download',
+                            style: TextStyle(
+                                color: Color(0xff3B3B3B),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 18),
+                          ),
+                        ],
+                      ),
+                      Icon(Icons.arrow_forward_ios_outlined, size: 20),
+                    ],
+                  ),
+                ),
+                // child: Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     Text(
+                //       'BIGsaver20',
+                //       style: TextStyle(color: Color(0xff989797)),
+                //     ),
+                //     Icon(Icons.arrow_forward_ios_outlined,size: 20),
+                //   ],
+                // ),
+              ),
+            ),
             SizedBox(
               height: Dim().d24,
             ),
-            labdetails['type'] == '0' ? SizedBox(
-              height: 50,
-              width: 300,
-              child: ElevatedButton(
-                  onPressed: () {
-                    AppointmentCancel(labdetails['id']);
-                  },
-                  style: ElevatedButton.styleFrom( elevation: 0,
-                      backgroundColor: Clr().primaryColor,
-                      shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(10))),
-                  child: Text(
-                    'Cancel',
-                    // 'Download Invoice',
-                    style: Sty().mediumText.copyWith(
-                      color: Clr().white,
-                      fontWeight: FontWeight.w600,),
-                  )),
-            ) : labdetails['type'] == '1' ? Container() : Container(),
+            labdetails['status'] == 0
+                ? SizedBox(
+                    height: 50,
+                    width: 300,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          AppointmentCancel(labdetails['id']);
+                        },
+                        style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: Clr().primaryColor,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
+                        child: Text(
+                          'Cancel',
+                          // 'Download Invoice',
+                          style: Sty().mediumText.copyWith(
+                                color: Clr().white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        )),
+                  )
+                : labdetails['status'] == 1
+                    ? Container()
+                    : Container(),
             SizedBox(
               height: Dim().d24,
             ),
@@ -318,21 +535,18 @@ class _BookingDetailsState extends State<BookingDetails> {
               padding: EdgeInsets.symmetric(horizontal: Dim().d12),
               child: Text(
                 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum ',
-               textAlign: TextAlign.center     ,
-                style: TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w400),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
             ),
             SizedBox(
               height: Dim().d16,
             ),
             Text('Contact Support',
-                style:
-                Sty().mediumText.copyWith(
-                    fontWeight:
-                    FontWeight.w600,fontSize: 16,
-                    color: Color(0xff80C342)
-                )),
+                style: Sty().mediumText.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Color(0xff80C342))),
             SizedBox(
               height: Dim().d32,
             ),
@@ -344,18 +558,18 @@ class _BookingDetailsState extends State<BookingDetails> {
 
   // appointment cancel
 
- void AppointmentCancel(id) async {
+  void AppointmentCancel(id) async {
     FormData data = FormData.fromMap({
       'appointment_id': id,
     });
-    var result = await STM().postWithToken(ctx, Str().processing, 'cancel_lab_appointment', data, usertoken, 'customer');
+    var result = await STM().postWithToken(ctx, Str().processing,
+        'cancel_lab_appointment', data, usertoken, 'customer');
     var success = result['success'];
     var message = result['message'];
-    if(success){
+    if (success) {
       STM().successDialogWithReplace(ctx, message, Home());
-    }else{
+    } else {
       STM().errorDialog(ctx, message);
     }
- }
-
+  }
 }

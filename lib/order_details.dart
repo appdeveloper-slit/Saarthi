@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:saarathi/values/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../manage/static_method.dart';
 import '../values/colors.dart';
 import '../values/dimens.dart';
@@ -140,6 +141,63 @@ class _OrderDetailsState extends State<OrderDetails> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // Padding(
+                                  //   padding: EdgeInsets.only(bottom: Dim().d14),
+                                  //   child: Row(
+                                  //     children: [
+                                  //       STM().imageDisplay(
+                                  //           list: a['medicine']
+                                  //                       ['medicine_images']
+                                  //                   .isEmpty
+                                  //               ? ''
+                                  //               : a['medicine']
+                                  //                       ['medicine_images'][0]
+                                  //                   ['image'],
+                                  //           url: a['medicine']
+                                  //                       ['medicine_images']
+                                  //                   .isEmpty
+                                  //               ? ''
+                                  //               : a['medicine']
+                                  //                       ['medicine_images'][0]
+                                  //                   ['image'],
+                                  //           h: Dim().d40,
+                                  //           w: Dim().d56),
+                                  //       SizedBox(
+                                  //         width: Dim().d8,
+                                  //       ),
+                                  //       Expanded(
+                                  //         flex: 3,
+                                  //         child: Text(
+                                  //             '${a['medicine']['name'].toString()}',
+                                  //             style: Sty().mediumText.copyWith(
+                                  //                 fontWeight: FontWeight.w400,
+                                  //                 fontSize: Dim().d16,
+                                  //                 color: Color(0xff3B3B3B))),
+                                  //       ),
+                                  //       SizedBox(
+                                  //         width: Dim().d12,
+                                  //       ),
+                                  //       Expanded(
+                                  //         child: Text(
+                                  //             'x${a['quantity']}',
+                                  //             style: Sty().mediumText.copyWith(
+                                  //                 fontWeight: FontWeight.w300,
+                                  //                 fontSize: Dim().d14,
+                                  //                 color: Color(0xff3B3B3B))),
+                                  //       ),
+                                  //       SizedBox(
+                                  //         width: Dim().d12,
+                                  //       ),
+                                  //       Text(
+                                  //           '₹${a['total_amount']}',
+                                  //           // '₹${price}',
+                                  //           style: Sty().mediumText.copyWith(
+                                  //               fontWeight: FontWeight.w300,
+                                  //               fontSize: Dim().d14,
+                                  //               color: Color(0xff3B3B3B))),
+                                  //     ],
+                                  //   ),
+                                  // ),
                                   Padding(
                                     padding: EdgeInsets.only(bottom: Dim().d14),
                                     child: Row(
@@ -164,127 +222,148 @@ class _OrderDetailsState extends State<OrderDetails> {
                                         SizedBox(
                                           width: Dim().d8,
                                         ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                              '${a['medicine']['name'].toString()}',
-                                              style: Sty().mediumText.copyWith(
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: Dim().d16,
-                                                  color: Color(0xff3B3B3B))),
-                                        ),
-                                        SizedBox(
-                                          width: Dim().d12,
-                                        ),
-                                        Expanded(
-                                          child: Text(
-                                              'x${a['medicine']['quantity']}',
+                                        if (a['medicine_variant'] != null)
+                                          Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                                '${a['medicine']['name'].toString()} ${a['medicine_variant']['variant_name']}',
+                                                // 'gsdvhssdhsd',
+                                                // '${b['variant_name'].toString()}',
+                                                style: Sty()
+                                                    .mediumText
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        fontSize: Dim().d16,
+                                                        color:
+                                                            Color(0xff3B3B3B))),
+                                          ),
+                                        if (a['medicine_variant'] != null)
+                                          SizedBox(
+                                            width: Dim().d12,
+                                          ),
+                                        if (a['medicine_variant'] != null)
+                                          Expanded(
+                                            child: Text(
+                                                'x${widget.order['order_medicine'][index]['quantity']}',
+                                                // 'x${b['quantity']}',
+                                                style: Sty()
+                                                    .mediumText
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        fontSize: Dim().d14,
+                                                        color:
+                                                            Color(0xff3B3B3B))),
+                                          ),
+                                        if (a['medicine_variant'] != null)
+                                          SizedBox(
+                                            width: Dim().d12,
+                                          ),
+                                        if (a['medicine_variant'] != null)
+                                          Text(
+                                              '₹${a['medicine_variant']['selling_price']}',
                                               style: Sty().mediumText.copyWith(
                                                   fontWeight: FontWeight.w300,
                                                   fontSize: Dim().d14,
                                                   color: Color(0xff3B3B3B))),
-                                        ),
-                                        SizedBox(
-                                          width: Dim().d12,
-                                        ),
-                                        Text('₹${price}',
-                                            style: Sty().mediumText.copyWith(
-                                                fontWeight: FontWeight.w300,
-                                                fontSize: Dim().d14,
-                                                color: Color(0xff3B3B3B))),
                                       ],
                                     ),
                                   ),
-                                  ListView.builder(
-                                      itemCount: widget
-                                          .order['order_medicine'][index]
-                                              ['medicine']['medicine_variant']
-                                          .length,
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemBuilder: (context, index2) {
-                                        var b = widget.order['order_medicine']
-                                                [index]['medicine']
-                                            ['medicine_variant'][index2];
-                                        var varientprice;
-                                        try {
-                                          varientprice = double.parse(
-                                                  b['selling_price']
-                                                      .toString()) *
-                                              b['quantity'];
-                                        } catch (_) {
-                                          varientprice =
-                                              b['selling_price'].toString() *
-                                                  b['quantity'];
-                                        }
-                                        ;
-                                        return Padding(
-                                          padding: EdgeInsets.only(
-                                              bottom: Dim().d14),
-                                          child: Row(
-                                            children: [
-                                              STM().imageDisplay(
-                                                  list: a['medicine'][
-                                                              'medicine_images']
-                                                          .isEmpty
-                                                      ? ''
-                                                      : a['medicine'][
-                                                              'medicine_images']
-                                                          [0]['image'],
-                                                  url: a['medicine']['medicine_images']
-                                                          .isEmpty
-                                                      ? ''
-                                                      : a['medicine']
-                                                              ['medicine_images']
-                                                          [0]['image'],
-                                                  h: Dim().d40,
-                                                  w: Dim().d56),
-                                              SizedBox(
-                                                width: Dim().d8,
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                    '${b['variant_name'].toString()}',
-                                                    style: Sty()
-                                                        .mediumText
-                                                        .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                            fontSize: Dim().d16,
-                                                            color: Color(
-                                                                0xff3B3B3B))),
-                                              ),
-                                              SizedBox(
-                                                width: Dim().d12,
-                                              ),
-                                              Expanded(
-                                                child: Text('x${b['quantity']}',
-                                                    style: Sty()
-                                                        .mediumText
-                                                        .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w300,
-                                                            fontSize: Dim().d14,
-                                                            color: Color(
-                                                                0xff3B3B3B))),
-                                              ),
-                                              SizedBox(
-                                                width: Dim().d12,
-                                              ),
-                                              Text('₹${varientprice}',
-                                                  style: Sty()
-                                                      .mediumText
-                                                      .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w300,
-                                                          fontSize: Dim().d14,
-                                                          color: Color(
-                                                              0xff3B3B3B))),
-                                            ],
-                                          ),
-                                        );
-                                      }),
+                                  // ListView.builder(
+                                  //     itemCount: widget
+                                  //         .order['order_medicine'][index]
+                                  //             ['medicine_variant']
+                                  //         .length,
+                                  //     shrinkWrap: true,
+                                  //     physics: NeverScrollableScrollPhysics(),
+                                  //     itemBuilder: (context, index2) {
+                                  //
+                                  //       // var b = widget.order['order_medicine'][index]['medicine_variant'][index2];
+                                  //       // var varientprice;
+                                  //       // try {
+                                  //       //   varientprice = double.parse(
+                                  //       //           b['selling_price']
+                                  //       //               .toString()) *
+                                  //       //       b['quantity'];
+                                  //       // } catch (_) {
+                                  //       //   varientprice =
+                                  //       //       b['selling_price'].toString() *
+                                  //       //           b['quantity'];
+                                  //       // }
+                                  //       // ;
+                                  //       return Padding(
+                                  //         padding: EdgeInsets.only(
+                                  //             bottom: Dim().d14),
+                                  //         child: Row(
+                                  //           children: [
+                                  //             STM().imageDisplay(
+                                  //                 list: a['medicine'][
+                                  //                             'medicine_images']
+                                  //                         .isEmpty
+                                  //                     ? ''
+                                  //                     : a['medicine'][
+                                  //                             'medicine_images']
+                                  //                         [0]['image'],
+                                  //                 url: a['medicine']['medicine_images']
+                                  //                         .isEmpty
+                                  //                     ? ''
+                                  //                     : a['medicine']
+                                  //                             ['medicine_images']
+                                  //                         [0]['image'],
+                                  //                 h: Dim().d40,
+                                  //                 w: Dim().d56),
+                                  //             SizedBox(
+                                  //               width: Dim().d8,
+                                  //             ),
+                                  //             Expanded(
+                                  //               flex: 3,
+                                  //               child: Text(
+                                  //                 '',
+                                  //                   // '${b['variant_name'].toString()}',
+                                  //                   style: Sty()
+                                  //                       .mediumText
+                                  //                       .copyWith(
+                                  //                           fontWeight:
+                                  //                               FontWeight.w400,
+                                  //                           fontSize: Dim().d16,
+                                  //                           color: Color(
+                                  //                               0xff3B3B3B))),
+                                  //             ),
+                                  //             SizedBox(
+                                  //               width: Dim().d12,
+                                  //             ),
+                                  //             Expanded(
+                                  //               child: Text(
+                                  //                   '',
+                                  //                   // 'x${b['quantity']}',
+                                  //                   style: Sty()
+                                  //                       .mediumText
+                                  //                       .copyWith(
+                                  //                           fontWeight:
+                                  //                               FontWeight.w300,
+                                  //                           fontSize: Dim().d14,
+                                  //                           color: Color(
+                                  //                               0xff3B3B3B))),
+                                  //             ),
+                                  //             SizedBox(
+                                  //               width: Dim().d12,
+                                  //             ),
+                                  //             Text(
+                                  //               '',
+                                  //                 // '₹${varientprice}',
+                                  //                 style: Sty()
+                                  //                     .mediumText
+                                  //                     .copyWith(
+                                  //                         fontWeight:
+                                  //                             FontWeight.w300,
+                                  //                         fontSize: Dim().d14,
+                                  //                         color: Color(
+                                  //                             0xff3B3B3B))),
+                                  //           ],
+                                  //         ),
+                                  //       );
+                                  //     }),
                                 ],
                               );
                             }),
@@ -355,9 +434,13 @@ class _OrderDetailsState extends State<OrderDetails> {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Dim().d16),
-                  child: InkWell(onTap: (){
-                    STM().openWeb('${widget.order['invoice_path'].toString()}');
-                  },
+                  child: InkWell(
+                    onTap: () async {
+                      await launchUrl(
+                          Uri.parse(
+                              '${widget.order['invoice_path'].toString()}'),
+                          mode: LaunchMode.externalNonBrowserApplication);
+                    },
                     child: Container(
                       decoration: BoxDecoration(
                           color: Colors.white,

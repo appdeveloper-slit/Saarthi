@@ -44,7 +44,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
     );
     if (picked != null) {
       setState(() {
-        String s = STM().dateFormat('dd-MM-yyyy', picked);
+        String s = STM().dateFormat('yyyy-MM-dd', picked);
         dobCtrl = TextEditingController(text: s);
       });
     }
@@ -71,7 +71,7 @@ class _LipidProfileHistoryState extends State<LipidProfileHistory> {
     );
     if (picked != null) {
       setState(() {
-        String s = STM().dateFormat('dd-MM-yyyy', picked);
+        String s = STM().dateFormat('yyyy-MM-dd', picked);
         dobCtrl1 = TextEditingController(text: s);
       });
     }

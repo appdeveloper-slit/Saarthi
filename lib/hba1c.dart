@@ -305,7 +305,7 @@ class _HbA1cState extends State<HbA1c> {
         ctx, 'get_hba1c', body, usertoken, 'customer');
     setState(() {
       value = result['hba1c'];
-      date = result['date']['updated_at'];
+      date = result['date'];
     });
   }
 }

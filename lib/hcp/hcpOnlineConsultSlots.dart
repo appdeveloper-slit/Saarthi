@@ -232,7 +232,7 @@ class _OlConsSlotsState extends State<OlConsSlots> {
               height: 20,
             ),
             Text(
-              'Available Dates',
+              'Unavailable Dates',
               style: Sty().mediumText,
               overflow: TextOverflow.ellipsis,
               maxLines: 2,

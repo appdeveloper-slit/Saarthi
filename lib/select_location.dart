@@ -120,6 +120,7 @@ class _SelectLocationState extends State<SelectLocation> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             box(h: Dim().d8),
+            if( widget.type == 'home')
             InkWell(
               onTap: () {
                 permissionHandle();
@@ -148,7 +149,9 @@ class _SelectLocationState extends State<SelectLocation> {
                 ),
               ),
             ),
+            if( widget.type == 'home')
             SizedBox(height: Dim().d12),
+            if( widget.type == 'home')
             InkWell(
               onTap: () {
                 STM().redirect2page(

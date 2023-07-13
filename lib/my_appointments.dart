@@ -303,6 +303,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                       SizedBox(
                                                         height: Dim().d4,
                                                       ),
+                                                      if(upcominglabList[index]['hcp']['professional']['speciality_name'] != null)
                                                       Text(
                                                           upcominglabList[index]['hcp']['professional']['speciality_name'][0]['name'],
                                                           style: TextStyle(
@@ -494,6 +495,7 @@ class _MyAppointmentsState extends State<MyAppointments>
                                                       SizedBox(
                                                         height: Dim().d4,
                                                       ),
+                                                      if(completedlabList[index]['hcp']['professional']['speciality_name'] != null)
                                                       Text(
                                                           completedlabList[index]['hcp']['professional']['speciality_name'][0]['name'],
                                                           style: TextStyle(

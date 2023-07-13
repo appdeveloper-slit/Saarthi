@@ -78,7 +78,9 @@ class _MyOrdersState extends State<MyOrders> {
           padding: EdgeInsets.all(Dim().d16),
           child: Column(
             children: [
-              ListView.builder(
+              myOrderList.isEmpty ?  SizedBox(height: MediaQuery.of(ctx).size.height / 1.3,child: Center(
+                child: Text('No Orders',style: Sty().mediumText),
+              ),) :  ListView.builder(
                 itemCount: myOrderList.length,
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.vertical,
@@ -107,11 +109,13 @@ class _MyOrdersState extends State<MyOrders> {
                           child: Row(
                             children: [
                               STM().imageDisplay(
-                                  list: myOrderList[index]['cover_image']
+                                  list: myOrderList[index]['order_medicine'].length < 2 ? myOrderList[index]['order_medicine'][0]['medicine']['medicine_images'][0]['image']
+                                       : myOrderList[index]['cover_image']
                                           .isEmpty
                                       ? ''
                                       : myOrderList[index]['cover_image'],
-                                  url: myOrderList[index]['cover_image']
+                                  url: myOrderList[index]['order_medicine'].length < 2 ? myOrderList[index]['order_medicine'][0]['medicine']['medicine_images'][0]['image']
+                                      :myOrderList[index]['cover_image']
                                           .isEmpty
                                       ? ''
                                       : myOrderList[index]['cover_image'],

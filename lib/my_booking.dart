@@ -34,6 +34,7 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
     STM().checkInternet(context, widget).then((value) {
       if (value) {
         getPatient();
+        getBooking('');
         print(usertoken);
       }
     });
@@ -91,7 +92,7 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                 alignment: Alignment.centerLeft,
                 child: Container(
                   height: Dim().d40,
-                  width: MediaQuery.of(context).size.width * 0.70,
+                  width: MediaQuery.of(context).size.width * 0.80,
                   decoration: BoxDecoration(
                     color: Colors.green[100],
                     borderRadius: BorderRadius.circular(
@@ -192,9 +193,7 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    patientvalue  == null ?  Center(
-                      child: Text('Select Patient Name',style: Sty().mediumBoldText),
-                    ) : upcominglabList.isEmpty ? Center(
+                     upcominglabList.isEmpty ? Center(
                       child: Text('No Bookings',style: Sty().mediumBoldText),
                     )  : Column(
                       children: [
@@ -255,7 +254,7 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                                                       SizedBox(
                                                         height: Dim().d4,
                                                       ),
-                                                      Text(upcominglabList[index]['lab']['location'],
+                                                      Text(upcominglabList[index]['lab']['address'],
                                                           style: TextStyle(
                                                               fontSize: Dim().d14)),
                                                       SizedBox(
@@ -273,16 +272,14 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                                                       SizedBox(
                                                         height: Dim().d8,
                                                       ),
-                                                      Text('Pending',
-                                                          style: Sty()
-                                                              .mediumText
-                                                              .copyWith(
+                                                      Text(upcominglabList[index]['status'] == 1 ? 'Completed' : upcominglabList[index]['status'] == 2 ? 'Cancelled' : 'Pending',
+                                                          // 'Completed',
+                                                          style:
+                                                          Sty().mediumText.copyWith(
                                                               fontWeight:
-                                                              FontWeight
-                                                                  .w600,
-                                                              fontSize: Dim().d14,
-                                                              color: Color(
-                                                                  0xffFFC107))),
+                                                              FontWeight.w600,fontSize: 16,
+                                                              color: upcominglabList[index]['status'] == 1 ? Clr().green : upcominglabList[index]['status'] == 2 ? Clr().red : Color(0xffFFC107)
+                                                          )),
                                                       SizedBox(
                                                         height: Dim().d8,
                                                       ),
@@ -302,9 +299,7 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                       ],
                     ),
                     // second tab bar view widget
-                    patientvalue  == null ?  Center(
-                      child: Text('Select Patient Name',style: Sty().mediumBoldText),
-                    ) : completedlabList.isEmpty ? Center(
+                     completedlabList.isEmpty ? Center(
                       child: Text('No Bookings',style: Sty().mediumBoldText),
                     )  : Column(
                       children: [
@@ -360,7 +355,7 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                                                       SizedBox(
                                                         height: Dim().d4,
                                                       ),
-                                                      Text(completedlabList[index]['lab']['location'],
+                                                      Text(completedlabList[index]['lab']['address'],
                                                           style: TextStyle(
                                                               fontSize: Dim().d14)),
                                                       SizedBox(
@@ -378,13 +373,13 @@ class _MyBookingState extends State<MyBooking> with SingleTickerProviderStateMix
                                                       SizedBox(
                                                         height: Dim().d8,
                                                       ),
-                                                      Text(completedlabList[index]['type'] == "1" ? 'Completed' : 'Cancelled',
+                                                      Text(completedlabList[index]['status'] == 1 ? 'Completed' : 'Cancelled',
                                                           style: Sty()
                                                               .mediumText
                                                               .copyWith(
                                                               fontWeight: FontWeight.w600,
                                                               fontSize: 16,
-                                                              color:completedlabList[index]['type'] == "1" ? Clr().green : Clr().red)),
+                                                              color:completedlabList[index]['status'] == 1 ? Clr().green : Clr().red)),
                                                       SizedBox(
                                                         height: Dim().d8,
                                                       ),

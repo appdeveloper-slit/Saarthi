@@ -120,13 +120,71 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       decoration: BoxDecoration(
                           color: Clr().primaryColor,
                           borderRadius: BorderRadius.circular(50)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      child: Center(
                         child: InkWell(
                             onTap: (){
-                              _getFromCamera();
+                              showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: Clr().background1,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(
+                                              Dim().d14),
+                                          topRight: Radius.circular(
+                                              Dim().d14))),
+                                  builder: (index) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: Dim().d12,
+                                              vertical: Dim().d20),
+                                          child: Text('Profile Photo',
+                                              style:
+                                              Sty().mediumBoldText),
+                                        ),
+                                        SizedBox(height: Dim().d28),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment
+                                              .spaceEvenly,
+                                          children: [
+                                            InkWell(
+                                              onTap: () {
+                                                _getFromCamera(ImageSource.camera);
+                                                STM().back2Previous(ctx);
+                                              },
+                                              child: Column(
+                                                children: [
+                                                  Icon(Icons.add_a_photo_sharp,size: Dim().d32,color: Clr().primaryColor,),
+                                                  Text('Camera'),
+                                                ],
+                                              ),
+                                            ),
+                                            InkWell(
+                                              onTap: () {
+                                                _getFromCamera(ImageSource.gallery);
+                                                STM().back2Previous(ctx);
+                                              },
+                                              child: Column(
+                                                children: [
+                                                  Icon(Icons.add_business_sharp,size: Dim().d32,color: Clr().primaryColor),
+                                                  Text('Gallery')
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: Dim().d40),
+                                      ],
+                                    );
+                                  });
+
                             },
-                            child: SvgPicture.asset('assets/cam.svg')),
+                            child: Icon(Icons.add,size: Dim().d32,weight: Dim().d200,color: Clr().white,)),
                       ),
                     ),
                   )
@@ -449,9 +507,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  _getFromCamera() async {
+  _getFromCamera(sourse) async {
     PickedFile? pickedFile = await ImagePicker().getImage(
-      source: ImageSource.camera,
+      source: sourse,
       maxWidth: 1800,
       maxHeight: 1800,
     );

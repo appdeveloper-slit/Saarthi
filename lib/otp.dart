@@ -305,7 +305,7 @@ class _VerificationState extends State<Verification> {
     var message = result['message'];
     if (success) {
       if(widget.stypeValue == 'login'){
-        widget.signuptype == 'HCP' ? STM().finishAffinity(ctx, HomeVisit()) : STM().finishAffinity(ctx, Home());
+        widget.signuptype == 'HCP' ? STM().finishAffinity(ctx, HomeVisit()) : STM().finishAffinity(ctx, Home(type: 'from otp'));
         widget.signuptype == 'HCP' ? sp.setBool('hcplogin', true) : sp.setBool('login', true);
         widget.signuptype == 'HCP' ? sp.setString('hcptoken', result['hcp_token'].toString()) : sp.setString('customerId', result['customer_token']);
         widget.signuptype == 'Retailer' ? STM().finishAffinity(ctx, Home()) : null;

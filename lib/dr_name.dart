@@ -179,8 +179,8 @@ class DrNamepage extends State<DrName> {
           centerTitle: true,
           title: Text(
             widget.reshedule == 'yes'
-                ? 'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}'
-                : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                ? ' ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}'
+                : ' ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
             style: Sty().largeText.copyWith(
                 color: Clr().appbarTextColor,
                 fontSize: 20,
@@ -213,23 +213,21 @@ class DrNamepage extends State<DrName> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
                             widget.reshedule == 'yes'
-                                ? 'Dr. ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}'
-                                : 'Dr. ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
+                                ? ' ${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}'
+                                : ' ${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
                             style: Sty()
                                 .mediumText
                                 .copyWith(fontWeight: FontWeight.w600),
                           ),
-                          SizedBox(
-                            height: Dim().d8,
-                          ),
-                          Text(
+                           if(widget.doctorDetails['professional'] != null)
+                           if(widget.doctorDetails['professional']['speciality_name'] != null)
+                           Text(
                             widget.reshedule == 'yes'
-                                ? '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}'
-                                : '${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
+                                ? widget.doctorDetails['hcp']['professional']['speciality_name'] == null ? '' :'${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}'
+                                : widget.doctorDetails['professional']['speciality_name'] == null ? '' : '${widget.doctorDetails['professional']['speciality_name'][0]['name']}',
                             style: Sty()
                                 .smallText
                                 .copyWith(fontWeight: FontWeight.w400),
@@ -804,8 +802,8 @@ class DrNamepage extends State<DrName> {
                                 'details': widget.doctorDetails,
                                 'hcpname':
                                     '${widget.doctorDetails['hcp']['first_name']} ${widget.doctorDetails['hcp']['last_name']}',
-                                'speciality':
-                                    '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}',
+                                'speciality': widget.doctorDetails['hcp']['professional']['speciality_name'] != null ?
+                                    '${widget.doctorDetails['hcp']['professional']['speciality_name'][0]['name']}' : '',
                                 'bookingtime': slottime,
                                 'bookingdate': dayno,
                                 'patientname': widget.doctorDetails['patient']
@@ -828,8 +826,8 @@ class DrNamepage extends State<DrName> {
                                     .toString(),
                                 'hcpname':
                                     '${widget.doctorDetails['first_name']} ${widget.doctorDetails['last_name']}',
-                                'speciality':
-                                    widget.doctorDetails['professional']
+                                'speciality': widget.doctorDetails['professional']
+                                ['speciality_name'] == null ? '' : widget.doctorDetails['professional']
                                         ['speciality_name'][0]['name'],
                                 'bookingtime': slottime,
                                 'bookingdate': dayno,

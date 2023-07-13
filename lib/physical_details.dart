@@ -27,7 +27,7 @@ class _PhysicalDetailsState extends State<PhysicalDetails> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController weightCtrl = TextEditingController();
   TextEditingController heightCtrl = TextEditingController();
-  List<String> dietList = ['veg', 'non-veg'];
+  List<String> dietList = ['Veg', 'Non-Veg'];
   String t = "0";
   String? selectedValue;
   List<String> arrayList = [

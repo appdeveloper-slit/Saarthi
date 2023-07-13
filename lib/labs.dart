@@ -62,14 +62,14 @@ class _LabsState extends State<Labs> {
           ),
           centerTitle: true,
           actions: [
-            Padding(
-              padding: EdgeInsets.all(Dim().d8),
-              child: InkWell(
-                  onTap: () {
-                    // STM().redirect2page(context, Pharmacy());
-                  },
-                  child: SvgPicture.asset('assets/search.svg')),
-            ),
+            // Padding(
+            //   padding: EdgeInsets.all(Dim().d8),
+            //   child: InkWell(
+            //       onTap: () {
+            //         // STM().redirect2page(context, Pharmacy());
+            //       },
+            //       child: SvgPicture.asset('assets/search.svg')),
+            // ),
             SizedBox(
               width: Dim().d20,
             ),
@@ -93,9 +93,9 @@ class _LabsState extends State<Labs> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 8,
+                        crossAxisSpacing: 2,
                         childAspectRatio: 6 / 9,
-                        mainAxisSpacing: 8,
+                        mainAxisSpacing: 2,
                       ),
                       shrinkWrap: true,
                       itemCount: labList.length,
@@ -105,7 +105,7 @@ class _LabsState extends State<Labs> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                               side: BorderSide(color: Clr().borderColor)),
-                          child: Column(
+                          child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Padding(
                                 padding: EdgeInsets.symmetric(
@@ -149,16 +149,12 @@ class _LabsState extends State<Labs> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(
-                                height: Dim().d8,
-                              ),
                               Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: Dim().d12),
+                                padding: EdgeInsets.symmetric(horizontal: Dim().d12),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.location_on_outlined),
+                                    Icon(Icons.location_on_outlined),
                                     Flexible(
                                       child: Text(
                                         '${labList[index]['location'].toString()}',
@@ -170,11 +166,6 @@ class _LabsState extends State<Labs> {
                                       ),
                                     ),
                                   ],
-                                ),
-                              ),
-                              Expanded(
-                                child: SizedBox(
-                                  height: Dim().d4,
                                 ),
                               ),
                               InkWell(
@@ -234,6 +225,7 @@ class _LabsState extends State<Labs> {
     if (success) {
       setState(() {
         labList = result['labs'];
+        print(labList[0]['requirement']);
       });
     }
   }

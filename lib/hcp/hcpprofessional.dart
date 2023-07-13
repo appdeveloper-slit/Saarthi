@@ -43,7 +43,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
   List addspecialityList = [];
   List<dynamic> specialList = [];
   String v = "0";
-  String? categoryerror, specialitieserror, mapaddress, hcptoken;
+  String? categoryerror, specialitieserror, mapaddress, hcptoken,opderror;
 
   getSession() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -195,7 +195,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (t) {
+                      onChanged: widget.pagetype == 'edit' ?  null : (t) {
                         // STM().redirect2page(ctx, Home());
                         setState(() {
                           categoryValue = t.toString();
@@ -253,7 +253,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                                       ),
                                 ),
                                 selectedColor: Clr().black,
-                                onConfirm: (results) {
+                                onConfirm:  widget.pagetype == 'edit' ?  null : (results) {
                                   setState(() {
                                     addspecialityList = results;
                                     categoryValue == 'hcp'? specialitieserror = null : specialitieserror != null;
@@ -389,6 +389,7 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                     keyboardType: TextInputType.text,
                     onChanged: (value) {
                       setState(() {
+                        opderror = null;
                         mapaddress = null;
                       });
                     },
@@ -411,6 +412,11 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
                     ),
                   ),
                 ),
+                opderror == null
+                    ? SizedBox.shrink()
+                    : Text(opderror ?? '',
+                    style: Sty().mediumText.copyWith(
+                        color: Clr().errorRed, fontSize: Dim().d16)),
                 SizedBox(
                   height: Dim().d20,
                 ),
@@ -573,6 +579,11 @@ class _ProfessionalInfoState extends State<ProfessionalInfo> {
         });
         _isValid = false;
       }
+    }else{
+      setState(() {
+        opderror = "OPD Address is required";
+      });
+      _isValid = false;
     }
     if (_isValid) {
       int position = categoryList.indexWhere(

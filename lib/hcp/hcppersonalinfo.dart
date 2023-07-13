@@ -229,7 +229,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                             ),
                           );
                         }).toList(),
-                        onChanged: (t) {
+                        onChanged: widget.pagetype == 'edit' ? null :  (t) {
                           setState(() {
                             GenderValue = t as String;
                             gendererror = null;
@@ -275,7 +275,7 @@ class _hcp_PersonalinfoState extends State<hcp_Personalinfo> {
                     child: TextFormField(
                       readOnly: true,
                       onTap: () {
-                        datePicker();
+                        widget.pagetype == 'edit' ?  null : datePicker();
                         setState(() {
                           birtherror = null;
                         });
